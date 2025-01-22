@@ -22,4 +22,12 @@ public class TokenLocation {
     public int getColumn() {
         return column;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof TokenLocation tokenLocation &&
+                tokenLocation.getFile().equals(getFile()) &&
+                tokenLocation.getColumn() == getColumn() &&
+                tokenLocation.getLine() == getLine();
+    }
 }

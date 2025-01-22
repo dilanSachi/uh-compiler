@@ -1,11 +1,11 @@
 package fi.helsinki.compiler.tokenizer;
 
 public enum TokenType {
-    INTEGER,
+    INTEGER_LITERAL,
     OPERATOR,
     PUNCTUATION,
     IDENTIFIER,
-    TAB,
-    STRING,
-    BOOLEAN
+    STRING_LITERAL,
+    BOOLEAN_LITERAL,
+    KEYWORD
 }

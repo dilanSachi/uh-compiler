@@ -22,4 +22,12 @@ public class Token {
     public String getText() {
         return text;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Token tokenObj &&
+                tokenObj.getText().equals(getText()) &&
+                tokenObj.getTokenType() == getTokenType() &&
+                getTokenLocation().equals(tokenObj.getTokenLocation());
+    }
 }
