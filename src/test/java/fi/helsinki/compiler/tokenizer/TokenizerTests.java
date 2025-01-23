@@ -1,5 +1,6 @@
 package fi.helsinki.compiler.tokenizer;
 
+import fi.helsinki.compiler.exceptions.TokenizeException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -22,6 +23,52 @@ public class TokenizerTests {
     }
 
     @Test
+    public void testSimpleStatement() {
+        Tokenizer testTokenizer = new Tokenizer();
+        List<Token> tokens = testTokenizer.tokenize("if a <= bee then print_int(123)", "Testfile.dl");
+        Token[] expectedTokens = new Token[]{
+                new Token("if", TokenType.KEYWORD, new TokenLocation("Testfile.dl", 0, 0)),
+                new Token("a", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 3)),
+                new Token("<=", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 5)),
+                new Token("bee", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 8)),
+                new Token("then", TokenType.KEYWORD, new TokenLocation("Testfile.dl", 0, 12)),
+                new Token("print_int", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 17)),
+                new Token("(", TokenType.PUNCTUATION, new TokenLocation("Testfile.dl", 0, 26)),
+                new Token("123", TokenType.INTEGER_LITERAL, new TokenLocation("Testfile.dl", 0, 27)),
+                new Token(")", TokenType.PUNCTUATION, new TokenLocation("Testfile.dl", 0, 30))};
+        assertTokens(tokens, expectedTokens);
+    }
+
+    @Test
+    public void testStringLiteralWithDifferentCharacters() {
+        Tokenizer testTokenizer = new Tokenizer();
+        List<Token> tokens = testTokenizer.tokenize(
+                "var s : String = \"This is a str|ing 093!@#$%^&*()-_+=][}{`~.>,</?\";", "Testfile.dl");
+        Token[] expectedTokens = new Token[]{
+                new Token("var", TokenType.KEYWORD, new TokenLocation("Testfile.dl", 0, 0)),
+                new Token("s", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 4)),
+                new Token(":", TokenType.PUNCTUATION, new TokenLocation("Testfile.dl", 0, 6)),
+                new Token("String", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 8)),
+                new Token("=", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 15)),
+                new Token("\"This is a str|ing 093!@#$%^&*()-_+=][}{`~.>,</?\"", TokenType.STRING_LITERAL,
+                        new TokenLocation("Testfile.dl", 0, 17)),
+                new Token(";", TokenType.PUNCTUATION, new TokenLocation("Testfile.dl", 0, 66))};
+        assertTokens(tokens, expectedTokens);
+    }
+
+    @Test
+    public void testInvalidSimpleStatement() {
+        Tokenizer testTokenizer = new Tokenizer();
+        try {
+        testTokenizer.tokenize("if a <= bee @then print_int(123)", "Testfile.dl");
+        } catch (TokenizeException e) {
+            assertEquals(e.getMessage(), "Found invalid token: '@' at line: 0 and column: 12");
+            return;
+        }
+        fail("Expected a TokenizeException");
+    }
+
+    @Test
     public void testSimpleProgram() {
         String sourceCode = "var n: Int = read_int();\n" +
                 "print_int(n);\n" +
@@ -33,7 +80,8 @@ public class TokenizerTests {
                 "        n = 3*n + 1;\n" +
                 "    }\n" +
                 "    print_int(n);\n" +
-                "}";
+                "}" +
+                "## End comment";
         Tokenizer testTokenizer = new Tokenizer();
         List<Token> tokens = testTokenizer.tokenize(sourceCode, "Testfile.dl");
         Token[] expectedTokens = new Token[]{
