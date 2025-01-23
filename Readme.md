@@ -12,3 +12,5 @@ These are the main parts of the compiler.
 - [ ] IR Generator
 - [ ] Assembly Generator
 - [ ] Analysis & Optimization
+
+[![Build](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml/badge.svg)](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yml)
