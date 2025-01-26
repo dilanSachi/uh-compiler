@@ -30,4 +30,9 @@ public class TokenLocation {
                 tokenLocation.getColumn() == getColumn() &&
                 tokenLocation.getLine() == getLine();
     }
+
+    @Override
+    public String toString() {
+        return file + ": " + "L->" + line + ", C->" + column;
+    }
 }

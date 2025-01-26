@@ -7,5 +7,6 @@ public enum TokenType {
     IDENTIFIER,
     STRING_LITERAL,
     BOOLEAN_LITERAL,
-    KEYWORD
+    KEYWORD,
+    END
 }
