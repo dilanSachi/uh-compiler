@@ -13,4 +13,4 @@ These are the main parts of the compiler.
 - [ ] Assembly Generator
 - [ ] Analysis & Optimization
 
-[![Build](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml/badge.svg)](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yml)
+[![Build](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml/badge.svg)](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml)
