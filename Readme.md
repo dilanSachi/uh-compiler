@@ -4,9 +4,12 @@ These are the main parts of the compiler.
 - [x] Tokenizer
   - [x] Basic tokenization
   - [x] Basic test cases
-  - [ ] Edge test cases
+  - [x] Edge test cases
   - [ ] Negative test cases
-- [ ] Parser
+- [x] Parser
+  - [x] Integer literal
+  - [ ] Identifiers
+  - [ ] String literal
 - [ ] Interpreter
 - [ ] Type Checker
 - [ ] IR Generator
