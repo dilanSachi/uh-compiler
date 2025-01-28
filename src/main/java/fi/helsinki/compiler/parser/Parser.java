@@ -73,16 +73,14 @@ public class Parser {
         return left;
     }
 
-    public BinaryOp parseExpressionWithRightAssociativity() throws ParserException {
+    public Expression parseExpressionWithRightAssociativity() throws ParserException {
         Expression left = parseTerm();
         while (Arrays.asList("+", "-").contains(peek().getText())) {
-            Token operatorToken =  consume();
-            Expression right = parseTerm();
+            Token operatorToken = consume();
+            Expression right = parseExpressionWithRightAssociativity();
             left = new BinaryOp(left, operatorToken, right);
         }
-        Token operatorToken = consume("+", "-");
-        Expression right = parseTerm();
-        return new BinaryOp(left, operatorToken, right);
+        return left;
     }
 
 }
