@@ -28,7 +28,7 @@ public class Parser {
 
     private Token consume(String... expected) throws ParserException {
         Token token = peek();
-        if (!Arrays.stream(expected).anyMatch(token.getText()::equals)) {
+        if (expected.length > 0 && !Arrays.stream(expected).anyMatch(token.getText()::equals)) {
             String commaSeparated = Arrays.stream(expected).map(Objects::toString)
                     .collect(Collectors.joining(", ")).toString();
             throw new ParserException(token.getTokenLocation() + ": expected one of: " + commaSeparated);
@@ -37,7 +37,7 @@ public class Parser {
         return token;
     }
 
-    public Literal parseIntegerLiteral() throws ParserException {
+    private Literal parseIntegerLiteral() throws ParserException {
         if (peek().getTokenType() != TokenType.INTEGER_LITERAL) {
             throw new ParserException(peek().getTokenLocation() + ": expected an integer literal");
         }
@@ -45,15 +45,15 @@ public class Parser {
         return new Literal(Integer.valueOf(token.getText()));
     }
 
-    public Identifier parseIdentifier() throws ParserException {
-        if (peek().getTokenType() != TokenType.INTEGER_LITERAL) {
-            throw new ParserException(peek().getTokenLocation() + ": expected an integer literal");
+    private Identifier parseIdentifier() throws ParserException {
+        if (peek().getTokenType() != TokenType.IDENTIFIER) {
+            throw new ParserException(peek().getTokenLocation() + ": expected an identifier");
         }
         Token token = consume();
         return new Identifier(token.getText());
     }
 
-    public Expression parseTerm() throws ParserException {
+    private Expression parseTerm() throws ParserException {
         if (peek().getTokenType() == TokenType.INTEGER_LITERAL) {
             return parseIntegerLiteral();
         }
@@ -63,7 +63,17 @@ public class Parser {
         throw new ParserException(peek().getTokenLocation() + ": expected an integer literal or an identifier");
     }
 
-    public BinaryOp parseExpression() throws ParserException {
+    public Expression parseExpression() throws ParserException {
+        Expression left = parseTerm();
+        while (Arrays.asList("+", "-").contains(peek().getText())) {
+            Token operatorToken =  consume();
+            Expression right = parseTerm();
+            left = new BinaryOp(left, operatorToken, right);
+        }
+        return left;
+    }
+
+    public BinaryOp parseExpressionWithRightAssociativity() throws ParserException {
         Expression left = parseTerm();
         while (Arrays.asList("+", "-").contains(peek().getText())) {
             Token operatorToken =  consume();
