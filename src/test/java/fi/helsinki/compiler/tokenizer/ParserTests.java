@@ -1,9 +1,7 @@
 package fi.helsinki.compiler.tokenizer;
 
 import fi.helsinki.compiler.exceptions.ParserException;
-import fi.helsinki.compiler.parser.BinaryOp;
-import fi.helsinki.compiler.parser.Literal;
-import fi.helsinki.compiler.parser.Parser;
+import fi.helsinki.compiler.parser.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,6 +42,31 @@ public class ParserTests {
         rightLiteral = (Literal) leftOp.getRight();
         operatorToken = leftOp.getOperatorToken();
         assertEquals(rightLiteral.getValue(), 225);
+        assertEquals(operatorToken.getText(), "+");
+        assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
+        assertEquals(((Literal)leftOp.getLeft()).getValue(), 1);
+    }
+
+    @Test
+    public void testOperationsWithLiteralsAndIdentifiers() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("1 + a - 10 + xy", "Testfile.dl"));
+        BinaryOp binaryOp = (BinaryOp) testParser.parseExpression();
+        Expression rightLiteral = binaryOp.getRight();
+        Token operatorToken = binaryOp.getOperatorToken();
+        assertEquals(((Identifier) rightLiteral).getName(), "xy");
+        assertEquals(operatorToken.getText(), "+");
+        assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
+        BinaryOp leftOp = (BinaryOp) binaryOp.getLeft();
+        rightLiteral = leftOp.getRight();
+        operatorToken = leftOp.getOperatorToken();
+        assertEquals(((Literal) rightLiteral).getValue(), 10);
+        assertEquals(operatorToken.getText(), "-");
+        assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
+        leftOp = (BinaryOp) leftOp.getLeft();
+        rightLiteral = leftOp.getRight();
+        operatorToken = leftOp.getOperatorToken();
+        assertEquals(((Identifier) rightLiteral).getName(), "a");
         assertEquals(operatorToken.getText(), "+");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
         assertEquals(((Literal)leftOp.getLeft()).getValue(), 1);
