@@ -4,13 +4,16 @@ These are the main parts of the compiler.
 - [x] Tokenizer
   - [x] Basic tokenization
   - [x] Basic test cases
-  - [ ] Edge test cases
+  - [x] Edge test cases
   - [ ] Negative test cases
-- [ ] Parser
+- [x] Parser
+  - [x] Integer literal
+  - [ ] Identifiers
+  - [ ] String literal
 - [ ] Interpreter
 - [ ] Type Checker
 - [ ] IR Generator
 - [ ] Assembly Generator
 - [ ] Analysis & Optimization
 
-[![Build](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml/badge.svg)](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yml)
+[![Build](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml/badge.svg)](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml)
