@@ -1,7 +1,10 @@
-package fi.helsinki.compiler.tokenizer;
+package fi.helsinki.compiler.parser;
 
 import fi.helsinki.compiler.exceptions.ParserException;
-import fi.helsinki.compiler.parser.*;
+import fi.helsinki.compiler.tokenizer.Token;
+import fi.helsinki.compiler.tokenizer.TokenType;
+import fi.helsinki.compiler.tokenizer.Tokenizer;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +23,7 @@ public class ParserTests {
         assertEquals(leftLiteral.getValue(), 1);
         assertEquals(rightLiteral.getValue(), 2);
         assertEquals(operatorToken.getText(), "+");
-        assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
+        Assertions.assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
     }
 
     @Test
