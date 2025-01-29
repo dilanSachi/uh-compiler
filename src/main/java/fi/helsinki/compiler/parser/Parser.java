@@ -53,14 +53,35 @@ public class Parser {
         return new Identifier(token.getText());
     }
 
-    private Expression parseTerm() throws ParserException {
-        if (peek().getTokenType() == TokenType.INTEGER_LITERAL) {
+    private Expression parseFactor() throws ParserException {
+        Token token = peek();
+        if (token.getTokenType() == TokenType.PUNCTUATION && token.getText().equals("(")) {
+            return parseParenthesized();
+        }
+        if (token.getTokenType() == TokenType.INTEGER_LITERAL) {
             return parseIntegerLiteral();
         }
-        if (peek().getTokenType() == TokenType.IDENTIFIER) {
+        if (token.getTokenType() == TokenType.IDENTIFIER) {
             return parseIdentifier();
         }
-        throw new ParserException(peek().getTokenLocation() + ": expected an integer literal or an identifier");
+        throw new ParserException(token.getTokenLocation() + ": expected an integer literal or an identifier");
+    }
+
+    private Expression parseParenthesized() throws ParserException {
+        consume("(");
+        Expression expression = parseExpression();
+        consume(")");
+        return expression;
+    }
+
+    private Expression parseTerm() throws ParserException {
+        Expression left = parseFactor();
+        while (Arrays.asList("*", "/").contains(peek().getText())) {
+            Token operatorToken =  consume();
+            Expression right = parseFactor();
+            left = new BinaryOp(left, operatorToken, right);
+        }
+        return left;
     }
 
     public Expression parseExpression() throws ParserException {
