@@ -30,4 +30,9 @@ public class Token {
                 tokenObj.getTokenType() == getTokenType() &&
                 getTokenLocation().equals(tokenObj.getTokenLocation());
     }
+
+    @Override
+    public String toString() {
+        return String.format("Text: %s, Type: %s, Location: %s", this.getText(), this.tokenType, this.tokenLocation);
+    }
 }

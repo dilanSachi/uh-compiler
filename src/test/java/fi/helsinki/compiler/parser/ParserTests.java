@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ParserTests {
 
@@ -16,7 +17,7 @@ public class ParserTests {
     public void testBasicAddition() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 + 2", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parseExpression();
+        BinaryOp binaryOp = (BinaryOp) testParser.parse();
         Literal leftLiteral = (Literal) binaryOp.getLeft();
         Token operatorToken = binaryOp.getOperatorToken();
         Literal rightLiteral = (Literal) binaryOp.getRight();
@@ -30,7 +31,7 @@ public class ParserTests {
     public void testBasicMultiplication() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 * 2", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parseExpression();
+        BinaryOp binaryOp = (BinaryOp) testParser.parse();
         Literal leftLiteral = (Literal) binaryOp.getLeft();
         Token operatorToken = binaryOp.getOperatorToken();
         Literal rightLiteral = (Literal) binaryOp.getRight();
@@ -58,7 +59,7 @@ public class ParserTests {
     public void testAdditionAndSubtraction() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 + 225 - 10 + 8", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parseExpression();
+        BinaryOp binaryOp = (BinaryOp) testParser.parse();
         Literal rightLiteral = (Literal) binaryOp.getRight();
         Token operatorToken = binaryOp.getOperatorToken();
         assertEquals(rightLiteral.getValue(), 8);
@@ -83,7 +84,7 @@ public class ParserTests {
     public void testMultipleOperations() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 * 225 - 10 / 8", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parseExpression();
+        BinaryOp binaryOp = (BinaryOp) testParser.parse();
         Token operatorToken = binaryOp.getOperatorToken();
         assertEquals(operatorToken.getText(), "-");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
@@ -109,7 +110,7 @@ public class ParserTests {
     public void testMultipleOperationsWithParentheses() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 * (29 / 32) * 225 - 10 / 8 + (127 - 38)", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parseExpression();
+        BinaryOp binaryOp = (BinaryOp) testParser.parse();
         Token operatorToken = binaryOp.getOperatorToken();
         assertEquals(operatorToken.getText(), "+");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
@@ -171,7 +172,7 @@ public class ParserTests {
     public void testOperationsWithLiteralsAndIdentifiers() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 + a - 10 + xy", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parseExpression();
+        BinaryOp binaryOp = (BinaryOp) testParser.parse();
         Expression rightLiteral = binaryOp.getRight();
         Token operatorToken = binaryOp.getOperatorToken();
         assertEquals(((Identifier) rightLiteral).getName(), "xy");
@@ -217,17 +218,29 @@ public class ParserTests {
         assertEquals(((Identifier) rightOp.getRight()).getName(), "xy");
     }
 
-    @Test @Disabled
-    public void testEmptyTokenList() throws ParserException {
+    @Test
+    public void testEmptyTokenList() {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parseExpression();
-        Literal leftLiteral = (Literal) binaryOp.getLeft();
-        Token operatorToken = binaryOp.getOperatorToken();
-        Literal rightLiteral = (Literal) binaryOp.getRight();
-        assertEquals(leftLiteral.getValue(), 1);
-        assertEquals(rightLiteral.getValue(), 2);
-        assertEquals(operatorToken.getText(), "+");
-        assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
+        try {
+            testParser.parse();
+        } catch (ParserException e) {
+            assertEquals(e.getMessage(), "Cannot parse empty token list");
+            return;
+        }
+        fail("Expected an exception to be thrown");
+    }
+
+    @Test
+    public void testInvalidTokenList() {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("1 + 3 + c d", "Testfile.dl"));
+        try {
+            testParser.parse();
+        } catch (ParserException e) {
+            assertEquals("Parsing failed. Invalid tokens found: [Text: d, Type: IDENTIFIER, Location: Testfile.dl: L->0, C->10]", e.getMessage());
+            return;
+        }
+        fail("Expected an exception to be thrown");
     }
 }

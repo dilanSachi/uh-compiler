@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class Parser {
 
-    private List<Token> tokens;
+    private final List<Token> tokens;
     private int tokenPosition;
 
     public Parser(List<Token> tokens) {
@@ -28,9 +28,9 @@ public class Parser {
 
     private Token consume(String... expected) throws ParserException {
         Token token = peek();
-        if (expected.length > 0 && !Arrays.stream(expected).anyMatch(token.getText()::equals)) {
+        if (expected.length > 0 && Arrays.stream(expected).noneMatch(token.getText()::equals)) {
             String commaSeparated = Arrays.stream(expected).map(Objects::toString)
-                    .collect(Collectors.joining(", ")).toString();
+                    .collect(Collectors.joining(", "));
             throw new ParserException(token.getTokenLocation() + ": expected one of: " + commaSeparated);
         }
         tokenPosition += 1;
@@ -84,7 +84,7 @@ public class Parser {
         return left;
     }
 
-    public Expression parseExpression() throws ParserException {
+    private Expression parseExpression() throws ParserException {
         Expression left = parseTerm();
         while (Arrays.asList("+", "-").contains(peek().getText())) {
             Token operatorToken =  consume();
@@ -102,6 +102,18 @@ public class Parser {
             left = new BinaryOp(left, operatorToken, right);
         }
         return left;
+    }
+
+    public Expression parse() throws ParserException {
+        if (tokens.isEmpty()) {
+            throw new ParserException("Cannot parse empty token list");
+        }
+        Expression expression = parseExpression();
+        if (tokenPosition < tokens.size()) {
+            throw new ParserException("Parsing failed. Invalid tokens found: " +
+                    Arrays.toString(tokens.subList(tokenPosition, tokens.size()).toArray()));
+        }
+        return expression;
     }
 
 }
