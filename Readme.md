@@ -17,3 +17,4 @@ These are the main parts of the compiler.
 - [ ] Analysis & Optimization
 
 [![Build](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml/badge.svg)](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml)
+[![Code Coverage](https://codecov.io/gh/dilanSachi/uh-compiler/branch/master/graph/badge.svg)](https://codecov.io/gh/dilanSachi/uh-compiler)
