@@ -2,6 +2,9 @@ package fi.helsinki.compiler.parser;
 
 import fi.helsinki.compiler.tokenizer.Token;
 
+/*
+    AST node for a binary operation like `A + B`
+ */
 public class BinaryOp implements Expression {
     private Expression left;
     private Token operatorToken;

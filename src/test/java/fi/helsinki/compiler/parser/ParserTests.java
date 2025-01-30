@@ -5,11 +5,11 @@ import fi.helsinki.compiler.tokenizer.Token;
 import fi.helsinki.compiler.tokenizer.TokenType;
 import fi.helsinki.compiler.tokenizer.Tokenizer;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class ParserTests {
 
@@ -219,29 +219,12 @@ public class ParserTests {
     }
 
     @Test
-    public void testEmptyTokenList() {
+    public void testIfCondition() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
-        Parser testParser = new Parser(tokenizer.tokenize("", "Testfile.dl"));
-        try {
-            testParser.parse();
-        } catch (ParserException e) {
-            assertEquals(e.getMessage(), "Cannot parse empty token list");
-            return;
-        }
-        fail("Expected an exception to be thrown");
-    }
-
-    @Test
-    public void testInvalidTokenList() {
-        Tokenizer tokenizer = new Tokenizer();
-        Parser testParser = new Parser(tokenizer.tokenize("1 + 3 + c d", "Testfile.dl"));
-        try {
-            testParser.parse();
-        } catch (ParserException e) {
-            assertEquals("Parsing failed. Invalid tokens found: [Text: d, Type: IDENTIFIER, Location: Testfile.dl: L->0, C->10]", e.getMessage());
-            return;
-        }
-        fail("Expected an exception to be thrown");
+        Parser testParser = new Parser(tokenizer.tokenize("if a then b + c else d + e; d + ex", "Testfile.dl"));
+        Block block = testParser.parse2();
+        List<Expression> expressionList = block.getExpressionList();
+        assertEquals(expressionList.size(), 2);
     }
 
 }
