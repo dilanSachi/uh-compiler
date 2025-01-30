@@ -8,8 +8,13 @@ These are the main parts of the compiler.
   - [ ] Negative test cases
 - [x] Parser
   - [x] Integer literal
-  - [ ] Identifiers
-  - [ ] String literal
+  - [x] Identifiers
+  - [x] String literal
+  - [ ] Boolean literal
+  - [x] If then else blocks
+  - [ ] While block
+  - [ ] Function call
+  - [ ] Type declaration
 - [ ] Interpreter
 - [ ] Type Checker
 - [ ] IR Generator
