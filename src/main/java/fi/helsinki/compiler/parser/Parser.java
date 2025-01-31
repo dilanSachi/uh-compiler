@@ -53,14 +53,17 @@ public class Parser {
 
     private Expression parseFactor() throws ParserException {
         Token token = peek();
-        if (token.getTokenType() == TokenType.PUNCTUATION && token.getText().equals("(")) {
+        if (checkNextToken(TokenType.PUNCTUATION, Optional.of("("))) {
             return parseParenthesized();
         }
-        if (token.getTokenType() == TokenType.INTEGER_LITERAL) {
+        if (checkNextToken(TokenType.INTEGER_LITERAL, Optional.empty())) {
             return parseIntegerLiteral();
         }
-        if (token.getTokenType() == TokenType.IDENTIFIER) {
+        if (checkNextToken(TokenType.IDENTIFIER, Optional.empty())) {
             return parseIdentifier();
+        }
+        if (checkNextToken(TokenType.KEYWORD, Optional.of("if"))) {
+            return parseIfBlock();
         }
         throw new ParserException(token.getTokenLocation() + ": expected an integer literal or an identifier");
     }
@@ -140,7 +143,9 @@ public class Parser {
                 nextToken = peek();
             }
             if (checkNextToken(TokenType.IDENTIFIER, Optional.empty()) ||
-                    checkNextToken(TokenType.KEYWORD, Optional.empty())) {
+                    checkNextToken(TokenType.STRING_LITERAL, Optional.empty()) ||
+                    checkNextToken(TokenType.INTEGER_LITERAL, Optional.empty()) ||
+                    checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.empty())) {
                 Expression expression = parseExpression();
                 block.addExpression(expression);
                 nextToken = peek();

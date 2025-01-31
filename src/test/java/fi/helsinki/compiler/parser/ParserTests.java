@@ -221,10 +221,73 @@ public class ParserTests {
     @Test
     public void testIfCondition() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
-        Parser testParser = new Parser(tokenizer.tokenize("if a then b + c else d + e; d + ex", "Testfile.dl"));
+        Parser testParser = new Parser(tokenizer.tokenize("if a then b + c; d + ex", "Testfile.dl"));
         Block block = testParser.parse2();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 2);
+        ConditionalOp conditionalOp = (ConditionalOp) expressionList.get(0);
+        assertEquals(conditionalOp.getName(), "if");
+        assertEquals(((Identifier) conditionalOp.getCondition()).getName(), "a");
+        BinaryOp binaryOp = (BinaryOp) conditionalOp.getThenBlock();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "b");
+        assertEquals(binaryOp.getOperatorToken().getText(), "+");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "c");
+        assertEquals(conditionalOp.getElseBlock(), null);
+        binaryOp = (BinaryOp) expressionList.get(1);
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "d");
+        assertEquals(binaryOp.getOperatorToken().getText(), "+");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "ex");
+    }
+
+    @Test
+    public void testIfElseCondition() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("2 - y;if a then b + c else d + e; d + ex", "Testfile.dl"));
+        Block block = testParser.parse2();
+        List<Expression> expressionList = block.getExpressionList();
+        assertEquals(expressionList.size(), 3);
+        BinaryOp binaryOp = (BinaryOp) expressionList.get(0);
+        assertEquals(((Literal) binaryOp.getLeft()).getValue(), 2);
+        assertEquals(binaryOp.getOperatorToken().getText(), "-");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "y");
+        ConditionalOp conditionalOp = (ConditionalOp) expressionList.get(1);
+        assertEquals(conditionalOp.getName(), "if");
+        assertEquals(((Identifier) conditionalOp.getCondition()).getName(), "a");
+        binaryOp = (BinaryOp) conditionalOp.getThenBlock();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "b");
+        assertEquals(binaryOp.getOperatorToken().getText(), "+");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "c");
+        binaryOp = (BinaryOp) conditionalOp.getElseBlock();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "d");
+        assertEquals(binaryOp.getOperatorToken().getText(), "+");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "e");
+        binaryOp = (BinaryOp) expressionList.get(2);
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "d");
+        assertEquals(binaryOp.getOperatorToken().getText(), "+");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "ex");
+    }
+
+    @Test
+    public void testIfWithBinaryOpCondition() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("1 + if a then b + c; d + ex", "Testfile.dl"));
+        Block block = testParser.parse2();
+        List<Expression> expressionList = block.getExpressionList();
+        assertEquals(expressionList.size(), 2);
+        BinaryOp binaryOp = (BinaryOp) expressionList.get(0);
+        assertEquals(((Literal) binaryOp.getLeft()).getValue(), 1);
+        assertEquals(binaryOp.getOperatorToken().getText(), "+");
+        ConditionalOp conditionalOp = (ConditionalOp) binaryOp.getRight();
+        assertEquals(((Identifier) conditionalOp.getCondition()).getName(), "a");
+        binaryOp = (BinaryOp) conditionalOp.getThenBlock();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "b");
+        assertEquals(binaryOp.getOperatorToken().getText(), "+");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "c");
+        assertEquals(conditionalOp.getElseBlock(), null);
+        binaryOp = (BinaryOp) expressionList.get(1);
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "d");
+        assertEquals(binaryOp.getOperatorToken().getText(), "+");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "ex");
     }
 
 }

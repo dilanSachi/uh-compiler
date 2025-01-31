@@ -5,7 +5,7 @@ These are the main parts of the compiler.
   - [x] Basic tokenization
   - [x] Basic test cases
   - [x] Edge test cases
-  - [ ] Negative test cases
+  - [x] Negative test cases
 - [x] Parser
   - [x] Integer literal
   - [x] Identifiers
