@@ -43,11 +43,30 @@ public class Parser {
         return new Literal(Integer.valueOf(token.getText()));
     }
 
-    private Identifier parseIdentifier() throws ParserException {
+    private FunctionCall parseFunctionCall(Token functionNameToken) throws ParserException {
+        consume("(");
+        List<Expression> parameters = new ArrayList<>();
+        while (true) {
+            parameters.add(parseExpression());
+            if (peek().getText().equals(")")) {
+                consume(")");
+                break;
+            } else {
+                consume(",");
+            }
+        }
+        return new FunctionCall(functionNameToken.getText(), parameters);
+    }
+
+    private Expression parseIdentifier() throws ParserException {
         if (peek().getTokenType() != TokenType.IDENTIFIER) {
             throw new ParserException(peek().getTokenLocation() + ": expected an identifier");
         }
         Token token = consume();
+        Token nextToken = peek();
+        if (nextToken.getText().equals("(")) {
+            return parseFunctionCall(token);
+        }
         return new Identifier(token.getText());
     }
 
