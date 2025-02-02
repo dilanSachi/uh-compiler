@@ -13,7 +13,7 @@ These are the main parts of the compiler.
   - [ ] Boolean literal
   - [x] If then else blocks
   - [ ] While block
-  - [ ] Function call
+  - [x] Function call
   - [ ] Type declaration
 - [ ] Interpreter
 - [ ] Type Checker
