@@ -96,7 +96,7 @@ public class Parser {
 
     private Expression parseTerm() throws ParserException {
         Expression left = parseFactor();
-        while (Arrays.asList("*", "/").contains(peek().getText())) {
+        while (Arrays.asList("*", "/", "%").contains(peek().getText())) {
             Token operatorToken =  consume();
             Expression right = parseFactor();
             left = new BinaryOp(left, operatorToken, right);

@@ -81,6 +81,25 @@ public class ParserTests {
     }
 
     @Test
+    public void testAdditionAndSubtractionWithRemainder() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("1 + 225 % 10 - 8", "Testfile.dl"));
+        BinaryOp binaryOp = (BinaryOp) testParser.parse();
+        Literal rightLiteral = (Literal) binaryOp.getRight();
+        Token operatorToken = binaryOp.getOperatorToken();
+        assertEquals(rightLiteral.getValue(), 8);
+        assertEquals(operatorToken.getText(), "-");
+        assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
+        BinaryOp leftOp = (BinaryOp) binaryOp.getLeft();
+        BinaryOp rightOp1 = (BinaryOp) leftOp.getRight();
+        assertEquals(((Literal) rightOp1.getLeft()).getValue(), 225);
+        assertEquals(((Literal) rightOp1.getRight()).getValue(), 10);
+        assertEquals(rightOp1.getOperatorToken().getText(), "%");
+        assertEquals(((Literal) leftOp.getLeft()).getValue(), 1);
+        assertEquals(leftOp.getOperatorToken().getText(), "+");
+    }
+
+    @Test
     public void testMultipleOperations() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 * 225 - 10 / 8", "Testfile.dl"));
@@ -393,6 +412,34 @@ public class ParserTests {
         List<Expression> parameters2 = functionCall2.getParameters();
         assertEquals(((Identifier) parameters2.get(0)).getName(), "b");
         assertEquals(((Literal) parameters2.get(1)).getValue(), 2);
+        assertEquals(((Literal) parameters1.get(2)).getValue(), 3);
+    }
+
+    @Test
+    public void testNestedFunctionCallWithIf() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("testFunction(a, if x then newTestFunction(b, 2) " +
+                "else newTestFunction2(c, 99), 3)", "Testfile.dl"));
+        Block block = testParser.parse2();
+        List<Expression> expressionList = block.getExpressionList();
+        assertEquals(expressionList.size(), 1);
+        FunctionCall functionCall1 = (FunctionCall) expressionList.get(0);
+        assertEquals(functionCall1.getFunctionName(), "testFunction");
+        List<Expression> parameters1 = functionCall1.getParameters();
+        assertEquals(parameters1.size(), 3);
+        assertEquals(((Identifier) parameters1.get(0)).getName(), "a");
+        ConditionalOp conditionalOp = (ConditionalOp) parameters1.get(1);
+        assertEquals(((Identifier) conditionalOp.getCondition()).getName(), "x");
+        FunctionCall functionCall2 = (FunctionCall) conditionalOp.getThenBlock();
+        assertEquals(functionCall2.getFunctionName(), "newTestFunction");
+        List<Expression> parameters2 = functionCall2.getParameters();
+        assertEquals(((Identifier) parameters2.get(0)).getName(), "b");
+        assertEquals(((Literal) parameters2.get(1)).getValue(), 2);
+        functionCall2 = (FunctionCall) conditionalOp.getElseBlock();
+        assertEquals(functionCall2.getFunctionName(), "newTestFunction2");
+        parameters2 = functionCall2.getParameters();
+        assertEquals(((Identifier) parameters2.get(0)).getName(), "c");
+        assertEquals(((Literal) parameters2.get(1)).getValue(), 99);
         assertEquals(((Literal) parameters1.get(2)).getValue(), 3);
     }
 
