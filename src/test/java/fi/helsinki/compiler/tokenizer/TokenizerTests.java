@@ -55,10 +55,44 @@ public class TokenizerTests {
     }
 
     @Test
+    public void testMultipleComparisonOperators() {
+        Tokenizer testTokenizer = new Tokenizer();
+        List<Token> tokens = testTokenizer.tokenize(
+                "a=(b and c) + d != e >= f or g <= h - i < j * k > l", "Testfile.dl");
+        Token[] expectedTokens = new Token[]{
+                new Token("a", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 0)),
+                new Token("=", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 1)),
+                new Token("(", TokenType.PUNCTUATION, new TokenLocation("Testfile.dl", 0, 2)),
+                new Token("b", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 3)),
+                new Token("and", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 5)),
+                new Token("c", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 9)),
+                new Token(")", TokenType.PUNCTUATION, new TokenLocation("Testfile.dl", 0, 10)),
+                new Token("+", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 12)),
+                new Token("d", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 14)),
+                new Token("!=", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 16)),
+                new Token("e", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 19)),
+                new Token(">=", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 21)),
+                new Token("f", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 24)),
+                new Token("or", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 26)),
+                new Token("g", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 29)),
+                new Token("<=", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 31)),
+                new Token("h", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 34)),
+                new Token("-", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 36)),
+                new Token("i", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 38)),
+                new Token("<", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 40)),
+                new Token("j", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 42)),
+                new Token("*", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 44)),
+                new Token("k", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 46)),
+                new Token(">", TokenType.OPERATOR, new TokenLocation("Testfile.dl", 0, 48)),
+                new Token("l", TokenType.IDENTIFIER, new TokenLocation("Testfile.dl", 0, 50))};
+        assertTokens(tokens, expectedTokens);
+    }
+
+    @Test
     public void testInvalidSimpleStatement() {
         Tokenizer testTokenizer = new Tokenizer();
         try {
-        testTokenizer.tokenize("if a <= bee @then print_int(123)", "Testfile.dl");
+            testTokenizer.tokenize("if a <= bee @then print_int(123)", "Testfile.dl");
         } catch (TokenizeException e) {
             assertEquals(e.getMessage(), "Found invalid token: '@' at line: 0 and column: 12");
             return;
