@@ -100,6 +100,45 @@ public class ParserTests {
     }
 
     @Test
+    public void testEqualOperator() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("x = y + 20", "Testfile.dl"));
+        BinaryOp binaryOp = (BinaryOp) testParser.parse();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
+        assertEquals(binaryOp.getOperatorToken().getText(), "=");
+        BinaryOp rightOp = (BinaryOp) binaryOp.getRight();
+        assertEquals(((Identifier) rightOp.getLeft()).getName(), "y");
+        assertEquals(((Literal) rightOp.getRight()).getValue(), 20);
+        assertEquals(rightOp.getOperatorToken().getText(), "+");
+    }
+
+    @Test
+    public void testDoubleEqualOperator() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("x == y + 20", "Testfile.dl"));
+        BinaryOp binaryOp = (BinaryOp) testParser.parse();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
+        assertEquals(binaryOp.getOperatorToken().getText(), "==");
+        BinaryOp rightOp = (BinaryOp) binaryOp.getRight();
+        assertEquals(((Identifier) rightOp.getLeft()).getName(), "y");
+        assertEquals(((Literal) rightOp.getRight()).getValue(), 20);
+        assertEquals(rightOp.getOperatorToken().getText(), "+");
+    }
+
+    @Test
+    public void testMultipleEqualityOperators() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("x = (y and z)", "Testfile.dl"));
+        BinaryOp binaryOp = (BinaryOp) testParser.parse();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
+        assertEquals(binaryOp.getOperatorToken().getText(), "=");
+        BinaryOp rightOp = (BinaryOp) binaryOp.getRight();
+        assertEquals(((Identifier) rightOp.getLeft()).getName(), "y");
+        assertEquals(((Identifier) rightOp.getRight()).getName(), "z");
+        assertEquals(rightOp.getOperatorToken().getText(), "and");
+    }
+
+    @Test
     public void testMultipleOperations() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 * 225 - 10 / 8", "Testfile.dl"));

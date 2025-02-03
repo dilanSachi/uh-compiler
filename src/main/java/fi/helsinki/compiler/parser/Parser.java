@@ -124,12 +124,17 @@ public class Parser {
             Expression right = parseTerm();
             left = new BinaryOp(left, operatorToken, right);
         }
+        while (Arrays.asList("=", "and", "or", "==", "!=", "<", "<=", ">", ">=").contains(peek().getText())) {
+            Token operatorToken = consume();
+            Expression right = parseExpression();
+            left = new BinaryOp(left, operatorToken, right);
+        }
         return left;
     }
 
     public Expression parseExpressionWithRightAssociativity() throws ParserException {
         Expression left = parseTerm();
-        while (Arrays.asList("+", "-").contains(peek().getText())) {
+        while (Arrays.asList("", "+", "-").contains(peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseExpressionWithRightAssociativity();
             left = new BinaryOp(left, operatorToken, right);
@@ -172,6 +177,9 @@ public class Parser {
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
                 consume(";");
                 nextToken = peek();
+            }
+            if (checkNextToken(TokenType.OPERATOR, Optional.of("="))) {
+                parseExpressionWithRightAssociativity();
             }
         }
         if (tokenPosition < tokens.size()) {

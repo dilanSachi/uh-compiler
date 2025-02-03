@@ -29,7 +29,6 @@ public class Tokenizer {
         while (true) {
             matcher = patternComment.matcher(sourceCode);
             if (matcher.find()) {
-//                System.out.println("Ignoring comment : " + sourceCode.substring(0, matcher.end()));
                 sourceCode = sourceCode.substring(matcher.end());
                 line += 1;
                 column = 0;
@@ -37,22 +36,18 @@ public class Tokenizer {
             }
             matcher = patternWhitespace.matcher(sourceCode);
             if (matcher.find()) {
-//                System.out.println("Found whitespaces : " + sourceCode.substring(0, matcher.end()) + ".");
                 sourceCode = sourceCode.substring(matcher.end());
                 column += matcher.end() - matcher.start();
                 continue;
             }
             matcher = patternTab.matcher(sourceCode);
             if (matcher.find()) {
-//                System.out.println("Found tab : " + sourceCode.substring(0, matcher.end()) + ".");
                 sourceCode = sourceCode.substring(matcher.end());
                 column += matcher.end() - matcher.start();
                 continue;
             }
             matcher = patternNewline.matcher(sourceCode);
             if (matcher.find()) {
-                String keyword = sourceCode.substring(0, matcher.end());
-//                System.out.println("Found newline : " + keyword);
                 sourceCode = sourceCode.substring(matcher.end());
                 line += 1;
                 column = 0;
@@ -74,7 +69,6 @@ public class Tokenizer {
                 } else {
                     column += matcher.end() - matcher.start() - 1;
                 }
-//                System.out.println("Found keyword : " + keyword);
                 continue;
             }
             matcher = patternBooleanLiteral.matcher(sourceCode);
@@ -82,7 +76,6 @@ public class Tokenizer {
                 String keyword = sourceCode.substring(0, matcher.end());
                 tokens.add(new Token(keyword, TokenType.BOOLEAN_LITERAL, new TokenLocation(filename, line, column)));
                 column += matcher.end() - matcher.start();
-//                System.out.println("Found boolean literal : " + keyword);
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;
             }
@@ -91,7 +84,6 @@ public class Tokenizer {
                 String keyword = sourceCode.substring(0, matcher.end());
                 tokens.add(new Token(keyword, TokenType.INTEGER_LITERAL, new TokenLocation(filename, line, column)));
                 column += matcher.end() - matcher.start();
-//                System.out.println("Found integer literal : " + keyword);
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;
             }
@@ -100,7 +92,6 @@ public class Tokenizer {
                 String keyword = sourceCode.substring(0, matcher.end());
                 tokens.add(new Token(keyword, TokenType.STRING_LITERAL, new TokenLocation(filename, line, column)));
                 column += matcher.end() - matcher.start();
-//                System.out.println("Found string literal : " + keyword);
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;
             }
@@ -109,7 +100,6 @@ public class Tokenizer {
                 String keyword = sourceCode.substring(0, matcher.end());
                 tokens.add(new Token(keyword, TokenType.OPERATOR, new TokenLocation(filename, line, column)));
                 column += matcher.end() - matcher.start();
-//                System.out.println("Found operator : " + keyword);
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;
             }
@@ -119,7 +109,6 @@ public class Tokenizer {
                 String keyword = sourceCode.substring(0, matcher.end());
                 tokens.add(new Token(keyword, TokenType.PUNCTUATION, new TokenLocation(filename, line, column)));
                 column += matcher.end() - matcher.start();
-//                System.out.println("Found punctuation : " + keyword);
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;
             }
@@ -128,7 +117,6 @@ public class Tokenizer {
                 String keyword = sourceCode.substring(0, matcher.end());
                 tokens.add(new Token(keyword, TokenType.IDENTIFIER, new TokenLocation(filename, line, column)));
                 column += matcher.end() - matcher.start();
-//                System.out.println("Found identifier : " + keyword);
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;
             }
