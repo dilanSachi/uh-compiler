@@ -12,6 +12,7 @@ These are the main parts of the compiler.
   - [x] String literal
   - [ ] Boolean literal
   - [x] If then else blocks
+  - [x] Comparison operators (=, ==, !=, <=, >=, >, <, and, or)
   - [ ] While block
   - [x] Function call
   - [ ] Type declaration
