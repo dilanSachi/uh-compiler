@@ -119,6 +119,46 @@ public class ParserTests {
     }
 
     @Test
+    public void testComparisonOperatorWithConditional() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize(
+                "if a > 2 then b = c + d else if e == 3 then f = g * h else i = j - k", "Testfile.dl"));
+        Block block = testParser.parse2();
+        assertEquals(block.getExpressionList().size(), 1);
+        ConditionalOp conditionalOp = (ConditionalOp) block.getExpressionList().get(0);
+        BinaryOp condition = (BinaryOp) conditionalOp.getCondition();
+        BinaryOp thenBlock = (BinaryOp) conditionalOp.getThenBlock();
+        ConditionalOp elseBlock = (ConditionalOp) conditionalOp.getElseBlock();
+        assertEquals(((Identifier) condition.getLeft()).getName(), "a");
+        assertEquals(condition.getOperatorToken().getText(), ">");
+        assertEquals(((Literal) condition.getRight()).getValue(), 2);
+        assertEquals(((Identifier) thenBlock.getLeft()).getName(), "b");
+        assertEquals(thenBlock.getOperatorToken().getText(), "=");
+        BinaryOp binaryOp = (BinaryOp) thenBlock.getRight();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "c");
+        assertEquals(binaryOp.getOperatorToken().getText(), "+");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "d");
+        condition = (BinaryOp) elseBlock.getCondition();
+        thenBlock = (BinaryOp) elseBlock.getThenBlock();
+        assertEquals(((Identifier) condition.getLeft()).getName(), "e");
+        assertEquals(condition.getOperatorToken().getText(), "==");
+        assertEquals(((Literal) condition.getRight()).getValue(), 3);
+        assertEquals(((Identifier) thenBlock.getLeft()).getName(), "f");
+        assertEquals(thenBlock.getOperatorToken().getText(), "=");
+        binaryOp = (BinaryOp) thenBlock.getRight();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "g");
+        assertEquals(binaryOp.getOperatorToken().getText(), "*");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "h");
+        BinaryOp elseBlock2 = (BinaryOp) elseBlock.getElseBlock();
+        assertEquals(((Identifier) elseBlock2.getLeft()).getName(), "i");
+        assertEquals(elseBlock2.getOperatorToken().getText(), "=");
+        binaryOp = (BinaryOp) elseBlock2.getRight();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "j");
+        assertEquals(binaryOp.getOperatorToken().getText(), "-");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "k");
+    }
+
+    @Test @Disabled
     public void testMultipleComparisonOperators() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize(

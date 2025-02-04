@@ -119,14 +119,14 @@ public class Parser {
 
     private Expression parseExpression() throws ParserException {
         Expression left = parseTerm();
-        while (Arrays.asList("+", "-").contains(peek().getText())) {
-            Token operatorToken =  consume();
-            Expression right = parseTerm();
-            left = new BinaryOp(left, operatorToken, right);
-        }
-        while (Arrays.asList("=", "and", "or", "==", "!=", "<", "<=", ">", ">=").contains(peek().getText())) {
+        while (Arrays.asList("=", "or", "and", "==", "!=", "<", "<=", ">", ">=").contains(peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseExpression();
+            left = new BinaryOp(left, operatorToken, right);
+        }
+        while (Arrays.asList("+", "-").contains(peek().getText())) {
+            Token operatorToken = consume();
+            Expression right = parseTerm();
             left = new BinaryOp(left, operatorToken, right);
         }
         return left;
@@ -178,9 +178,9 @@ public class Parser {
                 consume(";");
                 nextToken = peek();
             }
-            if (checkNextToken(TokenType.OPERATOR, Optional.of("="))) {
-                parseExpressionWithRightAssociativity();
-            }
+//            if (checkNextToken(TokenType.OPERATOR, Optional.of("="))) {
+//                parseExpressionWithRightAssociativity();
+//            }
         }
         if (tokenPosition < tokens.size()) {
             throw new ParserException("Parsing failed. Invalid tokens found: " +
