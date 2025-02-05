@@ -119,6 +119,44 @@ public class ParserTests {
     }
 
     @Test
+    public void testEqualOperator2() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("x + y = 20", "Testfile.dl"));
+        Block block = testParser.parse2();
+        assertEquals(block.getExpressionList().size(), 1);
+        BinaryOp binaryOp = (BinaryOp) block.getExpressionList().get(0);
+        assertEquals(((Literal) binaryOp.getRight()).getValue(), 20);
+        assertEquals(binaryOp.getOperatorToken().getText(), "=");
+        BinaryOp leftOp = (BinaryOp) binaryOp.getLeft();
+        assertEquals(((Identifier) leftOp.getLeft()).getName(), "x");
+        assertEquals(((Identifier) leftOp.getRight()).getName(), "y");
+        assertEquals(leftOp.getOperatorToken().getText(), "+");
+    }
+
+    @Test
+    public void testEqualOperator3() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("x + a + b + c = y - 20", "Testfile.dl"));
+        Block block = testParser.parse2();
+        assertEquals(block.getExpressionList().size(), 1);
+        BinaryOp binaryOp1 = (BinaryOp) block.getExpressionList().get(0);
+        BinaryOp binaryOp2 = (BinaryOp) binaryOp1.getLeft();
+        BinaryOp binaryOp3 = (BinaryOp) binaryOp1.getRight();
+        assertEquals(((Identifier) binaryOp3.getLeft()).getName(), "y");
+        assertEquals(((Literal) binaryOp3.getRight()).getValue(), 20);
+        assertEquals(binaryOp3.getOperatorToken().getText(), "-");
+        assertEquals(((Identifier) binaryOp2.getRight()).getName(), "c");
+        assertEquals(binaryOp2.getOperatorToken().getText(), "+");
+        BinaryOp binaryOp4 = (BinaryOp) binaryOp2.getLeft();
+        assertEquals(((Identifier) binaryOp4.getRight()).getName(), "b");
+        assertEquals(binaryOp4.getOperatorToken().getText(), "+");
+        BinaryOp binaryOp5 = (BinaryOp) binaryOp4.getLeft();
+        assertEquals(((Identifier) binaryOp5.getRight()).getName(), "a");
+        assertEquals(binaryOp5.getOperatorToken().getText(), "+");
+        assertEquals(((Identifier) binaryOp5.getLeft()).getName(), "x");
+    }
+
+    @Test
     public void testComparisonOperatorWithConditional() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize(
@@ -158,7 +196,7 @@ public class ParserTests {
         assertEquals(((Identifier) binaryOp.getRight()).getName(), "k");
     }
 
-    @Test @Disabled
+    @Test
     public void testMultipleComparisonOperators() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize(
@@ -169,12 +207,36 @@ public class ParserTests {
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "a");
         assertEquals(binaryOp.getOperatorToken().getText(), "=");
         BinaryOp rightOp = (BinaryOp) binaryOp.getRight();
-
-
-
-        assertEquals(((Identifier) rightOp.getLeft()).getName(), "y");
-        assertEquals(((Identifier) rightOp.getRight()).getName(), "z");
-        assertEquals(rightOp.getOperatorToken().getText(), "and");
+        assertEquals(rightOp.getOperatorToken().getText(), "or");
+        BinaryOp binaryOp1 = (BinaryOp) rightOp.getRight();
+        BinaryOp binaryOp2 = (BinaryOp) rightOp.getLeft();
+        assertEquals(binaryOp1.getOperatorToken().getText(), ">");
+        assertEquals(((Identifier) binaryOp1.getRight()).getName(), "l");
+        assertEquals(binaryOp2.getOperatorToken().getText(), "!=");
+        BinaryOp binaryOp3 = (BinaryOp) binaryOp1.getLeft();
+        assertEquals(binaryOp3.getOperatorToken().getText(), "<");
+        BinaryOp binaryOp4 = (BinaryOp) binaryOp2.getLeft();
+        BinaryOp binaryOp5 = (BinaryOp) binaryOp2.getRight();
+        assertEquals(binaryOp4.getOperatorToken().getText(), "+");
+        assertEquals(binaryOp5.getOperatorToken().getText(), ">=");
+        assertEquals(((Identifier) binaryOp5.getRight()).getName(), "f");
+        assertEquals(((Identifier) binaryOp5.getLeft()).getName(), "e");
+        assertEquals(((Identifier) binaryOp4.getRight()).getName(), "d");
+        BinaryOp binaryOp6 = (BinaryOp) binaryOp4.getLeft();
+        assertEquals(binaryOp6.getOperatorToken().getText(), "and");
+        assertEquals(((Identifier) binaryOp6.getRight()).getName(), "c");
+        assertEquals(((Identifier) binaryOp6.getLeft()).getName(), "b");
+        BinaryOp binaryOp7 = (BinaryOp) binaryOp3.getLeft();
+        BinaryOp binaryOp8 = (BinaryOp) binaryOp3.getRight();
+        assertEquals(binaryOp7.getOperatorToken().getText(), "<=");
+        assertEquals(binaryOp8.getOperatorToken().getText(), "*");
+        assertEquals(((Identifier) binaryOp8.getRight()).getName(), "k");
+        assertEquals(((Identifier) binaryOp8.getLeft()).getName(), "j");
+        assertEquals(((Identifier) binaryOp7.getLeft()).getName(), "g");
+        BinaryOp binaryOp9 = (BinaryOp) binaryOp7.getRight();
+        assertEquals(binaryOp9.getOperatorToken().getText(), "-");
+        assertEquals(((Identifier) binaryOp9.getRight()).getName(), "i");
+        assertEquals(((Identifier) binaryOp9.getLeft()).getName(), "h");
     }
 
     @Test

@@ -117,13 +117,8 @@ public class Parser {
         return new ConditionalOp(condition, thenBlock, null);
     }
 
-    private Expression parseExpression() throws ParserException {
+    private Expression parseAddition() throws ParserException {
         Expression left = parseTerm();
-        while (Arrays.asList("=", "or", "and", "==", "!=", "<", "<=", ">", ">=").contains(peek().getText())) {
-            Token operatorToken = consume();
-            Expression right = parseExpression();
-            left = new BinaryOp(left, operatorToken, right);
-        }
         while (Arrays.asList("+", "-").contains(peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseTerm();
@@ -132,11 +127,51 @@ public class Parser {
         return left;
     }
 
-    public Expression parseExpressionWithRightAssociativity() throws ParserException {
-        Expression left = parseTerm();
-        while (Arrays.asList("", "+", "-").contains(peek().getText())) {
+    private Expression parseThan() throws ParserException {
+        Expression left = parseAddition();
+        while (Arrays.asList("<", "<=", ">", ">=").contains(peek().getText())) {
             Token operatorToken = consume();
-            Expression right = parseExpressionWithRightAssociativity();
+            Expression right = parseAddition();
+            left = new BinaryOp(left, operatorToken, right);
+        }
+        return left;
+    }
+
+    private Expression parseEquality() throws ParserException {
+        Expression left = parseThan();
+        while (Arrays.asList("==", "!=").contains(peek().getText())) {
+            Token operatorToken = consume();
+            Expression right = parseThan();
+            left = new BinaryOp(left, operatorToken, right);
+        }
+        return left;
+    }
+
+    private Expression parseAnd() throws ParserException {
+        Expression left = parseEquality();
+        while (Arrays.asList("and").contains(peek().getText())) {
+            Token operatorToken = consume();
+            Expression right = parseEquality();
+            left = new BinaryOp(left, operatorToken, right);
+        }
+        return left;
+    }
+
+    private Expression parseOr() throws ParserException {
+        Expression left = parseAnd();
+        while (Arrays.asList("or").contains(peek().getText())) {
+            Token operatorToken = consume();
+            Expression right = parseAnd();
+            left = new BinaryOp(left, operatorToken, right);
+        }
+        return left;
+    }
+
+    private Expression parseExpression() throws ParserException {
+        Expression left = parseOr();
+        while (Arrays.asList("=").contains(peek().getText())) {
+            Token operatorToken = consume();
+            Expression right = parseExpression();
             left = new BinaryOp(left, operatorToken, right);
         }
         return left;
@@ -178,9 +213,6 @@ public class Parser {
                 consume(";");
                 nextToken = peek();
             }
-//            if (checkNextToken(TokenType.OPERATOR, Optional.of("="))) {
-//                parseExpressionWithRightAssociativity();
-//            }
         }
         if (tokenPosition < tokens.size()) {
             throw new ParserException("Parsing failed. Invalid tokens found: " +

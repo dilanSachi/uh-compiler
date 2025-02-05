@@ -14,7 +14,7 @@ public class ParserNegativeTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("", "Testfile.dl"));
         try {
-            testParser.parse();
+            testParser.parse2();
         } catch (ParserException e) {
             assertEquals(e.getMessage(), "Cannot parse empty token list");
             return;
