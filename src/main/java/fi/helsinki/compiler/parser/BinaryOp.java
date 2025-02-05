@@ -20,7 +20,7 @@ public class BinaryOp implements Expression {
         return left;
     }
 
-    public Token getOperatorToken() {
+    public Token getOperator() {
         return operatorToken;
     }
 

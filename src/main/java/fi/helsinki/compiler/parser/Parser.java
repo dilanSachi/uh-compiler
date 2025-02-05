@@ -94,11 +94,24 @@ public class Parser {
         return expression;
     }
 
+    private Expression parseUnaryAndNot() throws ParserException {
+        Expression unary;
+        while (Arrays.asList("-", "not").contains(peek().getText())) {
+            Token operatorToken =  consume();
+            Expression right = parseUnaryAndNot();
+            unary = new UnaryOp(operatorToken, right);
+            return unary;
+        }
+        return parseFactor();
+    }
+
     private Expression parseTerm() throws ParserException {
-        Expression left = parseFactor();
+        Expression left = parseUnaryAndNot();
+//        Expression left = parseFactor();
         while (Arrays.asList("*", "/", "%").contains(peek().getText())) {
             Token operatorToken =  consume();
-            Expression right = parseFactor();
+            Expression right = parseUnaryAndNot();
+//            Expression right = parseFactor();
             left = new BinaryOp(left, operatorToken, right);
         }
         return left;
@@ -212,6 +225,10 @@ public class Parser {
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
                 consume(";");
                 nextToken = peek();
+            }
+            if (checkNextToken(TokenType.OPERATOR, Optional.of("-")) ||
+                    checkNextToken(TokenType.OPERATOR, Optional.of("not"))) {
+
             }
         }
         if (tokenPosition < tokens.size()) {
