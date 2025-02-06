@@ -8,5 +8,6 @@ public enum TokenType {
     STRING_LITERAL,
     BOOLEAN_LITERAL,
     KEYWORD,
-    END
+    END,
+    START
 }

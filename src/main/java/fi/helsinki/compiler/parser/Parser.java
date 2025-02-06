@@ -24,6 +24,13 @@ public class Parser {
         return tokens.get(tokenPosition);
     }
 
+    private Token lookBack() {
+        if (tokenPosition == 0) {
+            return new Token("", TokenType.STRING_LITERAL, tokens.getFirst().getTokenLocation());
+        }
+        return tokens.get(tokenPosition - 1);
+    }
+
     private Token consume(String... expected) throws ParserException {
         Token token = peek();
         if (expected.length > 0 && Arrays.stream(expected).noneMatch(token.getText()::equals)) {
@@ -107,11 +114,9 @@ public class Parser {
 
     private Expression parseTerm() throws ParserException {
         Expression left = parseUnaryAndNot();
-//        Expression left = parseFactor();
         while (Arrays.asList("*", "/", "%").contains(peek().getText())) {
             Token operatorToken =  consume();
             Expression right = parseUnaryAndNot();
-//            Expression right = parseFactor();
             left = new BinaryOp(left, operatorToken, right);
         }
         return left;
@@ -128,6 +133,19 @@ public class Parser {
             return new ConditionalOp(condition, thenBlock, elseBlock);
         }
         return new ConditionalOp(condition, thenBlock, null);
+    }
+
+    private Expression parseWhileBlock() throws ParserException {
+        consume("while");
+        Expression condition = parseExpression();
+        consume("do");
+        Expression body;
+        if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
+            body = parse2().getExpressionList().getFirst();
+        } else {
+            body = parseExpression();
+        }
+        return new WhileOp(condition, body);
     }
 
     private Expression parseAddition() throws ParserException {
@@ -228,7 +246,23 @@ public class Parser {
             }
             if (checkNextToken(TokenType.OPERATOR, Optional.of("-")) ||
                     checkNextToken(TokenType.OPERATOR, Optional.of("not"))) {
-
+                Expression expression = parseExpression();
+                block.addExpression(expression);
+                nextToken = peek();
+            }
+            if (checkNextToken(TokenType.KEYWORD, Optional.of("while"))) {
+                block.addExpression(parseWhileBlock());
+                nextToken = peek();
+            }
+            if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
+                consume("{");
+                Block childBlock = parse2();
+                block.addExpression(childBlock);
+                nextToken = peek();
+            }
+            if (checkNextToken(TokenType.PUNCTUATION, Optional.of("}"))) {
+                consume("}");
+                return block;
             }
         }
         if (tokenPosition < tokens.size()) {

@@ -10,11 +10,17 @@ public class Block implements Expression {
         this.expressionList = expressionList;
     }
 
+    public Block() {}
+
     public void addExpression(Expression expression) {
         this.expressionList.add(expression);
     }
 
     public List<Expression> getExpressionList() {
         return expressionList;
+    }
+
+    public void setExpressionList(List<Expression> expressionList) {
+        this.expressionList = expressionList;
     }
 }
