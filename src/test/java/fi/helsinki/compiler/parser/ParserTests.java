@@ -5,6 +5,7 @@ import fi.helsinki.compiler.tokenizer.Token;
 import fi.helsinki.compiler.tokenizer.TokenType;
 import fi.helsinki.compiler.tokenizer.Tokenizer;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -657,6 +658,15 @@ public class ParserTests {
         assertEquals(((Literal) ((BinaryOp) binaryOp3.getRight()).getRight()).getValue(), 4);
         assertEquals(((BinaryOp) binaryOp3.getRight()).getOperator().getText(), "/");
         assertEquals(((Literal) ((BinaryOp) binaryOp3.getRight()).getLeft()).getValue(), 35);
+    }
+
+    @Test @Disabled
+    public void testVariableDefinition() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("var a = 3", "Testfile.dl"));
+        Block block = testParser.parse2();
+        List<Expression> expressionList = block.getExpressionList();
+        assertEquals(expressionList.size(), 1);
     }
 
 }

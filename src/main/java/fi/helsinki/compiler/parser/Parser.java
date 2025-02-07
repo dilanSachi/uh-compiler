@@ -225,12 +225,10 @@ public class Parser {
             throw new ParserException("Cannot parse empty token list");
         }
         Block block = new Block(new ArrayList<>());
-        Token nextToken = peek();
-        while (nextToken.getTokenType() != TokenType.END) {
+        while (!checkNextToken(TokenType.END, Optional.empty())) {
             if (checkNextToken(TokenType.KEYWORD, Optional.of("if"))) {
                 Expression ifExpression = parseIfBlock();
                 block.addExpression(ifExpression);
-                nextToken = peek();
             }
             if (checkNextToken(TokenType.IDENTIFIER, Optional.empty()) ||
                     checkNextToken(TokenType.STRING_LITERAL, Optional.empty()) ||
@@ -238,31 +236,31 @@ public class Parser {
                     checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.empty())) {
                 Expression expression = parseExpression();
                 block.addExpression(expression);
-                nextToken = peek();
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
                 consume(";");
-                nextToken = peek();
             }
             if (checkNextToken(TokenType.OPERATOR, Optional.of("-")) ||
                     checkNextToken(TokenType.OPERATOR, Optional.of("not"))) {
                 Expression expression = parseExpression();
                 block.addExpression(expression);
-                nextToken = peek();
             }
             if (checkNextToken(TokenType.KEYWORD, Optional.of("while"))) {
                 block.addExpression(parseWhileBlock());
-                nextToken = peek();
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
                 consume("{");
                 Block childBlock = parse2();
                 block.addExpression(childBlock);
-                nextToken = peek();
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of("}"))) {
                 consume("}");
                 return block;
+            }
+            if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
+                consume("var");
+                VariableDef variableDef = new VariableDef(consume().getText());
+                block.addExpression(variableDef);
             }
         }
         if (tokenPosition < tokens.size()) {
