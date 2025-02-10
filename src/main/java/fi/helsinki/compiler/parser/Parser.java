@@ -26,7 +26,7 @@ public class Parser {
 
     private Token lookBack() {
         if (tokenPosition == 0) {
-            return new Token("", TokenType.STRING_LITERAL, tokens.getFirst().getTokenLocation());
+            return new Token("", TokenType.START, tokens.getFirst().getTokenLocation());
         }
         return tokens.get(tokenPosition - 1);
     }
