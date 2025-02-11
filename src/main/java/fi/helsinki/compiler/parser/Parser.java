@@ -92,6 +92,10 @@ public class Parser {
         if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
             return parseBlock();
         }
+        if (checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.of("true")) ||
+                checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.of("false"))) {
+            return new Boolean(consume().getText());
+        }
         throw new ParserException("Invalid token: " + token.getText() + token.getTokenLocation() +
                 ": expected an integer literal or an identifier");
     }
@@ -255,27 +259,22 @@ public class Parser {
             if (checkNextToken(TokenType.KEYWORD, Optional.of("if"))) {
                 Expression ifExpression = parseIfBlock();
                 block.addExpression(ifExpression);
-            }
-            if (checkNextToken(TokenType.IDENTIFIER, Optional.empty()) ||
+            } else if (checkNextToken(TokenType.IDENTIFIER, Optional.empty()) ||
                     checkNextToken(TokenType.STRING_LITERAL, Optional.empty()) ||
                     checkNextToken(TokenType.INTEGER_LITERAL, Optional.empty()) ||
                     checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.empty())) {
                 Expression expression = parseExpression();
                 block.addExpression(expression);
-            }
-            if (checkNextToken(TokenType.OPERATOR, Optional.of("-")) ||
+            } else if (checkNextToken(TokenType.OPERATOR, Optional.of("-")) ||
                     checkNextToken(TokenType.OPERATOR, Optional.of("not"))) {
                 Expression expression = parseExpression();
                 block.addExpression(expression);
-            }
-            if (checkNextToken(TokenType.KEYWORD, Optional.of("while"))) {
+            } else if (checkNextToken(TokenType.KEYWORD, Optional.of("while"))) {
                 block.addExpression(parseWhileBlock());
-            }
-            if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
+            } else if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
                 Block childBlock = parseBlock();
                 block.addExpression(childBlock);
-            }
-            if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
+            } else if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
                 block.addExpression(parseVariableDefinition());
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
@@ -283,6 +282,10 @@ public class Parser {
                 if (checkNextToken(TokenType.PUNCTUATION, Optional.of("}"))) {
                     block.addExpression(new Unit());
                 }
+            } else if (!checkNextToken(TokenType.PUNCTUATION, Optional.of("}")) &&
+                    !checkNextToken(TokenType.END, Optional.empty()) &&
+                    !lookBack().getText().equals("}")) {
+                throw new ParserException("Parsing failed. Invalid tokens found. Expected ';', but found " + peek());
             }
         }
         consume("}");
@@ -298,35 +301,31 @@ public class Parser {
             if (checkNextToken(TokenType.KEYWORD, Optional.of("if"))) {
                 Expression ifExpression = parseIfBlock();
                 block.addExpression(ifExpression);
-            }
-            if (checkNextToken(TokenType.IDENTIFIER, Optional.empty()) ||
+            } else if (checkNextToken(TokenType.IDENTIFIER, Optional.empty()) ||
                     checkNextToken(TokenType.STRING_LITERAL, Optional.empty()) ||
                     checkNextToken(TokenType.INTEGER_LITERAL, Optional.empty()) ||
                     checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.empty())) {
                 Expression expression = parseExpression();
                 block.addExpression(expression);
-            }
-            if (checkNextToken(TokenType.OPERATOR, Optional.of("-")) ||
+            } else if (checkNextToken(TokenType.OPERATOR, Optional.of("-")) ||
                     checkNextToken(TokenType.OPERATOR, Optional.of("not"))) {
                 Expression expression = parseExpression();
                 block.addExpression(expression);
-            }
-            if (checkNextToken(TokenType.KEYWORD, Optional.of("while"))) {
+            } else if (checkNextToken(TokenType.KEYWORD, Optional.of("while"))) {
                 block.addExpression(parseWhileBlock());
-            }
-            if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
+            } else if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
                 Block childBlock = parseBlock();
                 block.addExpression(childBlock);
-            }
-            if (checkNextToken(TokenType.PUNCTUATION, Optional.of("}"))) {
+            } else if (checkNextToken(TokenType.PUNCTUATION, Optional.of("}"))) {
                 consume("}");
                 return block;
-            }
-            if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
+            } else if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
                 block.addExpression(parseVariableDefinition());
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
                 consume(";");
+            } else if (peek().getTokenType() != TokenType.END && !lookBack().getText().equals("}")) {
+                throw new ParserException("Parsing failed. Invalid tokens found. Expected ';', but found " + peek());
             }
         }
         if (tokenPosition < tokens.size()) {

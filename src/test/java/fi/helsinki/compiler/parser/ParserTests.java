@@ -7,9 +7,12 @@ import fi.helsinki.compiler.tokenizer.Tokenizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -771,6 +774,24 @@ public class ParserTests {
         assertEquals(((FunctionCall) whileBlock.getExpressionList().get(2)).getParameters().size(), 1);
         assertEquals(((Identifier) ((FunctionCall) whileBlock.getExpressionList().get(2)).getParameters().get(0)).getName(), "y");
         assertTrue(whileBlock.getExpressionList().get(3) instanceof Unit);
+    }
+
+    @ParameterizedTest
+    @MethodSource("dataProvider")
+    public void testValidBlocks(String sourceCode) throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize(sourceCode, "Testfile.dl"));
+        testParser.parse2();
+    }
+
+    static Stream<Arguments> dataProvider() {
+        return Stream.of(
+                Arguments.of("{ { a } { b } }"),
+                Arguments.of("{ if true then { a }; b }"),
+                Arguments.of("{ if true then { a } b; c }"),
+                Arguments.of("{ if true then { a } else { b } c }"),
+                Arguments.of("x = { { f(a) } { b } }"),
+                Arguments.of("{ if true then { a } b }"));
     }
 
 }

@@ -5,7 +5,9 @@ import fi.helsinki.compiler.tokenizer.Tokenizer;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.*;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -51,17 +53,23 @@ public class ParserNegativeTests {
         fail("Expected an exception to be thrown");
     }
 
-    @ParameterizedTest @Disabled
-    @ValueSource(strings = {"{ a b }", "{ if true then { a } b c }"})
-    void testInvalidBlocks(String sourceCode) {
+    @ParameterizedTest
+    @MethodSource ("dataProvider")
+    void testInvalidBlocks(String sourceCode, String error) {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize(sourceCode, "Testfile.dl"));
         try {
             testParser.parse2();
         } catch (ParserException e) {
-            assertEquals("Testfile.dl: L->0, C->7: expected one of: =", e.getMessage());
+            assertEquals(error, e.getMessage());
             return;
         }
         fail("Expected an exception to be thrown");
+    }
+
+    static Stream<Arguments> dataProvider() {
+        return Stream.of(
+            Arguments.of("{ a b }", "Parsing failed. Invalid tokens found. Expected ';', but found Text: b, Type: IDENTIFIER, Location: Testfile.dl: L->0, C->4"),
+            Arguments.of("{ if true then { a } b c }", "Invalid token: trueTestfile.dl: L->0, C->5: expected an integer literal or an identifier"));
     }
 }
