@@ -325,6 +325,9 @@ public class Parser {
             if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
                 block.addExpression(parseVariableDefinition());
             }
+            if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
+                consume(";");
+            }
         }
         if (tokenPosition < tokens.size()) {
             throw new ParserException("Parsing failed. Invalid tokens found: " +
