@@ -15,7 +15,7 @@ These are the main parts of the compiler.
   - [x] Comparison operators (=, ==, !=, <=, >=, >, <, and, or)
   - [x] While block
   - [x] Function call
-  - [ ] Type declaration
+  - [x] Type declaration
 - [ ] Interpreter
 - [ ] Type Checker
 - [ ] IR Generator
