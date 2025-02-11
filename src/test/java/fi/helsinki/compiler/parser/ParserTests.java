@@ -5,12 +5,14 @@ import fi.helsinki.compiler.tokenizer.Token;
 import fi.helsinki.compiler.tokenizer.TokenType;
 import fi.helsinki.compiler.tokenizer.Tokenizer;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ParserTests {
 
@@ -660,13 +662,115 @@ public class ParserTests {
         assertEquals(((Literal) ((BinaryOp) binaryOp3.getRight()).getLeft()).getValue(), 35);
     }
 
-    @Test @Disabled
+    @Test
     public void testVariableDefinition() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("var a = 3", "Testfile.dl"));
         Block block = testParser.parse2();
-        List<Expression> expressionList = block.getExpressionList();
-        assertEquals(expressionList.size(), 1);
+        assertEquals(block.getExpressionList().size(), 1);
+        VariableDef variableDef = (VariableDef) block.getExpressionList().get(0);
+        assertEquals(variableDef.getName(), "a");
+        assertTrue(variableDef.getType().isEmpty());
+        assertEquals(((Literal) variableDef.getValue()).getValue(), 3);
+    }
+
+    @Test
+    public void testVariableDefinitionWithType() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("var a: Int = 3", "Testfile.dl"));
+        Block block = testParser.parse2();
+        assertEquals(block.getExpressionList().size(), 1);
+        VariableDef variableDef = (VariableDef) block.getExpressionList().get(0);
+        assertEquals(variableDef.getName(), "a");
+        assertEquals(variableDef.getType().get(), "Int");
+        assertEquals(((Literal) variableDef.getValue()).getValue(), 3);
+    }
+
+    @Test
+    public void testVariableDefinitionWithIfBlock() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("var a: Int = if x == 3 then z else y", "Testfile.dl"));
+        Block block = testParser.parse2();
+        assertEquals(block.getExpressionList().size(), 1);
+        VariableDef variableDef = (VariableDef) block.getExpressionList().get(0);
+        assertEquals(variableDef.getName(), "a");
+        assertEquals(variableDef.getType().get(), "Int");
+        ConditionalOp conditionalOp = (ConditionalOp) variableDef.getValue();
+        BinaryOp binaryOp = (BinaryOp) conditionalOp.getCondition();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
+        assertEquals(binaryOp.getOperator().getText(), "==");
+        assertEquals(((Literal) binaryOp.getRight()).getValue(), 3);
+        assertEquals(((Identifier) conditionalOp.getThenBlock()).getName(), "z");
+        assertEquals(((Identifier) conditionalOp.getElseBlock()).getName(), "y");
+    }
+
+    @Test
+    public void testBlockWithoutEndingSemicolon() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("{\n" +
+                        "    f(a);\n" +
+                        "    x = y;\n" +
+                        "    f(x)\n" +
+                        "}", "Testfile.dl"));
+        Block block = testParser.parse2();
+        assertEquals(block.getExpressionList().size(), 3);
+        FunctionCall functionCall = (FunctionCall) block.getExpressionList().get(0);
+        assertEquals(functionCall.getFunctionName(), "f");
+        assertEquals(functionCall.getParameters().size(), 1);
+        assertEquals(((Identifier) functionCall.getParameters().get(0)).getName(), "a");
+        functionCall = (FunctionCall) block.getExpressionList().get(2);
+        assertEquals(functionCall.getFunctionName(), "f");
+        assertEquals(functionCall.getParameters().size(), 1);
+        assertEquals(((Identifier) functionCall.getParameters().get(0)).getName(), "x");
+        BinaryOp binaryOp = (BinaryOp) block.getExpressionList().get(1);
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
+        assertEquals(binaryOp.getOperator().getText(), "=");
+        assertEquals(((Identifier) binaryOp.getRight()).getName(), "y");
+    }
+
+    @Test
+    public void testComplexBlock() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("{\n    while f() do {\n        x = 10;\n     " +
+                "   y = if g(x) then {\n            x = x + 1;\n            x\n} else {\ng(x)\n};\ng(y);\n};\n123\n}",
+                "Testfile.dl"));
+        Block block = testParser.parse2();
+        assertEquals(block.getExpressionList().size(), 2);
+        WhileOp whileOp = (WhileOp) block.getExpressionList().get(0);
+        assertEquals(((Literal) block.getExpressionList().get(1)).getValue(), 123);
+        FunctionCall functionCall = (FunctionCall) whileOp.getCondition();
+        assertEquals(functionCall.getFunctionName(), "f");
+        assertEquals(functionCall.getParameters().size(), 0);
+        Block whileBlock = (Block) whileOp.getBody();
+        BinaryOp binaryOp = (BinaryOp) whileBlock.getExpressionList().get(0);
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
+        assertEquals(((Literal) binaryOp.getRight()).getValue(), 10);
+        assertEquals(binaryOp.getOperator().getText(), "=");
+        binaryOp = (BinaryOp) whileBlock.getExpressionList().get(1);
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "y");
+        assertEquals(binaryOp.getOperator().getText(), "=");
+        ConditionalOp conditionalOp = (ConditionalOp) binaryOp.getRight();
+        functionCall = (FunctionCall) conditionalOp.getCondition();
+        assertEquals(functionCall.getFunctionName(), "g");
+        assertEquals(functionCall.getParameters().size(), 1);
+        assertEquals(((Identifier) functionCall.getParameters().get(0)).getName(), "x");
+        block = (Block) conditionalOp.getThenBlock();
+        binaryOp = (BinaryOp) block.getExpressionList().get(0);
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
+        assertEquals(binaryOp.getOperator().getText(), "=");
+        binaryOp = (BinaryOp) binaryOp.getRight();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
+        assertEquals(binaryOp.getOperator().getText(), "+");
+        assertEquals(((Literal) binaryOp.getRight()).getValue(), 1);
+        assertEquals(((Identifier) block.getExpressionList().get(1)).getName(), "x");
+        block = (Block) conditionalOp.getElseBlock();
+        assertEquals(((FunctionCall) block.getExpressionList().get(0)).getFunctionName(), "g");
+        assertEquals(((FunctionCall) block.getExpressionList().get(0)).getParameters().size(), 1);
+        assertEquals(((Identifier) ((FunctionCall) block.getExpressionList().get(0)).getParameters().get(0)).getName(), "x");
+        assertEquals(((FunctionCall) whileBlock.getExpressionList().get(2)).getFunctionName(), "g");
+        assertEquals(((FunctionCall) whileBlock.getExpressionList().get(2)).getParameters().size(), 1);
+        assertEquals(((Identifier) ((FunctionCall) whileBlock.getExpressionList().get(2)).getParameters().get(0)).getName(), "y");
+        assertTrue(whileBlock.getExpressionList().get(3) instanceof Unit);
     }
 
 }

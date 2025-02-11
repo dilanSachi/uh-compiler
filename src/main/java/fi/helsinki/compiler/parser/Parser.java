@@ -53,15 +53,13 @@ public class Parser {
     private FunctionCall parseFunctionCall(Token functionNameToken) throws ParserException {
         consume("(");
         List<Expression> parameters = new ArrayList<>();
-        while (true) {
+        while (!peek().getText().equals(")")) {
             parameters.add(parseExpression());
-            if (peek().getText().equals(")")) {
-                consume(")");
-                break;
-            } else {
+            if (!peek().getText().equals(")")) {
                 consume(",");
             }
         }
+        consume(")");
         return new FunctionCall(functionNameToken.getText(), parameters);
     }
 
@@ -91,7 +89,11 @@ public class Parser {
         if (checkNextToken(TokenType.KEYWORD, Optional.of("if"))) {
             return parseIfBlock();
         }
-        throw new ParserException(token.getTokenLocation() + ": expected an integer literal or an identifier");
+        if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
+            return parseBlock();
+        }
+        throw new ParserException("Invalid token: " + token.getText() + token.getTokenLocation() +
+                ": expected an integer literal or an identifier");
     }
 
     private Expression parseParenthesized() throws ParserException {
@@ -126,10 +128,20 @@ public class Parser {
         consume("if");
         Expression condition = parseExpression();
         consume("then");
-        Expression thenBlock = parseExpression();
+        Expression thenBlock;
+        if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
+            thenBlock = parseBlock();
+        } else {
+            thenBlock = parseExpression();
+        }
         if (peek().getTokenType() == TokenType.KEYWORD && peek().getText().equals("else")) {
             consume("else");
-            Expression elseBlock = parseExpression();
+            Expression elseBlock;
+            if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
+                elseBlock = parseBlock();
+            } else {
+                elseBlock = parseExpression();
+            }
             return new ConditionalOp(condition, thenBlock, elseBlock);
         }
         return new ConditionalOp(condition, thenBlock, null);
@@ -141,7 +153,7 @@ public class Parser {
         consume("do");
         Expression body;
         if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
-            body = parse2().getExpressionList().getFirst();
+            body = parseBlock();
         } else {
             body = parseExpression();
         }
@@ -208,6 +220,21 @@ public class Parser {
         return left;
     }
 
+    private Expression parseVariableDefinition() throws ParserException {
+        consume("var");
+        String varName = consume().getText();
+        if (peek().getText().equals(":")) {
+            consume(":");
+            String type = consume().getText();
+            consume("=");
+            Expression value = parseExpression();
+            return new VariableDef(varName, type, value);
+        }
+        consume("=");
+        Expression value = parseExpression();
+        return new VariableDef(varName, value);
+    }
+
     public Expression parse() throws ParserException {
         if (tokens.isEmpty()) {
             throw new ParserException("Cannot parse empty token list");
@@ -218,6 +245,48 @@ public class Parser {
                     Arrays.toString(tokens.subList(tokenPosition, tokens.size()).toArray()));
         }
         return expression;
+    }
+
+    private Block parseBlock() throws ParserException {
+        consume("{");
+        List<Expression> expressionList = new ArrayList<>();
+        Block block = new Block(expressionList);
+        while (!checkNextToken(TokenType.PUNCTUATION, Optional.of("}"))) {
+            if (checkNextToken(TokenType.KEYWORD, Optional.of("if"))) {
+                Expression ifExpression = parseIfBlock();
+                block.addExpression(ifExpression);
+            }
+            if (checkNextToken(TokenType.IDENTIFIER, Optional.empty()) ||
+                    checkNextToken(TokenType.STRING_LITERAL, Optional.empty()) ||
+                    checkNextToken(TokenType.INTEGER_LITERAL, Optional.empty()) ||
+                    checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.empty())) {
+                Expression expression = parseExpression();
+                block.addExpression(expression);
+            }
+            if (checkNextToken(TokenType.OPERATOR, Optional.of("-")) ||
+                    checkNextToken(TokenType.OPERATOR, Optional.of("not"))) {
+                Expression expression = parseExpression();
+                block.addExpression(expression);
+            }
+            if (checkNextToken(TokenType.KEYWORD, Optional.of("while"))) {
+                block.addExpression(parseWhileBlock());
+            }
+            if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
+                Block childBlock = parseBlock();
+                block.addExpression(childBlock);
+            }
+            if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
+                block.addExpression(parseVariableDefinition());
+            }
+            if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
+                consume(";");
+                if (checkNextToken(TokenType.PUNCTUATION, Optional.of("}"))) {
+                    block.addExpression(new Unit());
+                }
+            }
+        }
+        consume("}");
+        return block;
     }
 
     public Block parse2() throws ParserException {
@@ -237,9 +306,6 @@ public class Parser {
                 Expression expression = parseExpression();
                 block.addExpression(expression);
             }
-            if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
-                consume(";");
-            }
             if (checkNextToken(TokenType.OPERATOR, Optional.of("-")) ||
                     checkNextToken(TokenType.OPERATOR, Optional.of("not"))) {
                 Expression expression = parseExpression();
@@ -249,8 +315,7 @@ public class Parser {
                 block.addExpression(parseWhileBlock());
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
-                consume("{");
-                Block childBlock = parse2();
+                Block childBlock = parseBlock();
                 block.addExpression(childBlock);
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of("}"))) {
@@ -258,14 +323,15 @@ public class Parser {
                 return block;
             }
             if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
-                consume("var");
-                VariableDef variableDef = new VariableDef(consume().getText());
-                block.addExpression(variableDef);
+                block.addExpression(parseVariableDefinition());
             }
         }
         if (tokenPosition < tokens.size()) {
             throw new ParserException("Parsing failed. Invalid tokens found: " +
                     Arrays.toString(tokens.subList(tokenPosition, tokens.size()).toArray()));
+        }
+        if (block.getExpressionList().size() == 1 && block.getExpressionList().get(0) instanceof Block) {
+            return (Block) block.getExpressionList().get(0);
         }
         return block;
     }
