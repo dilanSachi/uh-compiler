@@ -70,6 +70,6 @@ public class ParserNegativeTests {
     static Stream<Arguments> dataProvider() {
         return Stream.of(
             Arguments.of("{ a b }", "Parsing failed. Invalid tokens found. Expected ';', but found Text: b, Type: IDENTIFIER, Location: Testfile.dl: L->0, C->4"),
-            Arguments.of("{ if true then { a } b c }", "Invalid token: trueTestfile.dl: L->0, C->5: expected an integer literal or an identifier"));
+            Arguments.of("{ if true then { a } b c }", "Parsing failed. Invalid tokens found. Expected ';', but found Text: c, Type: IDENTIFIER, Location: Testfile.dl: L->0, C->23"));
     }
 }
