@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -776,6 +775,61 @@ public class ParserTests {
         assertTrue(whileBlock.getExpressionList().get(3) instanceof Unit);
     }
 
+    @Test
+    public void testComplexBlock2() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("while a > 2 do {\n" +
+                        "    if b <= 4 then {\n" +
+                        "         while c - 2 < 3 do {\n" +
+                        "               d = d * 3\n" +
+                        "         }\n" +
+                        "    } else \n" +
+                        "         e = e % 10\n" +
+                        "    \n" +
+                        "}",
+                "Testfile.dl"));
+        Block block = testParser.parse2();
+        assertEquals(block.getExpressionList().size(), 1);
+        WhileOp whileOp = (WhileOp) block.getExpressionList().get(0);
+        BinaryOp binaryOp = (BinaryOp) whileOp.getCondition();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "a");
+        assertEquals(binaryOp.getOperator().getText(), ">");
+        assertEquals(((Literal) binaryOp.getRight()).getValue(), 2);
+        block = (Block) whileOp.getBody();
+        assertEquals(block.getExpressionList().size(), 1);
+        ConditionalOp conditionalOp = (ConditionalOp) block.getExpressionList().get(0);
+        binaryOp = (BinaryOp) conditionalOp.getCondition();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "b");
+        assertEquals(binaryOp.getOperator().getText(), "<=");
+        assertEquals(((Literal) binaryOp.getRight()).getValue(), 4);
+        block = (Block) conditionalOp.getThenBlock();
+        assertEquals(block.getExpressionList().size(), 1);
+        whileOp = (WhileOp) block.getExpressionList().get(0);
+        binaryOp = (BinaryOp) whileOp.getCondition();
+        assertEquals(binaryOp.getOperator().getText(), "<");
+        assertEquals(((Literal) binaryOp.getRight()).getValue(), 3);
+        binaryOp = (BinaryOp) binaryOp.getLeft();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "c");
+        assertEquals(binaryOp.getOperator().getText(), "-");
+        assertEquals(((Literal) binaryOp.getRight()).getValue(), 2);
+        block = (Block) whileOp.getBody();
+        assertEquals(block.getExpressionList().size(), 1);
+        binaryOp = (BinaryOp) block.getExpressionList().get(0);
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "d");
+        assertEquals(binaryOp.getOperator().getText(), "=");
+        binaryOp = (BinaryOp) binaryOp.getRight();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "d");
+        assertEquals(binaryOp.getOperator().getText(), "*");
+        assertEquals(((Literal) binaryOp.getRight()).getValue(), 3);
+        binaryOp = (BinaryOp) conditionalOp.getElseBlock();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "e");
+        assertEquals(binaryOp.getOperator().getText(), "=");
+        binaryOp = (BinaryOp) binaryOp.getRight();
+        assertEquals(((Identifier) binaryOp.getLeft()).getName(), "e");
+        assertEquals(binaryOp.getOperator().getText(), "%");
+        assertEquals(((Literal) binaryOp.getRight()).getValue(), 10);
+    }
+
     @ParameterizedTest
     @MethodSource("dataProvider")
     public void testValidBlocks(String sourceCode) throws ParserException {
@@ -791,7 +845,8 @@ public class ParserTests {
                 Arguments.of("{ if true then { a } b; c }"),
                 Arguments.of("{ if true then { a } else { b } c }"),
                 Arguments.of("x = { { f(a) } { b } }"),
-                Arguments.of("{ if true then { a } b }"));
+                Arguments.of("{ if true then { a } b }"),
+                Arguments.of("{ { x }; { y } }"),
+                Arguments.of("{ { x }; { y }; }"));
     }
-
 }
