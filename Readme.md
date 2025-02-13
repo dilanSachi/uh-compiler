@@ -10,13 +10,15 @@ These are the main parts of the compiler.
   - [x] Integer literal
   - [x] Identifiers
   - [x] String literal
-  - [ ] Boolean literal
+  - [x] Boolean literal
   - [x] If then else blocks
   - [x] Comparison operators (=, ==, !=, <=, >=, >, <, and, or)
   - [x] While block
   - [x] Function call
   - [x] Type declaration
-- [ ] Interpreter
+- [x] Interpreter - This is an optional part of the compiler which is done for learning
+  - [x] Basic recursion
+  - [ ] Symbol table
 - [ ] Type Checker
 - [ ] IR Generator
 - [ ] Assembly Generator
