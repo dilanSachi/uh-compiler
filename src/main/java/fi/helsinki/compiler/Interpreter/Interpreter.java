@@ -16,16 +16,14 @@ public class Interpreter {
             case BinaryOp binaryOp: {
                 Integer leftValue = (Integer) interpret(binaryOp.getLeft());
                 Integer rightValue = (Integer) interpret(binaryOp.getRight());
-                if (binaryOp.getOperator().getText().equals("+")) {
-                    return leftValue + rightValue;
-                } else if (binaryOp.getOperator().getText().equals("-")) {
-                    return leftValue - rightValue;
-                } else if (binaryOp.getOperator().getText().equals("*")) {
-                    return leftValue * rightValue;
-                } else if (binaryOp.getOperator().getText().equals("/")) {
-                    return leftValue / rightValue;
-                }
-                throw new InterpreterException("BinaryOp " + binaryOp.getOperator().getText() + " not yet supported");
+                return switch (binaryOp.getOperator().getText()) {
+                    case "+" -> leftValue + rightValue;
+                    case "-" -> leftValue - rightValue;
+                    case "*" -> leftValue * rightValue;
+                    case "/" -> leftValue / rightValue;
+                    default ->
+                            throw new InterpreterException("BinaryOp " + binaryOp.getOperator().getText() + " not yet supported");
+                };
             }
             case ConditionalOp conditionalOp: {
                 if ((boolean) interpret(conditionalOp.getCondition())) {
