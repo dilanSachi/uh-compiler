@@ -1,16 +1,19 @@
 package fi.helsinki.compiler.parser;
 
+import fi.helsinki.compiler.Location;
+
 import java.util.List;
 
-public class Block implements Expression {
+public class Block extends Expression {
 
     private List<Expression> expressionList;
 
-    public Block(List<Expression> expressionList) {
+    public Block(List<Expression> expressionList, Location location) {
+        super(location);
         this.expressionList = expressionList;
     }
 
-    public Block() {}
+//    public Block() {}
 
     public void addExpression(Expression expression) {
         this.expressionList.add(expression);

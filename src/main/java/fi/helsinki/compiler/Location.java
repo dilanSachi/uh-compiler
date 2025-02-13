@@ -1,11 +1,11 @@
-package fi.helsinki.compiler.tokenizer;
+package fi.helsinki.compiler;
 
-public class TokenLocation {
+public class Location {
     private String file;
     private int line;
     private int column;
 
-    public TokenLocation(String file, int line, int column) {
+    public Location(String file, int line, int column) {
         this.file = file;
         this.line = line;
         this.column = column;
@@ -25,10 +25,10 @@ public class TokenLocation {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof TokenLocation tokenLocation &&
-                tokenLocation.getFile().equals(getFile()) &&
-                tokenLocation.getColumn() == getColumn() &&
-                tokenLocation.getLine() == getLine();
+        return obj instanceof Location location &&
+                location.getFile().equals(getFile()) &&
+                location.getColumn() == getColumn() &&
+                location.getLine() == getLine();
     }
 
     @Override

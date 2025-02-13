@@ -47,7 +47,7 @@ public class Parser {
             throw new ParserException(peek().getTokenLocation() + ": expected an integer literal");
         }
         Token token = consume();
-        return new Literal(Integer.valueOf(token.getText()));
+        return new Literal(Integer.valueOf(token.getText()), token.getTokenLocation());
     }
 
     private FunctionCall parseFunctionCall(Token functionNameToken) throws ParserException {
@@ -60,7 +60,7 @@ public class Parser {
             }
         }
         consume(")");
-        return new FunctionCall(functionNameToken.getText(), parameters);
+        return new FunctionCall(functionNameToken.getText(), parameters, functionNameToken.getTokenLocation());
     }
 
     private Expression parseIdentifier() throws ParserException {
@@ -72,7 +72,7 @@ public class Parser {
         if (nextToken.getText().equals("(")) {
             return parseFunctionCall(token);
         }
-        return new Identifier(token.getText());
+        return new Identifier(token.getText(), token.getTokenLocation());
     }
 
     private Expression parseFactor() throws ParserException {
@@ -94,7 +94,8 @@ public class Parser {
         }
         if (checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.of("true")) ||
                 checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.of("false"))) {
-            return new Boolean(consume().getText());
+            Token booleanToken = consume();
+            return new Boolean(booleanToken.getText(), booleanToken.getTokenLocation());
         }
         throw new ParserException("Invalid token: " + token.getText() + token.getTokenLocation() +
                 ": expected an integer literal or an identifier");
@@ -112,7 +113,7 @@ public class Parser {
         while (Arrays.asList("-", "not").contains(peek().getText())) {
             Token operatorToken =  consume();
             Expression right = parseUnaryAndNot();
-            unary = new UnaryOp(operatorToken, right);
+            unary = new UnaryOp(operatorToken, right, operatorToken.getTokenLocation());
             return unary;
         }
         return parseFactor();
@@ -123,13 +124,13 @@ public class Parser {
         while (Arrays.asList("*", "/", "%").contains(peek().getText())) {
             Token operatorToken =  consume();
             Expression right = parseUnaryAndNot();
-            left = new BinaryOp(left, operatorToken, right);
+            left = new BinaryOp(left, operatorToken, right, operatorToken.getTokenLocation());
         }
         return left;
     }
 
     private Expression parseIfBlock() throws ParserException {
-        consume("if");
+        Token ifToken = consume("if");
         Expression condition = parseExpression();
         consume("then");
         Expression thenBlock;
@@ -146,13 +147,13 @@ public class Parser {
             } else {
                 elseBlock = parseExpression();
             }
-            return new ConditionalOp(condition, thenBlock, elseBlock);
+            return new ConditionalOp(condition, thenBlock, elseBlock, ifToken.getTokenLocation());
         }
-        return new ConditionalOp(condition, thenBlock, null);
+        return new ConditionalOp(condition, thenBlock, null, ifToken.getTokenLocation());
     }
 
     private Expression parseWhileBlock() throws ParserException {
-        consume("while");
+        Token whileToken = consume("while");
         Expression condition = parseExpression();
         consume("do");
         Expression body;
@@ -161,7 +162,7 @@ public class Parser {
         } else {
             body = parseExpression();
         }
-        return new WhileOp(condition, body);
+        return new WhileOp(condition, body, whileToken.getTokenLocation());
     }
 
     private Expression parseAddition() throws ParserException {
@@ -169,7 +170,7 @@ public class Parser {
         while (Arrays.asList("+", "-").contains(peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseTerm();
-            left = new BinaryOp(left, operatorToken, right);
+            left = new BinaryOp(left, operatorToken, right, operatorToken.getTokenLocation());
         }
         return left;
     }
@@ -179,7 +180,7 @@ public class Parser {
         while (Arrays.asList("<", "<=", ">", ">=").contains(peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseAddition();
-            left = new BinaryOp(left, operatorToken, right);
+            left = new BinaryOp(left, operatorToken, right, operatorToken.getTokenLocation());
         }
         return left;
     }
@@ -189,7 +190,7 @@ public class Parser {
         while (Arrays.asList("==", "!=").contains(peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseThan();
-            left = new BinaryOp(left, operatorToken, right);
+            left = new BinaryOp(left, operatorToken, right, operatorToken.getTokenLocation());
         }
         return left;
     }
@@ -199,7 +200,7 @@ public class Parser {
         while (Arrays.asList("and").contains(peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseEquality();
-            left = new BinaryOp(left, operatorToken, right);
+            left = new BinaryOp(left, operatorToken, right, operatorToken.getTokenLocation());
         }
         return left;
     }
@@ -209,7 +210,7 @@ public class Parser {
         while (Arrays.asList("or").contains(peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseAnd();
-            left = new BinaryOp(left, operatorToken, right);
+            left = new BinaryOp(left, operatorToken, right, operatorToken.getTokenLocation());
         }
         return left;
     }
@@ -219,7 +220,7 @@ public class Parser {
         while (Arrays.asList("=").contains(peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseExpression();
-            left = new BinaryOp(left, operatorToken, right);
+            left = new BinaryOp(left, operatorToken, right, operatorToken.getTokenLocation());
         }
         return left;
     }
@@ -230,13 +231,13 @@ public class Parser {
         if (peek().getText().equals(":")) {
             consume(":");
             String type = consume().getText();
-            consume("=");
+            Token equalToken = consume("=");
             Expression value = parseExpression();
-            return new VariableDef(varName, type, value);
+            return new VariableDef(varName, type, value, equalToken.getTokenLocation());
         }
-        consume("=");
+        Token equalToken = consume("=");
         Expression value = parseExpression();
-        return new VariableDef(varName, value);
+        return new VariableDef(varName, value, equalToken.getTokenLocation());
     }
 
     public Expression parse() throws ParserException {
@@ -252,9 +253,9 @@ public class Parser {
     }
 
     private Block parseBlock() throws ParserException {
-        consume("{");
+        Token blockToken = consume("{");
         List<Expression> expressionList = new ArrayList<>();
-        Block block = new Block(expressionList);
+        Block block = new Block(expressionList, blockToken.getTokenLocation());
         while (!checkNextToken(TokenType.PUNCTUATION, Optional.of("}"))) {
             if (checkNextToken(TokenType.KEYWORD, Optional.of("if"))) {
                 Expression ifExpression = parseIfBlock();
@@ -278,9 +279,9 @@ public class Parser {
                 block.addExpression(parseVariableDefinition());
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
-                consume(";");
+                Token uniToken = consume(";");
                 if (checkNextToken(TokenType.PUNCTUATION, Optional.of("}"))) {
-                    block.addExpression(new Unit());
+                    block.addExpression(new Unit(uniToken.getTokenLocation()));
                 }
             } else if (!checkNextToken(TokenType.PUNCTUATION, Optional.of("}")) &&
                     !checkNextToken(TokenType.END, Optional.empty()) &&
@@ -296,7 +297,7 @@ public class Parser {
         if (tokens.isEmpty()) {
             throw new ParserException("Cannot parse empty token list");
         }
-        Block block = new Block(new ArrayList<>());
+        Block block = new Block(new ArrayList<>(), peek().getTokenLocation());
         while (!checkNextToken(TokenType.END, Optional.empty())) {
             if (checkNextToken(TokenType.KEYWORD, Optional.of("if"))) {
                 Expression ifExpression = parseIfBlock();

@@ -17,7 +17,8 @@ public class InterpreterTests {
 
     @Test
     public void testBasicAddition() throws ParserException, InterpreterException {
-        BinaryOp binaryOp = new BinaryOp(new Literal(1), new Token("+", TokenType.OPERATOR, null), new Literal(2));
+        BinaryOp binaryOp = new BinaryOp(new Literal(1, null),
+                new Token("+", TokenType.OPERATOR, null), new Literal(2, null), null);
         Interpreter interpreter = new Interpreter();
         Object result = interpreter.interpret(binaryOp);
         assertEquals(result, 3);

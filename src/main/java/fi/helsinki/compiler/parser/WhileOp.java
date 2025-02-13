@@ -1,10 +1,13 @@
 package fi.helsinki.compiler.parser;
 
-public class WhileOp implements Expression {
+import fi.helsinki.compiler.Location;
+
+public class WhileOp extends Expression {
     private Expression condition;
     private Expression body;
 
-    public WhileOp(Expression condition, Expression body) {
+    public WhileOp(Expression condition, Expression body, Location location) {
+        super(location);
         this.condition = condition;
         this.body = body;
     }

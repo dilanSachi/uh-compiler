@@ -1,9 +1,12 @@
 package fi.helsinki.compiler.parser;
 
-public class Boolean implements Expression {
+import fi.helsinki.compiler.Location;
+
+public class Boolean extends Expression {
     private String value;
 
-    public Boolean(String value) {
+    public Boolean(String value, Location location) {
+        super(location);
         this.value = value;
     }
 

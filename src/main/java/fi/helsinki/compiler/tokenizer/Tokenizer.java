@@ -1,5 +1,6 @@
 package fi.helsinki.compiler.tokenizer;
 
+import fi.helsinki.compiler.Location;
 import fi.helsinki.compiler.exceptions.TokenizeException;
 
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public class Tokenizer {
                     keyword = sourceCode.substring(0, matcher.end() - 1);
                     sourceCode = sourceCode.substring(matcher.end() - 1);
                 }
-                tokens.add(new Token(keyword, TokenType.KEYWORD, new TokenLocation(filename, line, column)));
+                tokens.add(new Token(keyword, TokenType.KEYWORD, new Location(filename, line, column)));
                 if (matcher.hitEnd()) {
                     column += matcher.end() - matcher.start();
                 } else {
@@ -74,7 +75,7 @@ public class Tokenizer {
             matcher = patternBooleanLiteral.matcher(sourceCode);
             if (matcher.find()) {
                 String keyword = sourceCode.substring(0, matcher.end()).strip();
-                tokens.add(new Token(keyword, TokenType.BOOLEAN_LITERAL, new TokenLocation(filename, line, column)));
+                tokens.add(new Token(keyword, TokenType.BOOLEAN_LITERAL, new Location(filename, line, column)));
                 column += matcher.end() - matcher.start();
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;
@@ -82,7 +83,7 @@ public class Tokenizer {
             matcher = patternIntegerLiteral.matcher(sourceCode);
             if (matcher.find()) {
                 String keyword = sourceCode.substring(0, matcher.end()).strip();
-                tokens.add(new Token(keyword, TokenType.INTEGER_LITERAL, new TokenLocation(filename, line, column)));
+                tokens.add(new Token(keyword, TokenType.INTEGER_LITERAL, new Location(filename, line, column)));
                 column += matcher.end() - matcher.start();
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;
@@ -90,7 +91,7 @@ public class Tokenizer {
             matcher = patternStringLiteral.matcher(sourceCode);
             if (matcher.find()) {
                 String keyword = sourceCode.substring(0, matcher.end()).strip();
-                tokens.add(new Token(keyword, TokenType.STRING_LITERAL, new TokenLocation(filename, line, column)));
+                tokens.add(new Token(keyword, TokenType.STRING_LITERAL, new Location(filename, line, column)));
                 column += matcher.end() - matcher.start();
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;
@@ -98,7 +99,7 @@ public class Tokenizer {
             matcher = patternOperator.matcher(sourceCode);
             if (matcher.find()) {
                 String keyword = sourceCode.substring(0, matcher.end()).strip();
-                tokens.add(new Token(keyword, TokenType.OPERATOR, new TokenLocation(filename, line, column)));
+                tokens.add(new Token(keyword, TokenType.OPERATOR, new Location(filename, line, column)));
                 column += matcher.end() - matcher.start();
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;
@@ -107,7 +108,7 @@ public class Tokenizer {
             matcher = patternPunctuation.matcher(sourceCode);
             if (matcher.find()) {
                 String keyword = sourceCode.substring(0, matcher.end()).strip();
-                tokens.add(new Token(keyword, TokenType.PUNCTUATION, new TokenLocation(filename, line, column)));
+                tokens.add(new Token(keyword, TokenType.PUNCTUATION, new Location(filename, line, column)));
                 column += matcher.end() - matcher.start();
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;
@@ -115,7 +116,7 @@ public class Tokenizer {
             matcher = patternIdentifier.matcher(sourceCode);
             if (matcher.find()) {
                 String keyword = sourceCode.substring(0, matcher.end()).strip();
-                tokens.add(new Token(keyword, TokenType.IDENTIFIER, new TokenLocation(filename, line, column)));
+                tokens.add(new Token(keyword, TokenType.IDENTIFIER, new Location(filename, line, column)));
                 column += matcher.end() - matcher.start();
                 sourceCode = sourceCode.substring(matcher.end());
                 continue;

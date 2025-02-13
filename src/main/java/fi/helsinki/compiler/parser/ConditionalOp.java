@@ -1,12 +1,15 @@
 package fi.helsinki.compiler.parser;
 
-public class ConditionalOp implements Expression {
+import fi.helsinki.compiler.Location;
+
+public class ConditionalOp extends Expression {
     private String name = "if";
     private Expression condition;
     private Expression thenBlock;
     private Expression elseBlock;
 
-    public ConditionalOp(Expression condition, Expression thenBlock, Expression elseBlock) {
+    public ConditionalOp(Expression condition, Expression thenBlock, Expression elseBlock, Location location) {
+        super(location);
         this.condition = condition;
         this.thenBlock = thenBlock;
         this.elseBlock = elseBlock;

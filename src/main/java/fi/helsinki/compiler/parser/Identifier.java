@@ -1,10 +1,13 @@
 package fi.helsinki.compiler.parser;
 
-public class Identifier implements Expression {
+import fi.helsinki.compiler.Location;
+
+public class Identifier extends Expression {
 
     private String name;
 
-    public Identifier(String name) {
+    public Identifier(String name, Location location) {
+        super(location);
         this.name = name;
     }
 

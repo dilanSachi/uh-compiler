@@ -1,18 +1,20 @@
 package fi.helsinki.compiler.tokenizer;
 
+import fi.helsinki.compiler.Location;
+
 public class Token {
     private String text;
     private TokenType tokenType;
-    private TokenLocation tokenLocation;
+    private Location location;
 
-    public Token(String text, TokenType tokenType, TokenLocation tokenLocation) {
+    public Token(String text, TokenType tokenType, Location location) {
         this.text = text;
         this.tokenType = tokenType;
-        this.tokenLocation = tokenLocation;
+        this.location = location;
     }
 
-    public TokenLocation getTokenLocation() {
-        return tokenLocation;
+    public Location getTokenLocation() {
+        return location;
     }
 
     public TokenType getTokenType() {
@@ -33,6 +35,6 @@ public class Token {
 
     @Override
     public String toString() {
-        return String.format("Text: %s, Type: %s, Location: %s", this.getText(), this.tokenType, this.tokenLocation);
+        return String.format("Text: %s, Type: %s, Location: %s", this.getText(), this.tokenType, this.location);
     }
 }

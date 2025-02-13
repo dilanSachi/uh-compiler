@@ -1,6 +1,8 @@
 package fi.helsinki.compiler.tokenizer;
 
-public class NullLocation extends TokenLocation {
+import fi.helsinki.compiler.Location;
+
+public class NullLocation extends Location {
     public NullLocation() {
         super(null, 0, 0);
     }
