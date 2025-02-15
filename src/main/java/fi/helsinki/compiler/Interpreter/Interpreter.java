@@ -3,12 +3,13 @@ package fi.helsinki.compiler.Interpreter;
 import fi.helsinki.compiler.exceptions.InterpreterException;
 import fi.helsinki.compiler.parser.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class Interpreter {
 
-    public Optional<Value> interpret(Expression expression, SymTab symTab) throws InterpreterException {
+    private Optional<Value> interpret(Expression expression, SymTab symTab) throws InterpreterException {
         switch (expression) {
             case Literal literal: {
                 return Optional.of(new IntValue(literal.getValue()));
@@ -87,9 +88,34 @@ public class Interpreter {
                 }
                 return Optional.empty();
             }
+            case FunctionCall functionCall: {
+                List<Expression> parameters = functionCall.getParameters();
+                List<Value> paramValues = new ArrayList<>();
+                for (Expression parameter: parameters) {
+                    Optional<Value> paramValue = interpret(parameter, symTab);
+                    if (paramValue.isEmpty()) {
+                        throw new InterpreterException("Function provided with an invalid value");
+                    }
+                    paramValues.add(interpret(parameter, symTab).get());
+                }
+                FunctionDefinition functionDefinition = (FunctionDefinition) symTab.getValue(functionCall.getFunctionName());
+                functionDefinition.invoke(paramValues.toArray(new Value[]{}));
+                return Optional.empty();
+            }
             default: {
                 throw new InterpreterException("Invalid type found: " + expression);
             }
+        }
+    }
+
+    public Value interpretAST(Expression expression) throws InterpreterException {
+        SymTab globalSymTab = new SymTab(null);
+        globalSymTab.setValue("print_int", new PrintIntFunction());
+        Optional<Value> value = interpret(expression, globalSymTab);
+        if (value.isEmpty()) {
+            return null;
+        } else {
+            return value.get();
         }
     }
 }

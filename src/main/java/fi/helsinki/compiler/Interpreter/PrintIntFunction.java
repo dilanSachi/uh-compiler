@@ -1,8 +1,18 @@
 package fi.helsinki.compiler.Interpreter;
 
-public class PrintIntFunction implements FunctionDefinition {
+import fi.helsinki.compiler.exceptions.InterpreterException;
 
-    public void invoke(IntValue intValue) {
-        System.out.println(intValue.getIntValue() + "\n");
+public class PrintIntFunction extends FunctionDefinition {
+
+    public void invoke(Value... values) throws InterpreterException {
+        if (values.length > 1 || !(values[0] instanceof IntValue)) {
+            throw new InterpreterException("Invalid input type found");
+        }
+        System.out.println(((IntValue) values[0]).getIntValue() + "\n");
+    }
+
+    @Override
+    public String getType() {
+        return "PrintIntFunction";
     }
 }

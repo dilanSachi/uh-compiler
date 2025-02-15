@@ -1,8 +1,8 @@
 package fi.helsinki.compiler.Interpreter;
 
-public class FunctionValue extends Value {
+public class FunctionType extends Value {
 
-    public FunctionValue() {
+    public FunctionType() {
     }
 
 
