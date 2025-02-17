@@ -1,4 +1,4 @@
-package fi.helsinki.compiler.Interpreter;
+package fi.helsinki.compiler.interpreter;
 
 import fi.helsinki.compiler.exceptions.InterpreterException;
 

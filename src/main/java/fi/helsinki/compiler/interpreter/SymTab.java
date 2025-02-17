@@ -1,4 +1,4 @@
-package fi.helsinki.compiler.Interpreter;
+package fi.helsinki.compiler.interpreter;
 
 import fi.helsinki.compiler.exceptions.InterpreterException;
 
@@ -20,7 +20,7 @@ public class SymTab {
             return symbols.get(key);
         }
         if (parent == null) {
-            throw new InterpreterException("");
+            throw new InterpreterException("Symbol '" + key + "' not found in the context");
         }
         return parent.getValue(key);
     }

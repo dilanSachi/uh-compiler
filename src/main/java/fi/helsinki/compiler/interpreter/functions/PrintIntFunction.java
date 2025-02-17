@@ -1,5 +1,8 @@
-package fi.helsinki.compiler.Interpreter;
+package fi.helsinki.compiler.interpreter.functions;
 
+import fi.helsinki.compiler.interpreter.FunctionDefinition;
+import fi.helsinki.compiler.interpreter.IntValue;
+import fi.helsinki.compiler.interpreter.Value;
 import fi.helsinki.compiler.exceptions.InterpreterException;
 
 public class PrintIntFunction extends FunctionDefinition {

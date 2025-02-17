@@ -1,7 +1,11 @@
-package fi.helsinki.compiler.Interpreter;
+package fi.helsinki.compiler.interpreter;
 
+import fi.helsinki.compiler.interpreter.functions.PrintBoolFunction;
+import fi.helsinki.compiler.interpreter.functions.PrintIntFunction;
+import fi.helsinki.compiler.interpreter.operators.*;
 import fi.helsinki.compiler.exceptions.InterpreterException;
 import fi.helsinki.compiler.parser.*;
+import fi.helsinki.compiler.parser.Boolean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,19 +13,16 @@ import java.util.Optional;
 
 public class Interpreter {
 
-    private Optional<Value> interpret(Expression expression, SymTab symTab) throws InterpreterException {
+    public Optional<Value> interpret(Expression expression, SymTab symTab) throws InterpreterException {
         switch (expression) {
             case Literal literal: {
                 return Optional.of(new IntValue(literal.getValue()));
             }
+            case Boolean bool: {
+                return Optional.of(new BooleanValue(bool.getValue()));
+            }
             case BinaryOp binaryOp: {
-                Optional<Value> leftValue = interpret(binaryOp.getLeft(), symTab);
-                Optional<Value> rightValue = interpret(binaryOp.getRight(), symTab);
                 return switch (binaryOp.getOperator().getText()) {
-                    case "+" -> Optional.of(rightValue.get().add(leftValue.get()));
-                    case "-" -> Optional.of(rightValue.get().subtract(leftValue.get()));
-                    case "*" -> Optional.of(rightValue.get().multiply(leftValue.get()));
-                    case "/" -> Optional.of(rightValue.get().divide(leftValue.get()));
                     case "=" -> {
                         if (binaryOp.getLeft() instanceof Identifier identifier) {
                             Optional<Value> value = interpret(binaryOp.getRight(), symTab);
@@ -37,7 +38,8 @@ public class Interpreter {
                         }
                     }
                     default ->
-                            throw new InterpreterException("BinaryOp " + binaryOp.getOperator().getText() + " not yet supported");
+                        Optional.of(((Operator) symTab.getValue(binaryOp.getOperator().getText()))
+                                .operate(binaryOp.getLeft(), binaryOp.getRight(), symTab));
                 };
             }
             case UnaryOp unaryOp: {
@@ -111,11 +113,14 @@ public class Interpreter {
     public Value interpretAST(Expression expression) throws InterpreterException {
         SymTab globalSymTab = new SymTab(null);
         globalSymTab.setValue("print_int", new PrintIntFunction());
+        globalSymTab.setValue("print_bool", new PrintBoolFunction());
+        globalSymTab.setValue("+", new AdditionOp());
+        globalSymTab.setValue("-", new SubtractionOp());
+        globalSymTab.setValue("*", new MultiplicationOp());
+        globalSymTab.setValue("/", new DivisionOp());
+        globalSymTab.setValue("and", new AndOp());
+        globalSymTab.setValue("or", new OrOp());
         Optional<Value> value = interpret(expression, globalSymTab);
-        if (value.isEmpty()) {
-            return null;
-        } else {
-            return value.get();
-        }
+        return value.orElse(null);
     }
 }
