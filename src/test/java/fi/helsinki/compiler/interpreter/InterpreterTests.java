@@ -237,4 +237,14 @@ public class InterpreterTests {
         interpreter.interpretAST(parser.parse2());
         assertEquals(stdOut[0], "2\n3\n1\n");
     }
+
+    @Test
+    public void testReadIntFunction() throws ParserException, InterpreterException {
+        stdOut[0] = "";
+        System.setIn(new ByteArrayInputStream("4".getBytes()));
+        Parser parser = new Parser(new Tokenizer().tokenize("var x = read_int(); while x < 10 do {x = x + 1; print_int(x);}", "TestFile.dl"));
+        Interpreter interpreter = new Interpreter();
+        interpreter.interpretAST(parser.parse2());
+        assertEquals(stdOut[0], "5\n6\n7\n8\n9\n10\n");
+    }
 }

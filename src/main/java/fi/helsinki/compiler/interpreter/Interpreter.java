@@ -2,6 +2,7 @@ package fi.helsinki.compiler.interpreter;
 
 import fi.helsinki.compiler.interpreter.functions.PrintBoolFunction;
 import fi.helsinki.compiler.interpreter.functions.PrintIntFunction;
+import fi.helsinki.compiler.interpreter.functions.ReadIntFunction;
 import fi.helsinki.compiler.interpreter.operators.*;
 import fi.helsinki.compiler.exceptions.InterpreterException;
 import fi.helsinki.compiler.parser.*;
@@ -111,8 +112,7 @@ public class Interpreter {
                     paramValues.add(interpret(parameter, symTab).get());
                 }
                 FunctionDefinition functionDefinition = (FunctionDefinition) symTab.getValue(functionCall.getFunctionName());
-                functionDefinition.invoke(paramValues.toArray(new Value[]{}));
-                return Optional.empty();
+                return Optional.ofNullable(functionDefinition.invoke(paramValues.toArray(new Value[]{})));
             }
             default: {
                 throw new InterpreterException("Invalid type found: " + expression);
@@ -130,6 +130,7 @@ public class Interpreter {
         SymTab globalSymTab = new SymTab(null);
         globalSymTab.setValue("print_int", new PrintIntFunction());
         globalSymTab.setValue("print_bool", new PrintBoolFunction());
+        globalSymTab.setValue("read_int", new ReadIntFunction());
         globalSymTab.setValue("+", new AdditionOp());
         globalSymTab.setValue("-", new SubtractionOp());
         globalSymTab.setValue("*", new MultiplicationOp());
