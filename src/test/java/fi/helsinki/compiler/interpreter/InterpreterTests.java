@@ -247,4 +247,24 @@ public class InterpreterTests {
         interpreter.interpretAST(parser.parse2());
         assertEquals(stdOut[0], "5\n6\n7\n8\n9\n10\n");
     }
+
+    @Test
+    public void testCodeBlock() throws ParserException, InterpreterException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser parser = new Parser(tokenizer.tokenize("var a = 30; var b = 2; var c = -2; var d = 2; var e = 221;while a > 2 do {\n" +
+                        "    if b <= 14 then {\n" +
+                        "         while c - 2 < 3 do {\n" +
+                        "               d = d * 3;\n" +
+                        "               c = c + 1;\n" +
+                        "         }\n" +
+                        "    } else \n" +
+                        "         e = e % 10;\na = a - 1;b = b + 1;" +
+                        "    \n" +
+                        "}print_int(a);print_int(b);print_int(c);print_int(d);print_int(e);",
+                "Testfile.dl"));
+        stdOut[0] = "";
+        Interpreter interpreter = new Interpreter();
+        interpreter.interpretAST(parser.parse2());
+        assertEquals(stdOut[0], "2\n30\n5\n4374\n1\n");
+    }
 }
