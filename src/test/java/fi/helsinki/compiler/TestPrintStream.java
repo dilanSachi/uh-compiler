@@ -12,14 +12,14 @@ public class TestPrintStream extends PrintStream {
     }
 
     public void println(Object x) {
-        this.output[0] = x.toString();
+        this.output[0] = this.output[0] + x;
     }
 
     public void println(int x) {
-        this.output[0] = Integer.toString(x);
+        this.output[0] = this.output[0] + x;
     }
 
     public void println(String x) {
-        this.output[0] = x;
+        this.output[0] = this.output[0] + x;
     }
 }

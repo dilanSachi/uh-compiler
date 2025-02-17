@@ -18,7 +18,11 @@ These are the main parts of the compiler.
   - [x] Type declaration
 - [x] Interpreter - This is an optional part of the compiler which is done for learning
   - [x] Basic recursion
-  - [ ] Symbol table
+  - [x] Symbol table
+  - [x] All operators
+  - [ ] Function call
+  - [ ] Conditional block
+  - [ ] While block
 - [ ] Type Checker
 - [ ] IR Generator
 - [ ] Assembly Generator

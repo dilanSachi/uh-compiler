@@ -12,7 +12,7 @@ public class Tokenizer {
 
     private static final Pattern patternWhitespace = Pattern.compile("^ +");
     private static final Pattern patternTab = Pattern.compile("^\t+");
-    private static final Pattern patternComment = Pattern.compile("^((\\/\\/|##).*?(\\n|$))");
+    private static final Pattern patternComment = Pattern.compile("^((\\/\\/|#).*?(\\n|$))");
     private static final Pattern patternIdentifier = Pattern.compile("^(((?!var(?![a-zA-Z]))(?<![a-zA-Z])[a-z|A-Z|_]+[a-z|A-Z|_|0-9]*)|((var)[a-z|A-Z|_|0-9]+))");
     private static final Pattern patternOperator = Pattern.compile("^(==|or |and |=|!=|<=|>=|>|<|\\+|-|\\*|\\/|%)");
     private static final Pattern patternKeyword = Pattern.compile("^(if|while|function|var|do|then|else)( |\n|$)");

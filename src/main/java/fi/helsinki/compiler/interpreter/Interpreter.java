@@ -21,6 +21,15 @@ public class Interpreter {
             case Boolean bool: {
                 return Optional.of(new BooleanValue(bool.getValue()));
             }
+            case UnaryOp unaryOp: {
+                if (unaryOp.getOperator().getText().equals("-")) {
+                    return Optional.of(((Operator) symTab.getValue("negOp"))
+                            .operate(unaryOp.getExpression(), null, symTab));
+                } else {
+                    return Optional.of(((Operator) symTab.getValue("notOp"))
+                            .operate(unaryOp.getExpression(), null, symTab));
+                }
+            }
             case BinaryOp binaryOp: {
                 return switch (binaryOp.getOperator().getText()) {
                     case "=" -> {
@@ -42,31 +51,32 @@ public class Interpreter {
                                 .operate(binaryOp.getLeft(), binaryOp.getRight(), symTab));
                 };
             }
-            case UnaryOp unaryOp: {
-                Optional<Value> value = interpret(unaryOp.getExpression(), symTab);
-                if (unaryOp.getOperator().getText().equals("not")) {
-                    if (value.get() instanceof IntValue intValue) {
-                        return Optional.of(new IntValue(-intValue.getIntValue()));
-                    } else {
-                        throw new InterpreterException("Expected an integer value for the operation");
-                    }
-                } else {
-                    if (value.get() instanceof BooleanValue booleanValue) {
-                        return Optional.of(new BooleanValue(!booleanValue.getValue()));
-                    } else {
-                        throw new InterpreterException("Expected a boolean value for the operation");
-                    }
-                }
-            }
             case ConditionalOp conditionalOp: {
                 Optional<Value> condition = interpret(conditionalOp.getCondition(), symTab);
                 if (condition.get() instanceof BooleanValue booleanValue) {
                     if (booleanValue.getValue()) {
                         return interpret(conditionalOp.getThenBlock(), symTab);
                     }
-                    return interpret(conditionalOp.getElseBlock(), symTab);
+                    if (conditionalOp.getElseBlock() != null) {
+                        return interpret(conditionalOp.getElseBlock(), symTab);
+                    }
+                    return Optional.empty();
                 } else {
                     throw new InterpreterException("Expected a conditional value.");
+                }
+            }
+            case WhileOp whileOp: {
+                while (true) {
+                    Optional<Value> condition = interpret(whileOp.getCondition(), symTab);
+                    if (condition.get() instanceof BooleanValue booleanValue) {
+                        if (booleanValue.getValue()) {
+                            interpret(whileOp.getBody(), symTab);
+                        } else {
+                            return Optional.empty();
+                        }
+                    } else {
+                        throw new InterpreterException("Expected a conditional value.");
+                    }
                 }
             }
             case VariableDef variableDef:
@@ -111,6 +121,12 @@ public class Interpreter {
     }
 
     public Value interpretAST(Expression expression) throws InterpreterException {
+        SymTab globalSymTab = getGlobalSymTab();
+        Optional<Value> value = interpret(expression, globalSymTab);
+        return value.orElse(null);
+    }
+
+    private SymTab getGlobalSymTab() {
         SymTab globalSymTab = new SymTab(null);
         globalSymTab.setValue("print_int", new PrintIntFunction());
         globalSymTab.setValue("print_bool", new PrintBoolFunction());
@@ -118,9 +134,17 @@ public class Interpreter {
         globalSymTab.setValue("-", new SubtractionOp());
         globalSymTab.setValue("*", new MultiplicationOp());
         globalSymTab.setValue("/", new DivisionOp());
+        globalSymTab.setValue("%", new ModulusOp());
         globalSymTab.setValue("and", new AndOp());
         globalSymTab.setValue("or", new OrOp());
-        Optional<Value> value = interpret(expression, globalSymTab);
-        return value.orElse(null);
+        globalSymTab.setValue("notOp", new NotOp());
+        globalSymTab.setValue("negOp", new NegationOp());
+        globalSymTab.setValue(">=", new GreaterThanOrEqualOp());
+        globalSymTab.setValue(">", new GreaterThanOp());
+        globalSymTab.setValue("<", new LessThanOp());
+        globalSymTab.setValue("<=", new LessThanOrEqualOp());
+        globalSymTab.setValue("!=", new InequalityOp());
+        globalSymTab.setValue("==", new EqualityOp());
+        return globalSymTab;
     }
 }
