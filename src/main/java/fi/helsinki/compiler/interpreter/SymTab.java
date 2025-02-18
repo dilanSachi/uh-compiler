@@ -49,7 +49,7 @@ public class SymTab {
         return parent.getSymbolOwner(key);
     }
 
-    public void setValue(String key, Value value) {
+    public void putValue(String key, Value value) {
         symbols.put(key, value);
     }
 }

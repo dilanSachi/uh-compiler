@@ -40,7 +40,7 @@ public class Interpreter {
                             if (symbolOwner.isEmpty()) {
                                 throw new InterpreterException("Unknown identifier: " + identifier);
                             } else {
-                                symbolOwner.get().setValue(identifier.getName(), value.get());
+                                symbolOwner.get().putValue(identifier.getName(), value.get());
                             }
                             yield value;
                         } else {
@@ -86,7 +86,7 @@ public class Interpreter {
                     throw new InterpreterException("Variable already declared in this scope: " + variableDef.getName());
                 }
                 Optional<Value> value = interpret(variableDef.getValue(), symTab);
-                symTab.setValue(key, value.get());
+                symTab.putValue(key, value.get());
                 return Optional.empty();
             case Identifier identifier:
                 return Optional.of(symTab.getValue(identifier.getName()));
@@ -128,24 +128,24 @@ public class Interpreter {
 
     private SymTab getGlobalSymTab() {
         SymTab globalSymTab = new SymTab(null);
-        globalSymTab.setValue("print_int", new PrintIntFunction());
-        globalSymTab.setValue("print_bool", new PrintBoolFunction());
-        globalSymTab.setValue("read_int", new ReadIntFunction());
-        globalSymTab.setValue("+", new AdditionOp());
-        globalSymTab.setValue("-", new SubtractionOp());
-        globalSymTab.setValue("*", new MultiplicationOp());
-        globalSymTab.setValue("/", new DivisionOp());
-        globalSymTab.setValue("%", new ModulusOp());
-        globalSymTab.setValue("and", new AndOp());
-        globalSymTab.setValue("or", new OrOp());
-        globalSymTab.setValue("notOp", new NotOp());
-        globalSymTab.setValue("negOp", new NegationOp());
-        globalSymTab.setValue(">=", new GreaterThanOrEqualOp());
-        globalSymTab.setValue(">", new GreaterThanOp());
-        globalSymTab.setValue("<", new LessThanOp());
-        globalSymTab.setValue("<=", new LessThanOrEqualOp());
-        globalSymTab.setValue("!=", new InequalityOp());
-        globalSymTab.setValue("==", new EqualityOp());
+        globalSymTab.putValue("print_int", new PrintIntFunction());
+        globalSymTab.putValue("print_bool", new PrintBoolFunction());
+        globalSymTab.putValue("read_int", new ReadIntFunction());
+        globalSymTab.putValue("+", new AdditionOp());
+        globalSymTab.putValue("-", new SubtractionOp());
+        globalSymTab.putValue("*", new MultiplicationOp());
+        globalSymTab.putValue("/", new DivisionOp());
+        globalSymTab.putValue("%", new ModulusOp());
+        globalSymTab.putValue("and", new AndOp());
+        globalSymTab.putValue("or", new OrOp());
+        globalSymTab.putValue("notOp", new NotOp());
+        globalSymTab.putValue("negOp", new NegationOp());
+        globalSymTab.putValue(">=", new GreaterThanOrEqualOp());
+        globalSymTab.putValue(">", new GreaterThanOp());
+        globalSymTab.putValue("<", new LessThanOp());
+        globalSymTab.putValue("<=", new LessThanOrEqualOp());
+        globalSymTab.putValue("!=", new InequalityOp());
+        globalSymTab.putValue("==", new EqualityOp());
         return globalSymTab;
     }
 }

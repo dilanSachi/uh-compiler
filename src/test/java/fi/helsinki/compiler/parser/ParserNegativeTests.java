@@ -18,7 +18,7 @@ public class ParserNegativeTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("", "Testfile.dl"));
         try {
-            testParser.parse2();
+            testParser.parse();
         } catch (ParserException e) {
             assertEquals(e.getMessage(), "Cannot parse empty token list");
             return;
@@ -31,7 +31,7 @@ public class ParserNegativeTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 + 3 + c d", "Testfile.dl"));
         try {
-            testParser.parse();
+            testParser.parseInternal();
         } catch (ParserException e) {
             assertEquals("Parsing failed. Invalid tokens found: [Text: d, Type: IDENTIFIER, Location: Testfile.dl: L->0, C->10]", e.getMessage());
             return;
@@ -44,7 +44,7 @@ public class ParserNegativeTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("var x: Int", "Testfile.dl"));
         try {
-            testParser.parse2();
+            testParser.parse();
         } catch (ParserException e) {
             assertEquals("Testfile.dl: L->0, C->7: expected one of: =", e.getMessage());
             return;
@@ -58,7 +58,7 @@ public class ParserNegativeTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize(sourceCode, "Testfile.dl"));
         try {
-            testParser.parse2();
+            testParser.parse();
         } catch (ParserException e) {
             assertEquals(error, e.getMessage());
             return;

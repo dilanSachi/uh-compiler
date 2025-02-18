@@ -22,7 +22,7 @@ public class ParserTests {
     public void testBasicAddition() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 + 2", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parse();
+        BinaryOp binaryOp = (BinaryOp) testParser.parseInternal();
         Literal leftLiteral = (Literal) binaryOp.getLeft();
         Token operatorToken = binaryOp.getOperator();
         Literal rightLiteral = (Literal) binaryOp.getRight();
@@ -36,7 +36,7 @@ public class ParserTests {
     public void testBasicMultiplication() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 * 2", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parse();
+        BinaryOp binaryOp = (BinaryOp) testParser.parseInternal();
         Literal leftLiteral = (Literal) binaryOp.getLeft();
         Token operatorToken = binaryOp.getOperator();
         Literal rightLiteral = (Literal) binaryOp.getRight();
@@ -50,7 +50,7 @@ public class ParserTests {
     public void testAdditionAndSubtraction() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 + 225 - 10 + 8", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parse();
+        BinaryOp binaryOp = (BinaryOp) testParser.parseInternal();
         Literal rightLiteral = (Literal) binaryOp.getRight();
         Token operatorToken = binaryOp.getOperator();
         assertEquals(rightLiteral.getValue(), 8);
@@ -75,7 +75,7 @@ public class ParserTests {
     public void testAdditionAndSubtractionWithRemainder() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 + 225 % 10 - 8", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         BinaryOp binaryOp = (BinaryOp) block.getExpressionList().get(0);
         Literal rightLiteral = (Literal) binaryOp.getRight();
@@ -96,7 +96,7 @@ public class ParserTests {
     public void testEqualOperator() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("x = y + 20", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         BinaryOp binaryOp = (BinaryOp) block.getExpressionList().get(0);
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
@@ -111,7 +111,7 @@ public class ParserTests {
     public void testDoubleEqualOperator() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("x == y + 20", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         BinaryOp binaryOp = (BinaryOp) block.getExpressionList().get(0);
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
@@ -126,7 +126,7 @@ public class ParserTests {
     public void testEqualPrecedence() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("a = b = 4", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         BinaryOp binaryOp = (BinaryOp) block.getExpressionList().get(0);
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "a");
@@ -141,7 +141,7 @@ public class ParserTests {
     public void testUnaryOperator() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("2 + 3 - 4 - - not 5", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         BinaryOp binaryOp = (BinaryOp) block.getExpressionList().get(0);
         BinaryOp binaryOp1 = (BinaryOp) binaryOp.getLeft();
@@ -161,7 +161,7 @@ public class ParserTests {
     public void testNestedUnaryOperator() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("- not -2", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         UnaryOp unaryOp = (UnaryOp) block.getExpressionList().get(0);
         assertEquals(unaryOp.getOperator().getText(), "-");
@@ -176,7 +176,7 @@ public class ParserTests {
     public void testEqualOperator2() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("x + y = 20", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         BinaryOp binaryOp = (BinaryOp) block.getExpressionList().get(0);
         assertEquals(((Literal) binaryOp.getRight()).getValue(), 20);
@@ -191,7 +191,7 @@ public class ParserTests {
     public void testEqualOperator3() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("x + a + b + c = y - 20", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         BinaryOp binaryOp1 = (BinaryOp) block.getExpressionList().get(0);
         BinaryOp binaryOp2 = (BinaryOp) binaryOp1.getLeft();
@@ -215,7 +215,7 @@ public class ParserTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize(
                 "if a > 2 then b = c + d else if e == 3 then f = g * h else i = j - k", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         ConditionalOp conditionalOp = (ConditionalOp) block.getExpressionList().get(0);
         BinaryOp condition = (BinaryOp) conditionalOp.getCondition();
@@ -255,7 +255,7 @@ public class ParserTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize(
                 "a=(b and c) + d != e >= f or g <= h - i < j * k > l", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         BinaryOp binaryOp = (BinaryOp) block.getExpressionList().get(0);
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "a");
@@ -297,7 +297,7 @@ public class ParserTests {
     public void testMultipleOperations() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 * 225 - 10 / 8", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parse();
+        BinaryOp binaryOp = (BinaryOp) testParser.parseInternal();
         Token operatorToken = binaryOp.getOperator();
         assertEquals(operatorToken.getText(), "-");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
@@ -323,7 +323,7 @@ public class ParserTests {
     public void testMultipleOperationsWithParentheses() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 * (29 / 32) * 225 - 10 / 8 + (127 - 38)", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parse();
+        BinaryOp binaryOp = (BinaryOp) testParser.parseInternal();
         Token operatorToken = binaryOp.getOperator();
         assertEquals(operatorToken.getText(), "+");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
@@ -360,7 +360,7 @@ public class ParserTests {
     public void testOperationsWithLiteralsAndIdentifiers() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 + a - 10 + xy", "Testfile.dl"));
-        BinaryOp binaryOp = (BinaryOp) testParser.parse();
+        BinaryOp binaryOp = (BinaryOp) testParser.parseInternal();
         Expression rightLiteral = binaryOp.getRight();
         Token operatorToken = binaryOp.getOperator();
         assertEquals(((Identifier) rightLiteral).getName(), "xy");
@@ -385,7 +385,7 @@ public class ParserTests {
     public void testIfCondition() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("if a then b + c; d + ex", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 2);
         ConditionalOp conditionalOp = (ConditionalOp) expressionList.get(0);
@@ -406,7 +406,7 @@ public class ParserTests {
     public void testIfElseCondition() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("2 - y;if a then b + c else d + e; d + ex", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 3);
         BinaryOp binaryOp = (BinaryOp) expressionList.get(0);
@@ -434,7 +434,7 @@ public class ParserTests {
     public void testIfWithBinaryOpCondition() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 + if a then b + c; d + ex", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 2);
         BinaryOp binaryOp = (BinaryOp) expressionList.get(0);
@@ -458,7 +458,7 @@ public class ParserTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("if a then if b then x + 1 else 1 - y " +
                 "else if c then m + 2 else 2 - n", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 1);
         ConditionalOp conditionalOp1 = (ConditionalOp) expressionList.get(0);
@@ -489,7 +489,7 @@ public class ParserTests {
     public void testFunctionCall() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("testFunction(a, b, 3)", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 1);
         FunctionCall functionCall = (FunctionCall) expressionList.get(0);
@@ -505,7 +505,7 @@ public class ParserTests {
     public void testFunctionCallWithIfElse() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("testFunction(a, if x then 3 else 4, 3)", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 1);
         FunctionCall functionCall = (FunctionCall) expressionList.get(0);
@@ -524,7 +524,7 @@ public class ParserTests {
     public void testFunctionCallWithBinaryOps() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("testFunction(a, a + 21, 3)", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 1);
         FunctionCall functionCall = (FunctionCall) expressionList.get(0);
@@ -543,7 +543,7 @@ public class ParserTests {
     public void testNestedFunctionCalls() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("testFunction(a, newTestFunction(b, 2), 3)", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 1);
         FunctionCall functionCall1 = (FunctionCall) expressionList.get(0);
@@ -564,7 +564,7 @@ public class ParserTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("testFunction(a, if x then newTestFunction(b, 2) " +
                 "else newTestFunction2(c, 99), 3)", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 1);
         FunctionCall functionCall1 = (FunctionCall) expressionList.get(0);
@@ -591,7 +591,7 @@ public class ParserTests {
     public void testBasicWhile() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("while a > 2 do b = 3", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 1);
         WhileOp whileOp = (WhileOp) expressionList.get(0);
@@ -610,7 +610,7 @@ public class ParserTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize(
                 "while a > 2 do if b == 3 then c = 2 else d = 4", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 1);
         WhileOp whileOp = (WhileOp) expressionList.get(0);
@@ -638,7 +638,7 @@ public class ParserTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize(
                 "while a > 2 do {a = a + 2; d = a - 35 / 4}", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 1);
         WhileOp whileOp = (WhileOp) expressionList.get(0);
@@ -668,7 +668,7 @@ public class ParserTests {
     public void testVariableDefinition() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("var a = 3", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         VariableDef variableDef = (VariableDef) block.getExpressionList().get(0);
         assertEquals(variableDef.getName(), "a");
@@ -680,7 +680,7 @@ public class ParserTests {
     public void testVariableDefinitionWithType() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("var a: Int = 3", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         VariableDef variableDef = (VariableDef) block.getExpressionList().get(0);
         assertEquals(variableDef.getName(), "a");
@@ -692,7 +692,7 @@ public class ParserTests {
     public void testVariableDefinitionWithIfBlock() throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("var a: Int = if x == 3 then z else y", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         VariableDef variableDef = (VariableDef) block.getExpressionList().get(0);
         assertEquals(variableDef.getName(), "a");
@@ -714,7 +714,7 @@ public class ParserTests {
                         "    x = y;\n" +
                         "    f(x)\n" +
                         "}", "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 3);
         FunctionCall functionCall = (FunctionCall) block.getExpressionList().get(0);
         assertEquals(functionCall.getFunctionName(), "f");
@@ -736,7 +736,7 @@ public class ParserTests {
         Parser testParser = new Parser(tokenizer.tokenize("{\n    while f() do {\n        x = 10;\n     " +
                 "   y = if g(x) then {\n            x = x + 1;\n            x\n} else {\ng(x)\n};\ng(y);\n};\n123\n}",
                 "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 2);
         WhileOp whileOp = (WhileOp) block.getExpressionList().get(0);
         assertEquals(((Literal) block.getExpressionList().get(1)).getValue(), 123);
@@ -788,7 +788,7 @@ public class ParserTests {
                         "    \n" +
                         "}",
                 "Testfile.dl"));
-        Block block = testParser.parse2();
+        Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         WhileOp whileOp = (WhileOp) block.getExpressionList().get(0);
         BinaryOp binaryOp = (BinaryOp) whileOp.getCondition();
@@ -835,7 +835,7 @@ public class ParserTests {
     public void testValidBlocks(String sourceCode) throws ParserException {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize(sourceCode, "Testfile.dl"));
-        testParser.parse2();
+        testParser.parse();
     }
 
     static Stream<Arguments> dataProvider() {

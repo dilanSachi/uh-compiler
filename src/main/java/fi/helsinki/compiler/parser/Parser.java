@@ -240,7 +240,7 @@ public class Parser {
         return new VariableDef(varName, value, equalToken.getTokenLocation());
     }
 
-    public Expression parse() throws ParserException {
+    Expression parseInternal() throws ParserException {
         if (tokens.isEmpty()) {
             throw new ParserException("Cannot parse empty token list");
         }
@@ -293,7 +293,7 @@ public class Parser {
         return block;
     }
 
-    public Block parse2() throws ParserException {
+    public Block parse() throws ParserException {
         if (tokens.isEmpty()) {
             throw new ParserException("Cannot parse empty token list");
         }
