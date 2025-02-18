@@ -1,6 +1,9 @@
 ## Simple Compiler
 This is a simple compiler written for the University of Helsinki [Compilers course](https://hy-compilers.github.io/spring-2025/project/). Compiler is written using Java 23.
 
+[![Build](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml/badge.svg)](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml)
+[![Code Coverage](https://codecov.io/gh/dilanSachi/uh-compiler/branch/master/graph/badge.svg)](https://codecov.io/gh/dilanSachi/uh-compiler)
+
 ### Sample
 A simple program written in this language would be as follows.
 ```
@@ -86,6 +89,3 @@ These are the main parts of the implementation stages/progress of the compiler.
 - [ ] IR Generator
 - [ ] Assembly Generator
 - [ ] Analysis & Optimization
-
-[![Build](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml/badge.svg)](https://github.com/dilanSachi/uh-compiler/actions/workflows/pull_request.yaml)
-[![Code Coverage](https://codecov.io/gh/dilanSachi/uh-compiler/branch/master/graph/badge.svg)](https://codecov.io/gh/dilanSachi/uh-compiler)
