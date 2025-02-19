@@ -109,7 +109,7 @@ public class Interpreter {
                     if (paramValue.isEmpty()) {
                         throw new InterpreterException("Function provided with an invalid value");
                     }
-                    paramValues.add(interpret(parameter, symTab).get());
+                    paramValues.add(paramValue.get());
                 }
                 FunctionDefinition functionDefinition = (FunctionDefinition) symTab.getValue(functionCall.getFunctionName());
                 return Optional.ofNullable(functionDefinition.invoke(paramValues.toArray(new Value[]{})));

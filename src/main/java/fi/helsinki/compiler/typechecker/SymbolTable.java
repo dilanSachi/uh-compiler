@@ -1,6 +1,6 @@
 package fi.helsinki.compiler.typechecker;
 
-import fi.helsinki.compiler.exceptions.InterpreterException;
+import fi.helsinki.compiler.exceptions.TypeCheckerException;
 import fi.helsinki.compiler.typechecker.types.Type;
 
 import java.util.HashMap;
@@ -15,14 +15,18 @@ public class SymbolTable {
         this.symbols = new HashMap();
     }
 
-    public Type getValue(String typeName) throws InterpreterException {
+    public Type getType(String typeName) throws TypeCheckerException {
         if (symbols.containsKey(typeName)) {
             return symbols.get(typeName);
         }
         if (parent == null) {
-            throw new InterpreterException("Type '" + typeName + "' not found in the context");
+            throw new TypeCheckerException("Type '" + typeName + "' not found in the context");
         }
-        return parent.getValue(typeName);
+        return parent.getType(typeName);
+    }
+
+    public boolean hasTypeLocally(String key) {
+        return symbols.containsKey(key);
     }
 
     public Optional<SymbolTable> getTypeOwner(String typeName) {
@@ -35,7 +39,7 @@ public class SymbolTable {
         return parent.getTypeOwner(typeName);
     }
 
-    public void putValue(String key, Type type) {
+    public void putType(String key, Type type) {
         symbols.put(key, type);
     }
 }
