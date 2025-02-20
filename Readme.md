@@ -85,7 +85,9 @@ These are the main parts of the implementation stages/progress of the compiler.
   - [x] Function call
   - [x] Conditional block
   - [x] While block
-- [ ] Type Checker
+- [x] Type Checker
+  - [x] Positive test cases
+  - [ ] Negative test cases
 - [ ] IR Generator
 - [ ] Assembly Generator
 - [ ] Analysis & Optimization
