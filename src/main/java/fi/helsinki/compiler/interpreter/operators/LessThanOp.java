@@ -2,7 +2,7 @@ package fi.helsinki.compiler.interpreter.operators;
 
 import fi.helsinki.compiler.exceptions.InterpreterException;
 import fi.helsinki.compiler.interpreter.*;
-import fi.helsinki.compiler.parser.Expression;
+import fi.helsinki.compiler.common.Expression;
 
 import java.util.Optional;
 

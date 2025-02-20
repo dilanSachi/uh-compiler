@@ -1,6 +1,6 @@
 package fi.helsinki.compiler.tokenizer;
 
-import fi.helsinki.compiler.Location;
+import fi.helsinki.compiler.common.Location;
 
 public class Token {
     private String text;

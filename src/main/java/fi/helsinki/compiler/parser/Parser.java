@@ -1,5 +1,6 @@
 package fi.helsinki.compiler.parser;
 
+import fi.helsinki.compiler.common.Expression;
 import fi.helsinki.compiler.exceptions.ParserException;
 import fi.helsinki.compiler.tokenizer.Token;
 import fi.helsinki.compiler.tokenizer.TokenType;

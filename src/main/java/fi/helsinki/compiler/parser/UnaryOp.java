@@ -1,6 +1,7 @@
 package fi.helsinki.compiler.parser;
 
-import fi.helsinki.compiler.Location;
+import fi.helsinki.compiler.common.Expression;
+import fi.helsinki.compiler.common.Location;
 import fi.helsinki.compiler.tokenizer.Token;
 
 public class UnaryOp extends Expression {

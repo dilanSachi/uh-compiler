@@ -1,7 +1,7 @@
 package fi.helsinki.compiler.typechecker;
 
 import fi.helsinki.compiler.exceptions.TypeCheckerException;
-import fi.helsinki.compiler.typechecker.types.Type;
+import fi.helsinki.compiler.common.types.Type;
 
 import java.util.HashMap;
 import java.util.Optional;

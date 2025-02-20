@@ -1,5 +1,6 @@
 package fi.helsinki.compiler.parser;
 
+import fi.helsinki.compiler.common.Expression;
 import fi.helsinki.compiler.exceptions.ParserException;
 import fi.helsinki.compiler.tokenizer.Token;
 import fi.helsinki.compiler.tokenizer.TokenType;
@@ -672,7 +673,7 @@ public class ParserTests {
         assertEquals(block.getExpressionList().size(), 1);
         VariableDef variableDef = (VariableDef) block.getExpressionList().get(0);
         assertEquals(variableDef.getName(), "a");
-        assertTrue(variableDef.getType().isEmpty());
+        assertTrue(variableDef.getDefinedType().isEmpty());
         assertEquals(((Literal) variableDef.getValue()).getValue(), 3);
     }
 
@@ -684,7 +685,7 @@ public class ParserTests {
         assertEquals(block.getExpressionList().size(), 1);
         VariableDef variableDef = (VariableDef) block.getExpressionList().get(0);
         assertEquals(variableDef.getName(), "a");
-        assertEquals(variableDef.getType().get(), "Int");
+        assertEquals(variableDef.getDefinedType().get(), "Int");
         assertEquals(((Literal) variableDef.getValue()).getValue(), 3);
     }
 
@@ -696,7 +697,7 @@ public class ParserTests {
         assertEquals(block.getExpressionList().size(), 1);
         VariableDef variableDef = (VariableDef) block.getExpressionList().get(0);
         assertEquals(variableDef.getName(), "a");
-        assertEquals(variableDef.getType().get(), "Int");
+        assertEquals(variableDef.getDefinedType().get(), "Int");
         ConditionalOp conditionalOp = (ConditionalOp) variableDef.getValue();
         BinaryOp binaryOp = (BinaryOp) conditionalOp.getCondition();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");

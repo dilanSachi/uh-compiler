@@ -5,7 +5,7 @@ import fi.helsinki.compiler.interpreter.BooleanValue;
 import fi.helsinki.compiler.interpreter.Interpreter;
 import fi.helsinki.compiler.interpreter.SymTab;
 import fi.helsinki.compiler.interpreter.Value;
-import fi.helsinki.compiler.parser.Expression;
+import fi.helsinki.compiler.common.Expression;
 
 import java.util.Optional;
 

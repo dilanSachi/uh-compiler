@@ -1,4 +1,4 @@
-package fi.helsinki.compiler;
+package fi.helsinki.compiler.common;
 
 public class Location {
     private String file;

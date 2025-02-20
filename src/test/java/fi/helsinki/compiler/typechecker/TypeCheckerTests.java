@@ -1,5 +1,6 @@
 package fi.helsinki.compiler.typechecker;
 
+import fi.helsinki.compiler.common.Expression;
 import fi.helsinki.compiler.exceptions.ParserException;
 import fi.helsinki.compiler.exceptions.TypeCheckerException;
 import fi.helsinki.compiler.parser.BinaryOp;
@@ -8,9 +9,9 @@ import fi.helsinki.compiler.parser.Parser;
 import fi.helsinki.compiler.tokenizer.Token;
 import fi.helsinki.compiler.tokenizer.TokenType;
 import fi.helsinki.compiler.tokenizer.Tokenizer;
-import fi.helsinki.compiler.typechecker.types.IntType;
-import fi.helsinki.compiler.typechecker.types.Type;
-import fi.helsinki.compiler.typechecker.types.UnitType;
+import fi.helsinki.compiler.common.types.IntType;
+import fi.helsinki.compiler.common.types.Type;
+import fi.helsinki.compiler.common.types.UnitType;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -87,7 +88,8 @@ public class TypeCheckerTests {
                         "}print_int(a);print_int(b);print_int(c);print_int(d);print_int(e);",
                 "Testfile.dl"));
         TypeChecker typeChecker = new TypeChecker();
-        Optional<Type> type = typeChecker.checkType(parser.parse());
+        Expression expression = parser.parse();
+        Optional<Type> type = typeChecker.checkType(expression);
         assertTrue(type.get() instanceof UnitType);
     }
 }

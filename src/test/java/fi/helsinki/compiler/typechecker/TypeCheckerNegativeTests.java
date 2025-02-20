@@ -2,17 +2,9 @@ package fi.helsinki.compiler.typechecker;
 
 import fi.helsinki.compiler.exceptions.ParserException;
 import fi.helsinki.compiler.exceptions.TypeCheckerException;
-import fi.helsinki.compiler.parser.BinaryOp;
-import fi.helsinki.compiler.parser.Literal;
 import fi.helsinki.compiler.parser.Parser;
-import fi.helsinki.compiler.tokenizer.Token;
-import fi.helsinki.compiler.tokenizer.TokenType;
 import fi.helsinki.compiler.tokenizer.Tokenizer;
-import fi.helsinki.compiler.typechecker.types.IntType;
-import fi.helsinki.compiler.typechecker.types.Type;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 

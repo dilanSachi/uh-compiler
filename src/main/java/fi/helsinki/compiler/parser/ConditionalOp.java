@@ -1,6 +1,7 @@
 package fi.helsinki.compiler.parser;
 
-import fi.helsinki.compiler.Location;
+import fi.helsinki.compiler.common.Expression;
+import fi.helsinki.compiler.common.Location;
 
 public class ConditionalOp extends Expression {
     private String name = "if";

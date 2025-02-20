@@ -1,4 +1,4 @@
-package fi.helsinki.compiler.typechecker.types;
+package fi.helsinki.compiler.common.types;
 
 public class IntType extends Type {
     @Override

@@ -1,13 +1,11 @@
 package fi.helsinki.compiler.typechecker;
 
-import fi.helsinki.compiler.exceptions.InterpreterException;
+import fi.helsinki.compiler.common.Expression;
+import fi.helsinki.compiler.common.types.*;
 import fi.helsinki.compiler.exceptions.TypeCheckerException;
-import fi.helsinki.compiler.interpreter.FunctionDefinition;
-import fi.helsinki.compiler.interpreter.Value;
 import fi.helsinki.compiler.parser.*;
 import fi.helsinki.compiler.parser.Boolean;
 import fi.helsinki.compiler.tokenizer.Token;
-import fi.helsinki.compiler.typechecker.types.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,22 +16,40 @@ public class TypeChecker {
     private Optional<Type> checkType(Expression expression, SymbolTable symbolTable) throws TypeCheckerException {
         switch (expression) {
             case Literal literal: {
-                return Optional.of(new IntType());
+                Type intType = new IntType();
+                literal.setType(intType);
+                return Optional.of(intType);
             }
             case Boolean bool: {
-                return Optional.of(new BooleanType());
+                Type boolType = new BooleanType();
+                bool.setType(boolType);
+                return Optional.of(boolType);
             }
             case VariableDef variableDef: {
                 String key = variableDef.getName();
                 if (symbolTable.hasTypeLocally(key)) {
                     throw new TypeCheckerException("Variable already declared in this scope: " + variableDef.getName());
                 }
-                Optional<Type> value = checkType(variableDef.getValue(), symbolTable);
-                symbolTable.putType(key, value.get());
+                Optional<Type> valueType = checkType(variableDef.getValue(), symbolTable);
+                Optional<String> definedTypeStr = variableDef.getDefinedType();
+                if (definedTypeStr.isPresent()) {
+                    Type definedType;
+                    if (definedTypeStr.get().equals("Int")) {
+                        definedType = new IntType();
+                    } else {
+                        definedType = new BooleanType();
+                    }
+                    if (!definedType.equals(valueType.get())) {
+                        throw new TypeCheckerException("Mismatching types found: " + definedType + ", " + valueType);
+                    }
+                }
+                symbolTable.putType(key, valueType.get());
                 return Optional.of(new UnitType());
             }
             case Identifier identifier: {
-                return Optional.of(symbolTable.getType(identifier.getName()));
+                Type identifierType = symbolTable.getType(identifier.getName());
+                identifier.setType(identifierType);
+                return Optional.of(identifierType);
             }
             case BinaryOp binaryOp: {
                 Optional<Type> leftType = checkType(binaryOp.getLeft(), symbolTable);
@@ -45,6 +61,7 @@ public class TypeChecker {
                             Type identifierType = symbolTable.getType(identifier.getName());
                             Optional<Type> assignedType = checkType(binaryOp.getRight(), symbolTable);
                             if (identifierType.getClass() == assignedType.get().getClass()) {
+                                binaryOp.setType(identifierType);
                                 yield Optional.of(identifierType);
                             }
                             throw new TypeCheckerException("Expected type " + identifierType);
@@ -55,7 +72,9 @@ public class TypeChecker {
                     case "==": {}
                     case "!=": {
                         if (leftType.get().getClass() == rightType.get().getClass()) {
-                            yield Optional.empty();
+                            Type boolType = new BooleanType();
+                            binaryOp.setType(boolType);
+                            yield Optional.of(boolType);
                         }
                         throw new TypeCheckerException("Mismatching types found for equality operators: "
                                 + leftType.get() + ", " + rightType.get());
@@ -64,9 +83,13 @@ public class TypeChecker {
                         if (leftType.isPresent() && rightType.isPresent()) {
                             if (leftType.get() instanceof IntType && rightType.get() instanceof IntType) {
                                 if ("+,-,*,%,/".contains(operator.getText())) {
-                                    yield Optional.of(new IntType());
+                                    Type intType = new IntType();
+                                    binaryOp.setType(intType);
+                                    yield Optional.of(intType);
                                 }
-                                yield Optional.of(new BooleanType());
+                                Type boolType = new BooleanType();
+                                binaryOp.setType(boolType);
+                                yield Optional.of(boolType);
                             } else {
                                 throw new TypeCheckerException("Expected an Int type for '" + operator.getText()
                                         + "' operator. Instead found " + leftType + ", " + rightType);
@@ -87,6 +110,7 @@ public class TypeChecker {
                         throw new TypeCheckerException("Invalid parameter type " + paramType
                                 + " for function " + functionCall.getFunctionName());
                     }
+                    parameter.setType(paramType.get());
                     paramTypes.add(paramType.get());
                 }
                 FunctionType functionType = (FunctionType) symbolTable.getType(functionCall.getFunctionName());
@@ -101,6 +125,7 @@ public class TypeChecker {
                                 ". Instead found " + paramTypes.get(i));
                     }
                 }
+                functionCall.setType(functionType.getReturnType());
                 return Optional.of(functionType.getReturnType());
             }
             case ConditionalOp conditionalOp: {
@@ -110,11 +135,15 @@ public class TypeChecker {
                     Optional<Type> elseType =  checkType(conditionalOp.getElseBlock(), symbolTable);
                     if (thenType.isPresent() && elseType.isPresent()) {
                         if (thenType.get().equals(elseType.get())) {
+                            conditionalOp.setType(thenType.get());
                             return thenType;
                         } else {
                             throw new TypeCheckerException("Types does not match in the conditional blocks: "
                                     + thenType.get().getType() + " ," + elseType.get().getType());
                         }
+                    } else if (thenType.isPresent()) {
+                        conditionalOp.setType(thenType.get());
+                        return thenType;
                     } else {
                         throw new TypeCheckerException("Invalid type found");
                     }
@@ -133,9 +162,11 @@ public class TypeChecker {
             case UnaryOp unaryOp: {
                 Optional<Type> operandType = checkType(unaryOp.getExpression(), symbolTable);
                 if (unaryOp.getOperator().getText().equals("-") && operandType.get() instanceof IntType) {
-                    return Optional.of(new IntType());
+                    Type intType = new IntType();
+                    return Optional.of(intType);
                 } else if (unaryOp.getOperator().getText().equals("not") && operandType.get() instanceof BooleanType) {
-                    return Optional.of(new BooleanType());
+                    Type boolType = new BooleanType();
+                    return Optional.of(boolType);
                 }
                 throw new TypeCheckerException("Invalid unary operation");
             }

@@ -1,5 +1,6 @@
 package fi.helsinki.compiler.interpreter;
 
+import fi.helsinki.compiler.common.Expression;
 import fi.helsinki.compiler.interpreter.functions.PrintBoolFunction;
 import fi.helsinki.compiler.interpreter.functions.PrintIntFunction;
 import fi.helsinki.compiler.interpreter.functions.ReadIntFunction;
