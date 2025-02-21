@@ -1,6 +1,5 @@
-package fi.helsinki.compiler.parser;
+package fi.helsinki.compiler.common.expressions;
 
-import fi.helsinki.compiler.common.Expression;
 import fi.helsinki.compiler.common.Location;
 
 public class ConditionalOp extends Expression {

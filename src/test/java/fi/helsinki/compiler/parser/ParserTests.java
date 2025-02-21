@@ -1,6 +1,7 @@
 package fi.helsinki.compiler.parser;
 
-import fi.helsinki.compiler.common.Expression;
+import fi.helsinki.compiler.common.expressions.Expression;
+import fi.helsinki.compiler.common.expressions.*;
 import fi.helsinki.compiler.exceptions.ParserException;
 import fi.helsinki.compiler.tokenizer.Token;
 import fi.helsinki.compiler.tokenizer.TokenType;
@@ -24,9 +25,9 @@ public class ParserTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 + 2", "Testfile.dl"));
         BinaryOp binaryOp = (BinaryOp) testParser.parseInternal();
-        Literal leftLiteral = (Literal) binaryOp.getLeft();
+        IntLiteral leftLiteral = (IntLiteral) binaryOp.getLeft();
         Token operatorToken = binaryOp.getOperator();
-        Literal rightLiteral = (Literal) binaryOp.getRight();
+        IntLiteral rightLiteral = (IntLiteral) binaryOp.getRight();
         assertEquals(leftLiteral.getValue(), 1);
         assertEquals(rightLiteral.getValue(), 2);
         assertEquals(operatorToken.getText(), "+");
@@ -38,9 +39,9 @@ public class ParserTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 * 2", "Testfile.dl"));
         BinaryOp binaryOp = (BinaryOp) testParser.parseInternal();
-        Literal leftLiteral = (Literal) binaryOp.getLeft();
+        IntLiteral leftLiteral = (IntLiteral) binaryOp.getLeft();
         Token operatorToken = binaryOp.getOperator();
-        Literal rightLiteral = (Literal) binaryOp.getRight();
+        IntLiteral rightLiteral = (IntLiteral) binaryOp.getRight();
         assertEquals(leftLiteral.getValue(), 1);
         assertEquals(rightLiteral.getValue(), 2);
         assertEquals(operatorToken.getText(), "*");
@@ -52,24 +53,24 @@ public class ParserTests {
         Tokenizer tokenizer = new Tokenizer();
         Parser testParser = new Parser(tokenizer.tokenize("1 + 225 - 10 + 8", "Testfile.dl"));
         BinaryOp binaryOp = (BinaryOp) testParser.parseInternal();
-        Literal rightLiteral = (Literal) binaryOp.getRight();
+        IntLiteral rightLiteral = (IntLiteral) binaryOp.getRight();
         Token operatorToken = binaryOp.getOperator();
         assertEquals(rightLiteral.getValue(), 8);
         assertEquals(operatorToken.getText(), "+");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
         BinaryOp leftOp = (BinaryOp) binaryOp.getLeft();
-        rightLiteral = (Literal) leftOp.getRight();
+        rightLiteral = (IntLiteral) leftOp.getRight();
         operatorToken = leftOp.getOperator();
         assertEquals(rightLiteral.getValue(), 10);
         assertEquals(operatorToken.getText(), "-");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
         leftOp = (BinaryOp) leftOp.getLeft();
-        rightLiteral = (Literal) leftOp.getRight();
+        rightLiteral = (IntLiteral) leftOp.getRight();
         operatorToken = leftOp.getOperator();
         assertEquals(rightLiteral.getValue(), 225);
         assertEquals(operatorToken.getText(), "+");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
-        assertEquals(((Literal) leftOp.getLeft()).getValue(), 1);
+        assertEquals(((IntLiteral) leftOp.getLeft()).getValue(), 1);
     }
 
     @Test
@@ -79,17 +80,17 @@ public class ParserTests {
         Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         BinaryOp binaryOp = (BinaryOp) block.getExpressionList().get(0);
-        Literal rightLiteral = (Literal) binaryOp.getRight();
+        IntLiteral rightLiteral = (IntLiteral) binaryOp.getRight();
         Token operatorToken = binaryOp.getOperator();
         assertEquals(rightLiteral.getValue(), 8);
         assertEquals(operatorToken.getText(), "-");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
         BinaryOp leftOp = (BinaryOp) binaryOp.getLeft();
         BinaryOp rightOp1 = (BinaryOp) leftOp.getRight();
-        assertEquals(((Literal) rightOp1.getLeft()).getValue(), 225);
-        assertEquals(((Literal) rightOp1.getRight()).getValue(), 10);
+        assertEquals(((IntLiteral) rightOp1.getLeft()).getValue(), 225);
+        assertEquals(((IntLiteral) rightOp1.getRight()).getValue(), 10);
         assertEquals(rightOp1.getOperator().getText(), "%");
-        assertEquals(((Literal) leftOp.getLeft()).getValue(), 1);
+        assertEquals(((IntLiteral) leftOp.getLeft()).getValue(), 1);
         assertEquals(leftOp.getOperator().getText(), "+");
     }
 
@@ -104,7 +105,7 @@ public class ParserTests {
         assertEquals(binaryOp.getOperator().getText(), "=");
         BinaryOp rightOp = (BinaryOp) binaryOp.getRight();
         assertEquals(((Identifier) rightOp.getLeft()).getName(), "y");
-        assertEquals(((Literal) rightOp.getRight()).getValue(), 20);
+        assertEquals(((IntLiteral) rightOp.getRight()).getValue(), 20);
         assertEquals(rightOp.getOperator().getText(), "+");
     }
 
@@ -119,7 +120,7 @@ public class ParserTests {
         assertEquals(binaryOp.getOperator().getText(), "==");
         BinaryOp rightOp = (BinaryOp) binaryOp.getRight();
         assertEquals(((Identifier) rightOp.getLeft()).getName(), "y");
-        assertEquals(((Literal) rightOp.getRight()).getValue(), 20);
+        assertEquals(((IntLiteral) rightOp.getRight()).getValue(), 20);
         assertEquals(rightOp.getOperator().getText(), "+");
     }
 
@@ -134,7 +135,7 @@ public class ParserTests {
         assertEquals(binaryOp.getOperator().getText(), "=");
         BinaryOp rightOp = (BinaryOp) binaryOp.getRight();
         assertEquals(((Identifier) rightOp.getLeft()).getName(), "b");
-        assertEquals(((Literal) rightOp.getRight()).getValue(), 4);
+        assertEquals(((IntLiteral) rightOp.getRight()).getValue(), 4);
         assertEquals(rightOp.getOperator().getText(), "=");
     }
 
@@ -149,13 +150,13 @@ public class ParserTests {
         UnaryOp unaryOp = (UnaryOp) binaryOp.getRight();
         assertEquals(unaryOp.getOperator().getText(), "-");
         assertEquals(((UnaryOp) unaryOp.getExpression()).getOperator().getText(), "not");
-        assertEquals(((Literal) ((UnaryOp) unaryOp.getExpression()).getExpression()).getValue(), 5);
+        assertEquals(((IntLiteral) ((UnaryOp) unaryOp.getExpression()).getExpression()).getValue(), 5);
         assertEquals(binaryOp1.getOperator().getText(), "-");
-        assertEquals(((Literal) binaryOp1.getRight()).getValue(), 4);
+        assertEquals(((IntLiteral) binaryOp1.getRight()).getValue(), 4);
         BinaryOp binaryOp2 = (BinaryOp) binaryOp1.getLeft();
         assertEquals(binaryOp2.getOperator().getText(), "+");
-        assertEquals(((Literal) binaryOp2.getLeft()).getValue(), 2);
-        assertEquals(((Literal) binaryOp2.getRight()).getValue(), 3);
+        assertEquals(((IntLiteral) binaryOp2.getLeft()).getValue(), 2);
+        assertEquals(((IntLiteral) binaryOp2.getRight()).getValue(), 3);
     }
 
     @Test
@@ -170,7 +171,7 @@ public class ParserTests {
         assertEquals(unaryOp.getOperator().getText(), "not");
         unaryOp = (UnaryOp) unaryOp.getExpression();
         assertEquals(unaryOp.getOperator().getText(), "-");
-        assertEquals(((Literal) unaryOp.getExpression()).getValue(), 2);
+        assertEquals(((IntLiteral) unaryOp.getExpression()).getValue(), 2);
     }
 
     @Test
@@ -180,7 +181,7 @@ public class ParserTests {
         Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 1);
         BinaryOp binaryOp = (BinaryOp) block.getExpressionList().get(0);
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 20);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 20);
         assertEquals(binaryOp.getOperator().getText(), "=");
         BinaryOp leftOp = (BinaryOp) binaryOp.getLeft();
         assertEquals(((Identifier) leftOp.getLeft()).getName(), "x");
@@ -198,7 +199,7 @@ public class ParserTests {
         BinaryOp binaryOp2 = (BinaryOp) binaryOp1.getLeft();
         BinaryOp binaryOp3 = (BinaryOp) binaryOp1.getRight();
         assertEquals(((Identifier) binaryOp3.getLeft()).getName(), "y");
-        assertEquals(((Literal) binaryOp3.getRight()).getValue(), 20);
+        assertEquals(((IntLiteral) binaryOp3.getRight()).getValue(), 20);
         assertEquals(binaryOp3.getOperator().getText(), "-");
         assertEquals(((Identifier) binaryOp2.getRight()).getName(), "c");
         assertEquals(binaryOp2.getOperator().getText(), "+");
@@ -224,7 +225,7 @@ public class ParserTests {
         ConditionalOp elseBlock = (ConditionalOp) conditionalOp.getElseBlock();
         assertEquals(((Identifier) condition.getLeft()).getName(), "a");
         assertEquals(condition.getOperator().getText(), ">");
-        assertEquals(((Literal) condition.getRight()).getValue(), 2);
+        assertEquals(((IntLiteral) condition.getRight()).getValue(), 2);
         assertEquals(((Identifier) thenBlock.getLeft()).getName(), "b");
         assertEquals(thenBlock.getOperator().getText(), "=");
         BinaryOp binaryOp = (BinaryOp) thenBlock.getRight();
@@ -235,7 +236,7 @@ public class ParserTests {
         thenBlock = (BinaryOp) elseBlock.getThenBlock();
         assertEquals(((Identifier) condition.getLeft()).getName(), "e");
         assertEquals(condition.getOperator().getText(), "==");
-        assertEquals(((Literal) condition.getRight()).getValue(), 3);
+        assertEquals(((IntLiteral) condition.getRight()).getValue(), 3);
         assertEquals(((Identifier) thenBlock.getLeft()).getName(), "f");
         assertEquals(thenBlock.getOperator().getText(), "=");
         binaryOp = (BinaryOp) thenBlock.getRight();
@@ -303,16 +304,16 @@ public class ParserTests {
         assertEquals(operatorToken.getText(), "-");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
         BinaryOp leftOp = (BinaryOp) binaryOp.getLeft();
-        Literal leftLiteral = (Literal) leftOp.getLeft();
-        Literal rightLiteral = (Literal) leftOp.getRight();
+        IntLiteral leftLiteral = (IntLiteral) leftOp.getLeft();
+        IntLiteral rightLiteral = (IntLiteral) leftOp.getRight();
         assertEquals(leftLiteral.getValue(), 1);
         assertEquals(rightLiteral.getValue(), 225);
         operatorToken = leftOp.getOperator();
         assertEquals(operatorToken.getText(), "*");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
         BinaryOp rightOp = (BinaryOp) binaryOp.getRight();
-        leftLiteral = (Literal) rightOp.getLeft();
-        rightLiteral = (Literal) rightOp.getRight();
+        leftLiteral = (IntLiteral) rightOp.getLeft();
+        rightLiteral = (IntLiteral) rightOp.getRight();
         assertEquals(leftLiteral.getValue(), 10);
         assertEquals(rightLiteral.getValue(), 8);
         operatorToken = rightOp.getOperator();
@@ -333,28 +334,28 @@ public class ParserTests {
         operatorToken = leftOp1.getOperator();
         assertEquals(operatorToken.getText(), "-");
         operatorToken = rightOp1.getOperator();
-        Literal leftliteral1 = (Literal) rightOp1.getLeft();
-        Literal rightliteral1 = (Literal) rightOp1.getRight();
+        IntLiteral leftliteral1 = (IntLiteral) rightOp1.getLeft();
+        IntLiteral rightliteral1 = (IntLiteral) rightOp1.getRight();
         assertEquals(leftliteral1.getValue(), 127);
         assertEquals(rightliteral1.getValue(), 38);
         assertEquals(operatorToken.getText(), "-");
         BinaryOp leftOp2 = (BinaryOp) leftOp1.getLeft();
         assertEquals(leftOp2.getOperator().getText(), "*");
-        Literal rightliteral3 = (Literal) leftOp2.getRight();
+        IntLiteral rightliteral3 = (IntLiteral) leftOp2.getRight();
         assertEquals(rightliteral3.getValue(), 225);
         BinaryOp rightOp2 = (BinaryOp) leftOp1.getRight();
         assertEquals(rightOp2.getOperator().getText(), "/");
-        Literal leftliteral2 = (Literal) rightOp2.getLeft();
-        Literal rightliteral2 = (Literal) rightOp2.getRight();
+        IntLiteral leftliteral2 = (IntLiteral) rightOp2.getLeft();
+        IntLiteral rightliteral2 = (IntLiteral) rightOp2.getRight();
         assertEquals(leftliteral2.getValue(), 10);
         assertEquals(rightliteral2.getValue(), 8);
         BinaryOp leftOp3 = (BinaryOp) leftOp2.getLeft();
         assertEquals(leftOp3.getOperator().getText(), "*");
-        assertEquals(((Literal) leftOp3.getLeft()).getValue(), 1);
+        assertEquals(((IntLiteral) leftOp3.getLeft()).getValue(), 1);
         BinaryOp rightOp3 = (BinaryOp) leftOp3.getRight();
         assertEquals(rightOp3.getOperator().getText(), "/");
-        assertEquals(((Literal) rightOp3.getLeft()).getValue(), 29);
-        assertEquals(((Literal) rightOp3.getRight()).getValue(), 32);
+        assertEquals(((IntLiteral) rightOp3.getLeft()).getValue(), 29);
+        assertEquals(((IntLiteral) rightOp3.getRight()).getValue(), 32);
     }
 
     @Test
@@ -370,7 +371,7 @@ public class ParserTests {
         BinaryOp leftOp = (BinaryOp) binaryOp.getLeft();
         rightLiteral = leftOp.getRight();
         operatorToken = leftOp.getOperator();
-        assertEquals(((Literal) rightLiteral).getValue(), 10);
+        assertEquals(((IntLiteral) rightLiteral).getValue(), 10);
         assertEquals(operatorToken.getText(), "-");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
         leftOp = (BinaryOp) leftOp.getLeft();
@@ -379,7 +380,7 @@ public class ParserTests {
         assertEquals(((Identifier) rightLiteral).getName(), "a");
         assertEquals(operatorToken.getText(), "+");
         assertEquals(operatorToken.getTokenType(), TokenType.OPERATOR);
-        assertEquals(((Literal) leftOp.getLeft()).getValue(), 1);
+        assertEquals(((IntLiteral) leftOp.getLeft()).getValue(), 1);
     }
 
     @Test
@@ -411,7 +412,7 @@ public class ParserTests {
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 3);
         BinaryOp binaryOp = (BinaryOp) expressionList.get(0);
-        assertEquals(((Literal) binaryOp.getLeft()).getValue(), 2);
+        assertEquals(((IntLiteral) binaryOp.getLeft()).getValue(), 2);
         assertEquals(binaryOp.getOperator().getText(), "-");
         assertEquals(((Identifier) binaryOp.getRight()).getName(), "y");
         ConditionalOp conditionalOp = (ConditionalOp) expressionList.get(1);
@@ -439,7 +440,7 @@ public class ParserTests {
         List<Expression> expressionList = block.getExpressionList();
         assertEquals(expressionList.size(), 2);
         BinaryOp binaryOp = (BinaryOp) expressionList.get(0);
-        assertEquals(((Literal) binaryOp.getLeft()).getValue(), 1);
+        assertEquals(((IntLiteral) binaryOp.getLeft()).getValue(), 1);
         assertEquals(binaryOp.getOperator().getText(), "+");
         ConditionalOp conditionalOp = (ConditionalOp) binaryOp.getRight();
         assertEquals(((Identifier) conditionalOp.getCondition()).getName(), "a");
@@ -474,14 +475,14 @@ public class ParserTests {
         BinaryOp binaryOp4 = (BinaryOp) conditionalOp3.getElseBlock();
         assertEquals(((Identifier) binaryOp1.getLeft()).getName(), "x");
         assertEquals(binaryOp1.getOperator().getText(), "+");
-        assertEquals(((Literal) binaryOp1.getRight()).getValue(), 1);
-        assertEquals(((Literal) binaryOp2.getLeft()).getValue(), 1);
+        assertEquals(((IntLiteral) binaryOp1.getRight()).getValue(), 1);
+        assertEquals(((IntLiteral) binaryOp2.getLeft()).getValue(), 1);
         assertEquals(binaryOp2.getOperator().getText(), "-");
         assertEquals(((Identifier) binaryOp2.getRight()).getName(), "y");
         assertEquals(((Identifier) binaryOp3.getLeft()).getName(), "m");
         assertEquals(binaryOp3.getOperator().getText(), "+");
-        assertEquals(((Literal) binaryOp3.getRight()).getValue(), 2);
-        assertEquals(((Literal) binaryOp4.getLeft()).getValue(), 2);
+        assertEquals(((IntLiteral) binaryOp3.getRight()).getValue(), 2);
+        assertEquals(((IntLiteral) binaryOp4.getLeft()).getValue(), 2);
         assertEquals(binaryOp4.getOperator().getText(), "-");
         assertEquals(((Identifier) binaryOp4.getRight()).getName(), "n");
     }
@@ -499,7 +500,7 @@ public class ParserTests {
         assertEquals(parameters.size(), 3);
         assertEquals(((Identifier) parameters.get(0)).getName(), "a");
         assertEquals(((Identifier) parameters.get(1)).getName(), "b");
-        assertEquals(((Literal) parameters.get(2)).getValue(), 3);
+        assertEquals(((IntLiteral) parameters.get(2)).getValue(), 3);
     }
 
     @Test
@@ -516,9 +517,9 @@ public class ParserTests {
         assertEquals(((Identifier) parameters.get(0)).getName(), "a");
         ConditionalOp conditionalOp = (ConditionalOp) parameters.get(1);
         assertEquals(((Identifier) conditionalOp.getCondition()).getName(), "x");
-        assertEquals(((Literal) conditionalOp.getThenBlock()).getValue(), 3);
-        assertEquals(((Literal) conditionalOp.getElseBlock()).getValue(), 4);
-        assertEquals(((Literal) parameters.get(2)).getValue(), 3);
+        assertEquals(((IntLiteral) conditionalOp.getThenBlock()).getValue(), 3);
+        assertEquals(((IntLiteral) conditionalOp.getElseBlock()).getValue(), 4);
+        assertEquals(((IntLiteral) parameters.get(2)).getValue(), 3);
     }
 
     @Test
@@ -535,9 +536,9 @@ public class ParserTests {
         assertEquals(((Identifier) parameters.get(0)).getName(), "a");
         BinaryOp binaryOp = (BinaryOp) parameters.get(1);
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "a");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 21);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 21);
         assertEquals(binaryOp.getOperator().getText(), "+");
-        assertEquals(((Literal) parameters.get(2)).getValue(), 3);
+        assertEquals(((IntLiteral) parameters.get(2)).getValue(), 3);
     }
 
     @Test
@@ -556,8 +557,8 @@ public class ParserTests {
         assertEquals(functionCall2.getFunctionName(), "newTestFunction");
         List<Expression> parameters2 = functionCall2.getParameters();
         assertEquals(((Identifier) parameters2.get(0)).getName(), "b");
-        assertEquals(((Literal) parameters2.get(1)).getValue(), 2);
-        assertEquals(((Literal) parameters1.get(2)).getValue(), 3);
+        assertEquals(((IntLiteral) parameters2.get(1)).getValue(), 2);
+        assertEquals(((IntLiteral) parameters1.get(2)).getValue(), 3);
     }
 
     @Test
@@ -579,13 +580,13 @@ public class ParserTests {
         assertEquals(functionCall2.getFunctionName(), "newTestFunction");
         List<Expression> parameters2 = functionCall2.getParameters();
         assertEquals(((Identifier) parameters2.get(0)).getName(), "b");
-        assertEquals(((Literal) parameters2.get(1)).getValue(), 2);
+        assertEquals(((IntLiteral) parameters2.get(1)).getValue(), 2);
         functionCall2 = (FunctionCall) conditionalOp.getElseBlock();
         assertEquals(functionCall2.getFunctionName(), "newTestFunction2");
         parameters2 = functionCall2.getParameters();
         assertEquals(((Identifier) parameters2.get(0)).getName(), "c");
-        assertEquals(((Literal) parameters2.get(1)).getValue(), 99);
-        assertEquals(((Literal) parameters1.get(2)).getValue(), 3);
+        assertEquals(((IntLiteral) parameters2.get(1)).getValue(), 99);
+        assertEquals(((IntLiteral) parameters1.get(2)).getValue(), 3);
     }
 
     @Test
@@ -598,11 +599,11 @@ public class ParserTests {
         WhileOp whileOp = (WhileOp) expressionList.get(0);
         BinaryOp binaryOp = (BinaryOp) whileOp.getCondition();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "a");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 2);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 2);
         assertEquals(binaryOp.getOperator().getText(), ">");
         binaryOp = (BinaryOp) whileOp.getBody();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "b");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 3);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 3);
         assertEquals(binaryOp.getOperator().getText(), "=");
     }
 
@@ -617,20 +618,20 @@ public class ParserTests {
         WhileOp whileOp = (WhileOp) expressionList.get(0);
         BinaryOp binaryOp = (BinaryOp) whileOp.getCondition();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "a");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 2);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 2);
         assertEquals(binaryOp.getOperator().getText(), ">");
         ConditionalOp conditionalOp = (ConditionalOp) whileOp.getBody();
         BinaryOp binaryOp1 = (BinaryOp) conditionalOp.getCondition();
         assertEquals(((Identifier) binaryOp1.getLeft()).getName(), "b");
-        assertEquals(((Literal) binaryOp1.getRight()).getValue(), 3);
+        assertEquals(((IntLiteral) binaryOp1.getRight()).getValue(), 3);
         assertEquals(binaryOp1.getOperator().getText(), "==");
         binaryOp1 = (BinaryOp) conditionalOp.getThenBlock();
         assertEquals(((Identifier) binaryOp1.getLeft()).getName(), "c");
-        assertEquals(((Literal) binaryOp1.getRight()).getValue(), 2);
+        assertEquals(((IntLiteral) binaryOp1.getRight()).getValue(), 2);
         assertEquals(binaryOp1.getOperator().getText(), "=");
         binaryOp1 = (BinaryOp) conditionalOp.getElseBlock();
         assertEquals(((Identifier) binaryOp1.getLeft()).getName(), "d");
-        assertEquals(((Literal) binaryOp1.getRight()).getValue(), 4);
+        assertEquals(((IntLiteral) binaryOp1.getRight()).getValue(), 4);
         assertEquals(binaryOp1.getOperator().getText(), "=");
     }
 
@@ -645,7 +646,7 @@ public class ParserTests {
         WhileOp whileOp = (WhileOp) expressionList.get(0);
         BinaryOp binaryOp = (BinaryOp) whileOp.getCondition();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "a");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 2);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 2);
         assertEquals(binaryOp.getOperator().getText(), ">");
         assertEquals(((Block) whileOp.getBody()).getExpressionList().size(), 2);
         BinaryOp binaryOp1 = (BinaryOp) ((Block) whileOp.getBody()).getExpressionList().get(0);
@@ -653,16 +654,16 @@ public class ParserTests {
         assertEquals(((Identifier) binaryOp1.getLeft()).getName(), "a");
         assertEquals(binaryOp1.getOperator().getText(), "=");
         assertEquals(((Identifier) ((BinaryOp) binaryOp1.getRight()).getLeft()).getName(), "a");
-        assertEquals(((Literal) ((BinaryOp) binaryOp1.getRight()).getRight()).getValue(), 2);
+        assertEquals(((IntLiteral) ((BinaryOp) binaryOp1.getRight()).getRight()).getValue(), 2);
         assertEquals(((BinaryOp) binaryOp1.getRight()).getOperator().getText(), "+");
         assertEquals(((Identifier) binaryOp2.getLeft()).getName(), "d");
         assertEquals(binaryOp2.getOperator().getText(), "=");
         BinaryOp binaryOp3 = (BinaryOp) binaryOp2.getRight();
         assertEquals(((Identifier) binaryOp3.getLeft()).getName(), "a");
         assertEquals(binaryOp3.getOperator().getText(), "-");
-        assertEquals(((Literal) ((BinaryOp) binaryOp3.getRight()).getRight()).getValue(), 4);
+        assertEquals(((IntLiteral) ((BinaryOp) binaryOp3.getRight()).getRight()).getValue(), 4);
         assertEquals(((BinaryOp) binaryOp3.getRight()).getOperator().getText(), "/");
-        assertEquals(((Literal) ((BinaryOp) binaryOp3.getRight()).getLeft()).getValue(), 35);
+        assertEquals(((IntLiteral) ((BinaryOp) binaryOp3.getRight()).getLeft()).getValue(), 35);
     }
 
     @Test
@@ -674,7 +675,7 @@ public class ParserTests {
         VariableDef variableDef = (VariableDef) block.getExpressionList().get(0);
         assertEquals(variableDef.getName(), "a");
         assertTrue(variableDef.getDefinedType().isEmpty());
-        assertEquals(((Literal) variableDef.getValue()).getValue(), 3);
+        assertEquals(((IntLiteral) variableDef.getValue()).getValue(), 3);
     }
 
     @Test
@@ -686,7 +687,7 @@ public class ParserTests {
         VariableDef variableDef = (VariableDef) block.getExpressionList().get(0);
         assertEquals(variableDef.getName(), "a");
         assertEquals(variableDef.getDefinedType().get(), "Int");
-        assertEquals(((Literal) variableDef.getValue()).getValue(), 3);
+        assertEquals(((IntLiteral) variableDef.getValue()).getValue(), 3);
     }
 
     @Test
@@ -702,7 +703,7 @@ public class ParserTests {
         BinaryOp binaryOp = (BinaryOp) conditionalOp.getCondition();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
         assertEquals(binaryOp.getOperator().getText(), "==");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 3);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 3);
         assertEquals(((Identifier) conditionalOp.getThenBlock()).getName(), "z");
         assertEquals(((Identifier) conditionalOp.getElseBlock()).getName(), "y");
     }
@@ -740,14 +741,14 @@ public class ParserTests {
         Block block = testParser.parse();
         assertEquals(block.getExpressionList().size(), 2);
         WhileOp whileOp = (WhileOp) block.getExpressionList().get(0);
-        assertEquals(((Literal) block.getExpressionList().get(1)).getValue(), 123);
+        assertEquals(((IntLiteral) block.getExpressionList().get(1)).getValue(), 123);
         FunctionCall functionCall = (FunctionCall) whileOp.getCondition();
         assertEquals(functionCall.getFunctionName(), "f");
         assertEquals(functionCall.getParameters().size(), 0);
         Block whileBlock = (Block) whileOp.getBody();
         BinaryOp binaryOp = (BinaryOp) whileBlock.getExpressionList().get(0);
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 10);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 10);
         assertEquals(binaryOp.getOperator().getText(), "=");
         binaryOp = (BinaryOp) whileBlock.getExpressionList().get(1);
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "y");
@@ -764,7 +765,7 @@ public class ParserTests {
         binaryOp = (BinaryOp) binaryOp.getRight();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "x");
         assertEquals(binaryOp.getOperator().getText(), "+");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 1);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 1);
         assertEquals(((Identifier) block.getExpressionList().get(1)).getName(), "x");
         block = (Block) conditionalOp.getElseBlock();
         assertEquals(((FunctionCall) block.getExpressionList().get(0)).getFunctionName(), "g");
@@ -795,24 +796,24 @@ public class ParserTests {
         BinaryOp binaryOp = (BinaryOp) whileOp.getCondition();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "a");
         assertEquals(binaryOp.getOperator().getText(), ">");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 2);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 2);
         block = (Block) whileOp.getBody();
         assertEquals(block.getExpressionList().size(), 1);
         ConditionalOp conditionalOp = (ConditionalOp) block.getExpressionList().get(0);
         binaryOp = (BinaryOp) conditionalOp.getCondition();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "b");
         assertEquals(binaryOp.getOperator().getText(), "<=");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 4);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 4);
         block = (Block) conditionalOp.getThenBlock();
         assertEquals(block.getExpressionList().size(), 1);
         whileOp = (WhileOp) block.getExpressionList().get(0);
         binaryOp = (BinaryOp) whileOp.getCondition();
         assertEquals(binaryOp.getOperator().getText(), "<");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 3);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 3);
         binaryOp = (BinaryOp) binaryOp.getLeft();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "c");
         assertEquals(binaryOp.getOperator().getText(), "-");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 2);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 2);
         block = (Block) whileOp.getBody();
         assertEquals(block.getExpressionList().size(), 1);
         binaryOp = (BinaryOp) block.getExpressionList().get(0);
@@ -821,14 +822,14 @@ public class ParserTests {
         binaryOp = (BinaryOp) binaryOp.getRight();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "d");
         assertEquals(binaryOp.getOperator().getText(), "*");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 3);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 3);
         binaryOp = (BinaryOp) conditionalOp.getElseBlock();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "e");
         assertEquals(binaryOp.getOperator().getText(), "=");
         binaryOp = (BinaryOp) binaryOp.getRight();
         assertEquals(((Identifier) binaryOp.getLeft()).getName(), "e");
         assertEquals(binaryOp.getOperator().getText(), "%");
-        assertEquals(((Literal) binaryOp.getRight()).getValue(), 10);
+        assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 10);
     }
 
     @ParameterizedTest

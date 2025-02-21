@@ -1,5 +1,6 @@
-package fi.helsinki.compiler.common;
+package fi.helsinki.compiler.common.expressions;
 
+import fi.helsinki.compiler.common.Location;
 import fi.helsinki.compiler.common.types.Type;
 import fi.helsinki.compiler.common.types.UnitType;
 

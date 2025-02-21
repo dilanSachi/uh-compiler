@@ -1,13 +1,12 @@
 package fi.helsinki.compiler.interpreter;
 
-import fi.helsinki.compiler.common.Expression;
+import fi.helsinki.compiler.common.expressions.Expression;
+import fi.helsinki.compiler.common.expressions.*;
 import fi.helsinki.compiler.interpreter.functions.PrintBoolFunction;
 import fi.helsinki.compiler.interpreter.functions.PrintIntFunction;
 import fi.helsinki.compiler.interpreter.functions.ReadIntFunction;
 import fi.helsinki.compiler.interpreter.operators.*;
 import fi.helsinki.compiler.exceptions.InterpreterException;
-import fi.helsinki.compiler.parser.*;
-import fi.helsinki.compiler.parser.Boolean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +16,10 @@ public class Interpreter {
 
     public Optional<Value> interpret(Expression expression, SymTab symTab) throws InterpreterException {
         switch (expression) {
-            case Literal literal: {
-                return Optional.of(new IntValue(literal.getValue()));
+            case IntLiteral intLiteral: {
+                return Optional.of(new IntValue(intLiteral.getValue()));
             }
-            case Boolean bool: {
+            case BooleanLiteral bool: {
                 return Optional.of(new BooleanValue(bool.getValue()));
             }
             case UnaryOp unaryOp: {

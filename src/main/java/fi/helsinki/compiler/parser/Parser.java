@@ -1,6 +1,7 @@
 package fi.helsinki.compiler.parser;
 
-import fi.helsinki.compiler.common.Expression;
+import fi.helsinki.compiler.common.expressions.Expression;
+import fi.helsinki.compiler.common.expressions.*;
 import fi.helsinki.compiler.exceptions.ParserException;
 import fi.helsinki.compiler.tokenizer.Token;
 import fi.helsinki.compiler.tokenizer.TokenType;
@@ -43,12 +44,12 @@ public class Parser {
         return token;
     }
 
-    private Literal parseIntegerLiteral() throws ParserException {
+    private IntLiteral parseIntegerLiteral() throws ParserException {
         if (peek().getTokenType() != TokenType.INTEGER_LITERAL) {
             throw new ParserException(peek().getTokenLocation() + ": expected an integer literal");
         }
         Token token = consume();
-        return new Literal(Integer.valueOf(token.getText()), token.getTokenLocation());
+        return new IntLiteral(Integer.valueOf(token.getText()), token.getTokenLocation());
     }
 
     private FunctionCall parseFunctionCall(Token functionNameToken) throws ParserException {
@@ -96,7 +97,7 @@ public class Parser {
         if (checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.of("true")) ||
                 checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.of("false"))) {
             Token booleanToken = consume();
-            return new Boolean(booleanToken.getText(), booleanToken.getTokenLocation());
+            return new BooleanLiteral(Boolean.valueOf(booleanToken.getText()), booleanToken.getTokenLocation());
         }
         throw new ParserException("Invalid token: " + token.getText() + token.getTokenLocation() +
                 ": expected an integer literal or an identifier");

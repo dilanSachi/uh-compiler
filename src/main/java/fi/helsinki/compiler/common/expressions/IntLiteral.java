@@ -1,13 +1,12 @@
-package fi.helsinki.compiler.parser;
+package fi.helsinki.compiler.common.expressions;
 
-import fi.helsinki.compiler.common.Expression;
 import fi.helsinki.compiler.common.Location;
 
-public class Literal extends Expression {
+public class IntLiteral extends Literal {
 
     private Integer value;
 
-    public Literal(Integer value, Location location) {
+    public IntLiteral(Integer value, Location location) {
         super(location);
         this.value = value;
     }

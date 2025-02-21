@@ -5,7 +5,7 @@ import fi.helsinki.compiler.interpreter.Interpreter;
 import fi.helsinki.compiler.interpreter.SymTab;
 import fi.helsinki.compiler.interpreter.Value;
 import fi.helsinki.compiler.exceptions.InterpreterException;
-import fi.helsinki.compiler.common.Expression;
+import fi.helsinki.compiler.common.expressions.Expression;
 
 import java.util.Optional;
 

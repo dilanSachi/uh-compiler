@@ -1,10 +1,9 @@
 package fi.helsinki.compiler.typechecker;
 
-import fi.helsinki.compiler.common.Expression;
+import fi.helsinki.compiler.common.expressions.Expression;
+import fi.helsinki.compiler.common.expressions.*;
 import fi.helsinki.compiler.common.types.*;
 import fi.helsinki.compiler.exceptions.TypeCheckerException;
-import fi.helsinki.compiler.parser.*;
-import fi.helsinki.compiler.parser.Boolean;
 import fi.helsinki.compiler.tokenizer.Token;
 
 import java.util.ArrayList;
@@ -15,12 +14,12 @@ public class TypeChecker {
 
     private Optional<Type> checkType(Expression expression, SymbolTable symbolTable) throws TypeCheckerException {
         switch (expression) {
-            case Literal literal: {
+            case IntLiteral literal: {
                 Type intType = new IntType();
                 literal.setType(intType);
                 return Optional.of(intType);
             }
-            case Boolean bool: {
+            case BooleanLiteral bool: {
                 Type boolType = new BooleanType();
                 bool.setType(boolType);
                 return Optional.of(boolType);

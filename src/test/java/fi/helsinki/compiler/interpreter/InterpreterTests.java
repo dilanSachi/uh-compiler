@@ -3,8 +3,8 @@ package fi.helsinki.compiler.interpreter;
 import fi.helsinki.compiler.TestPrintStream;
 import fi.helsinki.compiler.exceptions.InterpreterException;
 import fi.helsinki.compiler.exceptions.ParserException;
-import fi.helsinki.compiler.parser.BinaryOp;
-import fi.helsinki.compiler.parser.Literal;
+import fi.helsinki.compiler.common.expressions.BinaryOp;
+import fi.helsinki.compiler.common.expressions.IntLiteral;
 import fi.helsinki.compiler.parser.Parser;
 import fi.helsinki.compiler.tokenizer.Token;
 import fi.helsinki.compiler.tokenizer.TokenType;
@@ -34,8 +34,8 @@ public class InterpreterTests {
 
     @Test
     public void testBasicAddition() throws InterpreterException {
-        BinaryOp binaryOp = new BinaryOp(new Literal(1, null),
-                new Token("+", TokenType.OPERATOR, null), new Literal(2, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1, null),
+                new Token("+", TokenType.OPERATOR, null), new IntLiteral(2, null), null);
         Interpreter interpreter = new Interpreter();
         Value result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), 3);
@@ -43,8 +43,8 @@ public class InterpreterTests {
 
     @Test
     public void testBasicSubtraction() throws InterpreterException {
-        BinaryOp binaryOp = new BinaryOp(new Literal(1, null),
-                new Token("-", TokenType.OPERATOR, null), new Literal(2, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1, null),
+                new Token("-", TokenType.OPERATOR, null), new IntLiteral(2, null), null);
         Interpreter interpreter = new Interpreter();
         Value result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), -1);
@@ -52,8 +52,8 @@ public class InterpreterTests {
 
     @Test
     public void testBasicMultiplication() throws InterpreterException {
-        BinaryOp binaryOp = new BinaryOp(new Literal(100, null),
-                new Token("*", TokenType.OPERATOR, null), new Literal(120, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(100, null),
+                new Token("*", TokenType.OPERATOR, null), new IntLiteral(120, null), null);
         Interpreter interpreter = new Interpreter();
         Value result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), 12000);
@@ -61,8 +61,8 @@ public class InterpreterTests {
 
     @Test
     public void testBasicDivision() throws InterpreterException {
-        BinaryOp binaryOp = new BinaryOp(new Literal(140, null),
-                new Token("/", TokenType.OPERATOR, null), new Literal(7, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(140, null),
+                new Token("/", TokenType.OPERATOR, null), new IntLiteral(7, null), null);
         Interpreter interpreter = new Interpreter();
         Value result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), 20);
@@ -70,14 +70,14 @@ public class InterpreterTests {
 
     @Test
     public void testBasicModulus() throws InterpreterException {
-        BinaryOp binaryOp = new BinaryOp(new Literal(140, null),
-                new Token("%", TokenType.OPERATOR, null), new Literal(7, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(140, null),
+                new Token("%", TokenType.OPERATOR, null), new IntLiteral(7, null), null);
         Interpreter interpreter = new Interpreter();
         Value result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), 0);
 
-        binaryOp = new BinaryOp(new Literal(143, null),
-                new Token("%", TokenType.OPERATOR, null), new Literal(7, null), null);
+        binaryOp = new BinaryOp(new IntLiteral(143, null),
+                new Token("%", TokenType.OPERATOR, null), new IntLiteral(7, null), null);
         interpreter = new Interpreter();
         result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), 3);
