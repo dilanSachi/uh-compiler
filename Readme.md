@@ -71,7 +71,6 @@ These are the main parts of the implementation stages/progress of the compiler.
 - [x] Parser
   - [x] Integer literal
   - [x] Identifiers
-  - [x] String literal
   - [x] Boolean literal
   - [x] If then else blocks
   - [x] Comparison operators (=, ==, !=, <=, >=, >, <, and, or)
@@ -89,5 +88,13 @@ These are the main parts of the implementation stages/progress of the compiler.
   - [x] Positive test cases
   - [ ] Negative test cases
 - [ ] IR Generator
+  - [x] Integer literal
+  - [x] Identifiers
+  - [x] Boolean literal
+  - [ ] If then else blocks
+  - [ ] Comparison operators (=, ==, !=, <=, >=, >, <, and, or)
+  - [ ] While block
+  - [ ] Function call
+  - [ ] Type declaration
 - [ ] Assembly Generator
 - [ ] Analysis & Optimization
