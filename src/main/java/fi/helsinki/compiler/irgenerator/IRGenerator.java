@@ -114,11 +114,13 @@ public class IRGenerator {
             case WhileOp whileOp: {
                 Label doLabel = new Label("do", whileOp.getCondition().getLocation());
                 Label endLabel = new Label("end", whileOp.getLocation());
+                Label startLabel = new Label("while_start", whileOp.getLocation());
+                instructions.add(startLabel);
                 IRVariable condition = visit(whileOp.getCondition(), symbolTable);
                 instructions.add(new CondJump(condition, doLabel, endLabel, whileOp.getBody().getLocation()));
                 instructions.add(doLabel);
                 visit(whileOp.getBody(), symbolTable);
-                instructions.add(new CondJump(condition, doLabel, endLabel, whileOp.getBody().getLocation()));
+                instructions.add(new Jump(startLabel, whileOp.getBody().getLocation()));
                 instructions.add(endLabel);
                 return createVariable(new UnitType());
             }
