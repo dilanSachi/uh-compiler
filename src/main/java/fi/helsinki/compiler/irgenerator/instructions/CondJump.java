@@ -17,6 +17,6 @@ public class CondJump extends Instruction {
 
     @Override
     public String toString() {
-        return name + "," + condition + "," + thenLabel + "," + elseLabel;
+        return name + "(" + condition + "," + thenLabel + "," + elseLabel + ")";
     }
 }

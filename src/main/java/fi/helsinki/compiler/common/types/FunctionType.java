@@ -5,8 +5,10 @@ import java.util.List;
 public class FunctionType extends Type {
     private List<Type> parameterTypes;
     private Type returnType;
+    private String functionName;
 
-    public FunctionType(Type returnType, Type... parameterTypes) {
+    public FunctionType(String functionName, Type returnType, Type... parameterTypes) {
+        this.functionName = functionName;
         this.returnType = returnType;
         this.parameterTypes = List.of(parameterTypes);
     }
@@ -19,8 +21,12 @@ public class FunctionType extends Type {
         return returnType;
     }
 
+    public String getFunctionName() {
+        return functionName;
+    }
+
     @Override
-    public String getType() {
-        return "Function";
+    public String getTypeStr() {
+        return functionName;
     }
 }

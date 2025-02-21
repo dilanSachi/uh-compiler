@@ -15,6 +15,6 @@ public class Jump extends Instruction {
 
     @Override
     public String toString() {
-        return name + "," + label;
+        return name + "(" + label + ")";
     }
 }

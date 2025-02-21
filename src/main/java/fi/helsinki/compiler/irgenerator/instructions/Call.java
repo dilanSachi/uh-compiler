@@ -19,6 +19,6 @@ public class Call extends Instruction {
 
     @Override
     public String toString() {
-        return name + "(" + function + "," + String.join(",", Arrays.toString(arguments)) + "," + destination + ")";
+        return name + "(" + function.getType() + "," + String.join(",", Arrays.toString(arguments)) + "," + destination + ")";
     }
 }

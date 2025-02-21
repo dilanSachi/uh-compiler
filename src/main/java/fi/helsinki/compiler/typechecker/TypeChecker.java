@@ -138,7 +138,7 @@ public class TypeChecker {
                             return thenType;
                         } else {
                             throw new TypeCheckerException("Types does not match in the conditional blocks: "
-                                    + thenType.get().getType() + " ," + elseType.get().getType());
+                                    + thenType.get().getTypeStr() + " ," + elseType.get().getTypeStr());
                         }
                     } else if (thenType.isPresent()) {
                         conditionalOp.setType(thenType.get());
@@ -188,9 +188,9 @@ public class TypeChecker {
 
     public Optional<Type> checkType(Expression expression) throws TypeCheckerException {
         SymbolTable symbolTable = new SymbolTable(null);
-        symbolTable.putType("print_int", new FunctionType(new UnitType(), new IntType()));
-        symbolTable.putType("print_boolean", new FunctionType(new UnitType(), new BooleanType()));
-        symbolTable.putType("read_int", new FunctionType(new IntType(), new UnitType()));
+        symbolTable.putType("print_int", new FunctionType("print_int", new UnitType(), new IntType()));
+        symbolTable.putType("print_boolean", new FunctionType("print_boolean", new UnitType(), new BooleanType()));
+        symbolTable.putType("read_int", new FunctionType("read_int", new IntType(), new UnitType()));
         return checkType(expression, symbolTable);
     }
 }

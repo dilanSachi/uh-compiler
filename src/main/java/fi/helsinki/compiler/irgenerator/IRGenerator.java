@@ -2,14 +2,9 @@ package fi.helsinki.compiler.irgenerator;
 
 import fi.helsinki.compiler.common.expressions.*;
 import fi.helsinki.compiler.common.Location;
-import fi.helsinki.compiler.common.types.BooleanType;
-import fi.helsinki.compiler.common.types.IntType;
-import fi.helsinki.compiler.common.types.Type;
+import fi.helsinki.compiler.common.types.*;
 import fi.helsinki.compiler.exceptions.IRGenerationException;
-import fi.helsinki.compiler.irgenerator.instructions.Call;
-import fi.helsinki.compiler.irgenerator.instructions.Instruction;
-import fi.helsinki.compiler.irgenerator.instructions.LoadBoolConst;
-import fi.helsinki.compiler.irgenerator.instructions.LoadIntConst;
+import fi.helsinki.compiler.irgenerator.instructions.*;
 import fi.helsinki.compiler.tokenizer.Token;
 
 import java.util.*;
@@ -21,23 +16,30 @@ public class IRGenerator {
 
     public IRGenerator() {
         variableTypeMap = new HashMap<>();
-        instructions = new ArrayList<>();
+        setPredefinedVariableTypes();
+    }
+
+    private void setPredefinedVariableTypes() {
+        createVariable(new AdditionType());
+        createVariable(new GreaterThanType());
     }
 
     public List<Instruction> generateIR(Expression rootExpression) throws IRGenerationException {
-        IRVariable unitVariable = new IRVariable("unit");
-        List<Instruction> irInstructions = new ArrayList<>();
+        instructions = new ArrayList<>();
+        instructions.add(new Label("start", rootExpression.getLocation()));
         SymbolTable rootSymbolTable = new SymbolTable(null);
         for (IRVariable key: variableTypeMap.keySet()) {
-            rootSymbolTable.putVariable(key.getName(), key);
+            rootSymbolTable.putVariable(key.getType().getTypeStr(), key);
         }
         IRVariable finalResult = visit(rootExpression, rootSymbolTable);
         if (variableTypeMap.get(finalResult) instanceof IntType) {
-            // call print_int
+            instructions.add(new Call(createVariable(new FunctionType("print_int", new UnitType(), new IntType())),
+                    new IRVariable[]{finalResult}, createVariable(new UnitType()), rootExpression.getLocation()));
         } else if (variableTypeMap.get(finalResult) instanceof BooleanType) {
-            // call print_bool
+            instructions.add(new Call(createVariable(new FunctionType("print_bool", new UnitType(), new BooleanType())),
+                    new IRVariable[]{finalResult}, createVariable(new UnitType()), rootExpression.getLocation()));
         }
-        return irInstructions;
+        return instructions;
     }
 
     public IRVariable visit(Expression expression, SymbolTable symbolTable) throws IRGenerationException {
@@ -67,6 +69,58 @@ public class IRGenerator {
                 instructions.add(new Call(operatorVariable, new IRVariable[]{leftVariable, rightVariable}, result, location));
                 return result;
             }
+            case Block block: {
+                SymbolTable localSymbolTable = new SymbolTable(symbolTable);
+                List<Expression> expressionList = block.getExpressionList();
+                for (int i = 0; i < expressionList.size() - 1; i++) {
+                    visit(expressionList.get(i), localSymbolTable);
+                }
+                if (!(expressionList.getLast() instanceof Unit)) {
+                    return visit(expressionList.getLast(), localSymbolTable);
+                }
+                return createVariable(new UnitType());
+            }
+            case ConditionalOp conditionalOp: {
+                if (conditionalOp.getElseBlock() != null) {
+                    Label thenLabel = new Label("then", conditionalOp.getThenBlock().getLocation());
+                    Label elseLabel = new Label("else", location);
+                    Label endLabel = new Label("end", location);
+                    IRVariable conditionVariable = visit(conditionalOp.getCondition(), symbolTable);
+                    instructions.add(new CondJump(conditionVariable, thenLabel, elseLabel, location));
+                    instructions.add(thenLabel);
+                    List<Expression> expressionList = ((Block) conditionalOp.getThenBlock()).getExpressionList();
+                    Type finalType = !expressionList.isEmpty() ? expressionList.get(expressionList.size() - 1).getType() : new UnitType();
+                    IRVariable outputVariable = createVariable(finalType);
+                    IRVariable thenVariable = visit(conditionalOp.getThenBlock(), symbolTable);
+                    instructions.add(new Copy(thenVariable, outputVariable, location));
+                    instructions.add(new Jump(endLabel, location));
+                    instructions.add(elseLabel);
+                    IRVariable elseVariable = visit(conditionalOp.getElseBlock(), symbolTable);
+                    instructions.add(new Copy(elseVariable, outputVariable, location));
+                    instructions.add(endLabel);
+                    return outputVariable;
+                } else {
+                    Label thenLabel = new Label("then", conditionalOp.getThenBlock().getLocation());
+                    Label endLabel = new Label("end", location);
+                    IRVariable conditionVariable = visit(conditionalOp.getCondition(), symbolTable);
+                    instructions.add(new CondJump(conditionVariable, thenLabel, endLabel, location));
+                    instructions.add(thenLabel);
+                    visit(conditionalOp.getThenBlock(), symbolTable);
+                    instructions.add(endLabel);
+                    return createVariable(new UnitType());
+                }
+            }
+            case WhileOp whileOp: {
+                Label doLabel = new Label("do", whileOp.getCondition().getLocation());
+                Label endLabel = new Label("end", whileOp.getLocation());
+                IRVariable condition = visit(whileOp.getCondition(), symbolTable);
+                instructions.add(new CondJump(condition, doLabel, endLabel, whileOp.getBody().getLocation()));
+                instructions.add(doLabel);
+                visit(whileOp.getBody(), symbolTable);
+                instructions.add(new CondJump(condition, doLabel, endLabel, whileOp.getBody().getLocation()));
+                instructions.add(endLabel);
+                return createVariable(new UnitType());
+            }
             default: {
 
             }
@@ -75,7 +129,7 @@ public class IRGenerator {
     }
 
     public IRVariable createVariable(Type type) {
-        IRVariable variable = new IRVariable(type.getType());
+        IRVariable variable = IRVariable.createVariable(type);
         variableTypeMap.put(variable, type);
         return variable;
     }

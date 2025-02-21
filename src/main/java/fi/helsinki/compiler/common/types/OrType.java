@@ -1,8 +1,8 @@
 package fi.helsinki.compiler.common.types;
 
-public class UnitType extends Type {
+public class OrType extends Type {
     @Override
     public String getTypeStr() {
-        return "Unit";
+        return "or";
     }
 }
