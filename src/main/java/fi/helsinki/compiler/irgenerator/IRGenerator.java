@@ -15,6 +15,7 @@ public class IRGenerator {
     private List<Instruction> instructions;
 
     public IRGenerator() {
+        IRVariable.resetCounter();
         variableTypeMap = new HashMap<>();
         setPredefinedVariableTypes();
     }
@@ -42,7 +43,7 @@ public class IRGenerator {
         return instructions;
     }
 
-    public IRVariable visit(Expression expression, SymbolTable symbolTable) throws IRGenerationException {
+    private IRVariable visit(Expression expression, SymbolTable symbolTable) throws IRGenerationException {
         Location location = expression.getLocation();
         switch (expression) {
             case IntLiteral intLiteral: {
@@ -128,7 +129,7 @@ public class IRGenerator {
         return null;
     }
 
-    public IRVariable createVariable(Type type) {
+    private IRVariable createVariable(Type type) {
         IRVariable variable = IRVariable.createVariable(type);
         variableTypeMap.put(variable, type);
         return variable;

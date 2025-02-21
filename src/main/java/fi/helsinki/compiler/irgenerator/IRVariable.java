@@ -20,6 +20,10 @@ public class IRVariable {
         return new IRVariable(counter, type);
     }
 
+    public static void resetCounter() {
+        counter = -1;
+    }
+
     public String getName() {
         return name;
     }

@@ -130,9 +130,9 @@ public class TypeChecker {
             case ConditionalOp conditionalOp: {
                 Optional<Type> type = checkType(conditionalOp.getCondition(), symbolTable);
                 if (type.get() instanceof BooleanType) {
-                    Optional<Type> thenType =  checkType(conditionalOp.getThenBlock(), symbolTable);
-                    Optional<Type> elseType =  checkType(conditionalOp.getElseBlock(), symbolTable);
-                    if (thenType.isPresent() && elseType.isPresent()) {
+                    Optional<Type> thenType = checkType(conditionalOp.getThenBlock(), symbolTable);
+                    if (conditionalOp.getElseBlock() != null) {
+                        Optional<Type> elseType = checkType(conditionalOp.getElseBlock(), symbolTable);
                         if (thenType.get().equals(elseType.get())) {
                             conditionalOp.setType(thenType.get());
                             return thenType;
@@ -140,11 +140,9 @@ public class TypeChecker {
                             throw new TypeCheckerException("Types does not match in the conditional blocks: "
                                     + thenType.get().getTypeStr() + " ," + elseType.get().getTypeStr());
                         }
-                    } else if (thenType.isPresent()) {
-                        conditionalOp.setType(thenType.get());
-                        return thenType;
                     } else {
-                        throw new TypeCheckerException("Invalid type found");
+                        conditionalOp.setType(new UnitType());
+                        return thenType;
                     }
                 } else {
                     throw new TypeCheckerException("Expected a Boolean type for the conditional type.");
