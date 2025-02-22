@@ -16,6 +16,7 @@ public class IRGenerator {
 
     public IRGenerator() {
         IRVariable.resetCounter();
+        Label.resetCounter();
         variableTypeMap = new HashMap<>();
         setPredefinedVariableTypes();
     }
@@ -30,8 +31,9 @@ public class IRGenerator {
         createVariable(new MultiplicationType());
         createVariable(new DivisionType());
         createVariable(new ModulusType());
-        createVariable(new AndType());
-        createVariable(new OrType());
+        createVariable(new FunctionType("print_int", new UnitType(), new IntType()));
+        createVariable(new FunctionType("print_boolean", new UnitType(), new BooleanType()));
+        createVariable(new FunctionType("read_int", new IntType(), new UnitType()));
     }
 
     public List<Instruction> generateIR(Expression rootExpression) throws IRGenerationException {
@@ -70,6 +72,18 @@ public class IRGenerator {
             case Identifier identifier: {
                 return symbolTable.getVariable(identifier.getName());
             }
+            case UnaryOp unaryOp: {
+                IRVariable variable = visit(unaryOp.getExpression(), symbolTable);
+                IRVariable resultVariable = createVariable(unaryOp.getType());
+                IRVariable operatorVariable;
+                if (unaryOp.getOperator().getText().equals("-")) {
+                    operatorVariable = createVariable(new NegationType());
+                } else {
+                    operatorVariable = createVariable(new NotType());
+                }
+                instructions.add(new Call(operatorVariable, new IRVariable[]{variable}, resultVariable, unaryOp.getLocation()));
+                return resultVariable;
+            }
             case BinaryOp binaryOp: {
                 Token operator = binaryOp.getOperator();
                 if (operator.getText().equals("=")) {
@@ -77,6 +91,56 @@ public class IRGenerator {
                     IRVariable identifier = symbolTable.getVariable(((Identifier) binaryOp.getLeft()).getName());
                     instructions.add(new Copy(variable, identifier, binaryOp.getLeft().getLocation()));
                     return identifier;
+                }
+                if (operator.getText().equals("and")) {
+                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
+                    Label andRightLabel = new Label("and_right", binaryOp.getLeft().getLocation());
+                    Label andSkipLabel = new Label("and_skip", binaryOp.getLeft().getLocation());
+                    Label andEndLabel = new Label("and_end", binaryOp.getLocation());
+                    instructions.add(new CondJump(leftVariable, andRightLabel, andSkipLabel, binaryOp.getLocation()));
+                    instructions.add(andRightLabel);
+                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
+                    IRVariable resultVariable = createVariable(binaryOp.getType());
+                    instructions.add(new Copy(rightVariable, resultVariable, binaryOp.getLocation()));
+                    instructions.add(new Jump(andEndLabel, binaryOp.getLocation()));
+                    instructions.add(andSkipLabel);
+                    instructions.add(new LoadBoolConst(false, resultVariable, binaryOp.getLocation()));
+                    instructions.add(new Jump(andEndLabel, binaryOp.getLocation()));
+                    instructions.add(andEndLabel);
+                    return resultVariable;
+                }
+                if (operator.getText().equals("or")) {
+                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
+                    Label orRightLabel = new Label("or_right", binaryOp.getLeft().getLocation());
+                    Label orSkipLabel = new Label("or_skip", binaryOp.getLeft().getLocation());
+                    Label orEndLabel = new Label("or_end", binaryOp.getLocation());
+                    instructions.add(new CondJump(leftVariable, orSkipLabel, orRightLabel, binaryOp.getLocation()));
+                    instructions.add(orRightLabel);
+                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
+                    IRVariable resultVariable = createVariable(binaryOp.getType());
+                    instructions.add(new Copy(rightVariable, resultVariable, binaryOp.getLocation()));
+                    instructions.add(new Jump(orEndLabel, binaryOp.getLocation()));
+                    instructions.add(orSkipLabel);
+                    instructions.add(new LoadBoolConst(true, resultVariable, binaryOp.getLocation()));
+                    instructions.add(new Jump(orEndLabel, binaryOp.getLocation()));
+                    instructions.add(orEndLabel);
+                    return resultVariable;
+                }
+                if (operator.getText().equals("!=")) {
+                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
+                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
+                    IRVariable resultVariable = createVariable(binaryOp.getType());
+                    instructions.add(new Call(createVariable(new InequalityType()), new IRVariable[]{leftVariable,
+                            rightVariable}, resultVariable, binaryOp.getLocation()));
+                    return resultVariable;
+                }
+                if (operator.getText().equals("==")) {
+                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
+                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
+                    IRVariable resultVariable = createVariable(binaryOp.getType());
+                    instructions.add(new Call(createVariable(new EqualityType()), new IRVariable[]{leftVariable,
+                            rightVariable}, resultVariable, binaryOp.getLocation()));
+                    return resultVariable;
                 }
                 IRVariable operatorVariable = symbolTable.getVariable(operator.getText());
                 IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
@@ -144,7 +208,19 @@ public class IRGenerator {
                 IRVariable leftSide = createVariable(variableDef.getType());
                 symbolTable.putVariable(variableDef.getName(), leftSide);
                 instructions.add(new Copy(rightSide, leftSide, variableDef.getLocation()));
-                return leftSide;
+                return createVariable(new UnitType());
+            }
+            case FunctionCall functionCall: {
+                List<Expression> parameters = functionCall.getParameters();
+                List<IRVariable> params = new ArrayList<>();
+                for (Expression parameter: parameters) {
+                    params.add(visit(parameter, symbolTable));
+                }
+                IRVariable functionVariable = symbolTable.getVariable(functionCall.getFunctionName());
+                IRVariable resultVariable = createVariable(functionCall.getType());
+                instructions.add(new Call(functionVariable, params.toArray(new IRVariable[]{}),
+                        resultVariable, functionCall.getLocation()));
+                return resultVariable;
             }
             default: {
 

@@ -12,6 +12,7 @@ public class IRVariable {
 
     private IRVariable(int counter, Type type) {
         this.name = "x" + counter;
+        // need to check whether we need to hardcode unittype variable
         this.type = type;
     }
 

@@ -327,6 +327,9 @@ public class Parser {
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
                 consume(";");
+                if (checkNextToken(TokenType.END, Optional.empty())) {
+                    block.addExpression(new Unit(peek().getTokenLocation()));
+                }
             } else if (peek().getTokenType() != TokenType.END && !lookBack().getText().equals("}")) {
                 throw new ParserException("Parsing failed. Invalid tokens found. Expected ';', but found " + peek());
             }

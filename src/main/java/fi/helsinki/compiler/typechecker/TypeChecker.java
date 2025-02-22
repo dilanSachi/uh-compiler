@@ -44,7 +44,7 @@ public class TypeChecker {
                 }
                 symbolTable.putType(key, valueType.get());
                 variableDef.setType(valueType.get());
-                return Optional.of(valueType.get());
+                return Optional.of(new UnitType());
             }
             case Identifier identifier: {
                 Type identifierType = symbolTable.getType(identifier.getName());
@@ -90,6 +90,15 @@ public class TypeChecker {
                                 Type boolType = new BooleanType();
                                 binaryOp.setType(boolType);
                                 yield Optional.of(boolType);
+                            } else if (operator.getText().equals("and") || operator.getText().equals("or")) {
+                                if (leftType.get() instanceof BooleanType && rightType.get() instanceof BooleanType) {
+                                    Type booleanType = new BooleanType();
+                                    binaryOp.setType(booleanType);
+                                    yield Optional.of(booleanType);
+                                } else {
+                                    throw new TypeCheckerException("Expected a Boolean type for '" + operator.getText()
+                                            + "' operator. Instead found " + leftType + ", " + rightType);
+                                }
                             } else {
                                 throw new TypeCheckerException("Expected an Int type for '" + operator.getText()
                                         + "' operator. Instead found " + leftType + ", " + rightType);
@@ -161,9 +170,11 @@ public class TypeChecker {
                 Optional<Type> operandType = checkType(unaryOp.getExpression(), symbolTable);
                 if (unaryOp.getOperator().getText().equals("-") && operandType.get() instanceof IntType) {
                     Type intType = new IntType();
+                    unaryOp.setType(intType);
                     return Optional.of(intType);
                 } else if (unaryOp.getOperator().getText().equals("not") && operandType.get() instanceof BooleanType) {
                     Type boolType = new BooleanType();
+                    unaryOp.setType(boolType);
                     return Optional.of(boolType);
                 }
                 throw new TypeCheckerException("Invalid unary operation");
