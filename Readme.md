@@ -94,7 +94,7 @@ These are the main parts of the implementation stages/progress of the compiler.
   - [x] If then else blocks
   - [x] Comparison operators (=, ==, !=, <=, >=, >, <, and, or)
   - [x] While block
-  - [ ] Function call
-  - [ ] Type declaration
+  - [x] Function call
+  - [x] Type declaration
 - [ ] Assembly Generator
 - [ ] Analysis & Optimization
