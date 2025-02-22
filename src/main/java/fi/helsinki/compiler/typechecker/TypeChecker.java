@@ -43,7 +43,8 @@ public class TypeChecker {
                     }
                 }
                 symbolTable.putType(key, valueType.get());
-                return Optional.of(new UnitType());
+                variableDef.setType(valueType.get());
+                return Optional.of(valueType.get());
             }
             case Identifier identifier: {
                 Type identifierType = symbolTable.getType(identifier.getName());

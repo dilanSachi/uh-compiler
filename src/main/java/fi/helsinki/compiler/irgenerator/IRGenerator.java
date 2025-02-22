@@ -23,6 +23,15 @@ public class IRGenerator {
     private void setPredefinedVariableTypes() {
         createVariable(new AdditionType());
         createVariable(new GreaterThanType());
+        createVariable(new GreaterThanOrEqualType());
+        createVariable(new LessThanOrEqualType());
+        createVariable(new LessThanType());
+        createVariable(new SubtractionType());
+        createVariable(new MultiplicationType());
+        createVariable(new DivisionType());
+        createVariable(new ModulusType());
+        createVariable(new AndType());
+        createVariable(new OrType());
     }
 
     public List<Instruction> generateIR(Expression rootExpression) throws IRGenerationException {
@@ -63,6 +72,12 @@ public class IRGenerator {
             }
             case BinaryOp binaryOp: {
                 Token operator = binaryOp.getOperator();
+                if (operator.getText().equals("=")) {
+                    IRVariable variable = visit(binaryOp.getRight(), symbolTable);
+                    IRVariable identifier = symbolTable.getVariable(((Identifier) binaryOp.getLeft()).getName());
+                    instructions.add(new Copy(variable, identifier, binaryOp.getLeft().getLocation()));
+                    return identifier;
+                }
                 IRVariable operatorVariable = symbolTable.getVariable(operator.getText());
                 IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
                 IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
@@ -123,6 +138,13 @@ public class IRGenerator {
                 instructions.add(new Jump(startLabel, whileOp.getBody().getLocation()));
                 instructions.add(endLabel);
                 return createVariable(new UnitType());
+            }
+            case VariableDef variableDef: {
+                IRVariable rightSide = visit(variableDef.getValue(), symbolTable);
+                IRVariable leftSide = createVariable(variableDef.getType());
+                symbolTable.putVariable(variableDef.getName(), leftSide);
+                instructions.add(new Copy(rightSide, leftSide, variableDef.getLocation()));
+                return leftSide;
             }
             default: {
 

@@ -1,8 +1,6 @@
 package fi.helsinki.compiler.irgenerator;
 
 import fi.helsinki.compiler.common.expressions.Expression;
-import fi.helsinki.compiler.common.types.Type;
-import fi.helsinki.compiler.common.types.UnitType;
 import fi.helsinki.compiler.exceptions.IRGenerationException;
 import fi.helsinki.compiler.exceptions.ParserException;
 import fi.helsinki.compiler.exceptions.TypeCheckerException;
@@ -14,10 +12,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IRGeneratorTests {
 
@@ -31,10 +27,10 @@ public class IRGeneratorTests {
         List<Instruction> instructions = irGenerator.generateIR(expression);
         assertEquals(instructions.size(), 5);
         assertEquals(instructions.get(0).toString(), "Label(start)");
-        assertEquals(instructions.get(1).toString(), "LoadIntConst(1,x2)");
-        assertEquals(instructions.get(2).toString(), "LoadIntConst(2,x3)");
-        assertEquals(instructions.get(3).toString(), "Call(+,[x2, x3],x4)");
-        assertEquals(instructions.get(4).toString(), "Call(print_int,[x4],x6)");
+        assertEquals(instructions.get(1).toString(), "LoadIntConst(1,x11)");
+        assertEquals(instructions.get(2).toString(), "LoadIntConst(2,x12)");
+        assertEquals(instructions.get(3).toString(), "Call(+,[x11, x12],x13)");
+        assertEquals(instructions.get(4).toString(), "Call(print_int,[x13],x15)");
     }
 
     @Test
@@ -47,23 +43,23 @@ public class IRGeneratorTests {
         List<Instruction> instructions = irGenerator.generateIR(expression);
         assertEquals(instructions.size(), 18);
         assertEquals(instructions.get(0).toString(), "Label(start)");
-        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x2)");
-        assertEquals(instructions.get(2).toString(), "LoadIntConst(12,x3)");
-        assertEquals(instructions.get(3).toString(), "Call(>,[x2, x3],x4)");
-        assertEquals(instructions.get(4).toString(), "CondJump(x4,Label(then),Label(else))");
+        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
+        assertEquals(instructions.get(2).toString(), "LoadIntConst(12,x12)");
+        assertEquals(instructions.get(3).toString(), "Call(>,[x11, x12],x13)");
+        assertEquals(instructions.get(4).toString(), "CondJump(x13,Label(then),Label(else))");
         assertEquals(instructions.get(5).toString(), "Label(then)");
-        assertEquals(instructions.get(6).toString(), "LoadIntConst(1,x6)");
-        assertEquals(instructions.get(7).toString(), "LoadIntConst(1,x7)");
-        assertEquals(instructions.get(8).toString(), "Call(+,[x6, x7],x8)");
-        assertEquals(instructions.get(9).toString(), "Copy(x8,x5)");
+        assertEquals(instructions.get(6).toString(), "LoadIntConst(1,x15)");
+        assertEquals(instructions.get(7).toString(), "LoadIntConst(1,x16)");
+        assertEquals(instructions.get(8).toString(), "Call(+,[x15, x16],x17)");
+        assertEquals(instructions.get(9).toString(), "Copy(x17,x14)");
         assertEquals(instructions.get(10).toString(), "Jump(Label(end))");
         assertEquals(instructions.get(11).toString(), "Label(else)");
-        assertEquals(instructions.get(12).toString(), "LoadIntConst(2,x9)");
-        assertEquals(instructions.get(13).toString(), "LoadIntConst(3,x10)");
-        assertEquals(instructions.get(14).toString(), "Call(+,[x9, x10],x11)");
-        assertEquals(instructions.get(15).toString(), "Copy(x11,x5)");
+        assertEquals(instructions.get(12).toString(), "LoadIntConst(2,x18)");
+        assertEquals(instructions.get(13).toString(), "LoadIntConst(3,x19)");
+        assertEquals(instructions.get(14).toString(), "Call(+,[x18, x19],x20)");
+        assertEquals(instructions.get(15).toString(), "Copy(x20,x14)");
         assertEquals(instructions.get(16).toString(), "Label(end)");
-        assertEquals(instructions.get(17).toString(), "Call(print_int,[x5],x13)");
+        assertEquals(instructions.get(17).toString(), "Call(print_int,[x14],x22)");
     }
 
     @Test
@@ -76,21 +72,21 @@ public class IRGeneratorTests {
         List<Instruction> instructions = irGenerator.generateIR(expression);
         assertEquals(instructions.size(), 17);
         assertEquals(instructions.get(0).toString(), "Label(start)");
-        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x2)");
-        assertEquals(instructions.get(2).toString(), "LoadIntConst(12,x3)");
-        assertEquals(instructions.get(3).toString(), "Call(>,[x2, x3],x4)");
-        assertEquals(instructions.get(4).toString(), "CondJump(x4,Label(then),Label(else))");
+        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
+        assertEquals(instructions.get(2).toString(), "LoadIntConst(12,x12)");
+        assertEquals(instructions.get(3).toString(), "Call(>,[x11, x12],x13)");
+        assertEquals(instructions.get(4).toString(), "CondJump(x13,Label(then),Label(else))");
         assertEquals(instructions.get(5).toString(), "Label(then)");
-        assertEquals(instructions.get(6).toString(), "LoadIntConst(1,x6)");
-        assertEquals(instructions.get(7).toString(), "LoadIntConst(1,x7)");
-        assertEquals(instructions.get(8).toString(), "Call(+,[x6, x7],x8)");
-        assertEquals(instructions.get(9).toString(), "Copy(x9,x5)");
+        assertEquals(instructions.get(6).toString(), "LoadIntConst(1,x15)");
+        assertEquals(instructions.get(7).toString(), "LoadIntConst(1,x16)");
+        assertEquals(instructions.get(8).toString(), "Call(+,[x15, x16],x17)");
+        assertEquals(instructions.get(9).toString(), "Copy(x18,x14)");
         assertEquals(instructions.get(10).toString(), "Jump(Label(end))");
         assertEquals(instructions.get(11).toString(), "Label(else)");
-        assertEquals(instructions.get(12).toString(), "LoadIntConst(2,x10)");
-        assertEquals(instructions.get(13).toString(), "LoadIntConst(3,x11)");
-        assertEquals(instructions.get(14).toString(), "Call(+,[x10, x11],x12)");
-        assertEquals(instructions.get(15).toString(), "Copy(x13,x5)");
+        assertEquals(instructions.get(12).toString(), "LoadIntConst(2,x19)");
+        assertEquals(instructions.get(13).toString(), "LoadIntConst(3,x20)");
+        assertEquals(instructions.get(14).toString(), "Call(+,[x19, x20],x21)");
+        assertEquals(instructions.get(15).toString(), "Copy(x22,x14)");
         assertEquals(instructions.get(16).toString(), "Label(end)");
     }
 
@@ -104,14 +100,14 @@ public class IRGeneratorTests {
         List<Instruction> instructions = irGenerator.generateIR(expression);
         assertEquals(instructions.size(), 10);
         assertEquals(instructions.get(0).toString(), "Label(start)");
-        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x2)");
-        assertEquals(instructions.get(2).toString(), "LoadIntConst(12,x3)");
-        assertEquals(instructions.get(3).toString(), "Call(>,[x2, x3],x4)");
-        assertEquals(instructions.get(4).toString(), "CondJump(x4,Label(then),Label(end))");
+        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
+        assertEquals(instructions.get(2).toString(), "LoadIntConst(12,x12)");
+        assertEquals(instructions.get(3).toString(), "Call(>,[x11, x12],x13)");
+        assertEquals(instructions.get(4).toString(), "CondJump(x13,Label(then),Label(end))");
         assertEquals(instructions.get(5).toString(), "Label(then)");
-        assertEquals(instructions.get(6).toString(), "LoadIntConst(1,x5)");
-        assertEquals(instructions.get(7).toString(), "LoadIntConst(1,x6)");
-        assertEquals(instructions.get(8).toString(), "Call(+,[x5, x6],x7)");
+        assertEquals(instructions.get(6).toString(), "LoadIntConst(1,x14)");
+        assertEquals(instructions.get(7).toString(), "LoadIntConst(1,x15)");
+        assertEquals(instructions.get(8).toString(), "Call(+,[x14, x15],x16)");
         assertEquals(instructions.get(9).toString(), "Label(end)");
     }
 
@@ -126,16 +122,68 @@ public class IRGeneratorTests {
         assertEquals(instructions.size(), 12);
         assertEquals(instructions.get(0).toString(), "Label(start)");
         assertEquals(instructions.get(1).toString(), "Label(while_start)");
-        assertEquals(instructions.get(2).toString(), "LoadIntConst(3,x2)");
-        assertEquals(instructions.get(3).toString(), "LoadIntConst(12,x3)");
-        assertEquals(instructions.get(4).toString(), "Call(>,[x2, x3],x4)");
-        assertEquals(instructions.get(5).toString(), "CondJump(x4,Label(do),Label(end))");
+        assertEquals(instructions.get(2).toString(), "LoadIntConst(3,x11)");
+        assertEquals(instructions.get(3).toString(), "LoadIntConst(12,x12)");
+        assertEquals(instructions.get(4).toString(), "Call(>,[x11, x12],x13)");
+        assertEquals(instructions.get(5).toString(), "CondJump(x13,Label(do),Label(end))");
         assertEquals(instructions.get(6).toString(), "Label(do)");
-        assertEquals(instructions.get(7).toString(), "LoadIntConst(1,x5)");
-        assertEquals(instructions.get(8).toString(), "LoadIntConst(1,x6)");
-        assertEquals(instructions.get(9).toString(), "Call(+,[x5, x6],x7)");
+        assertEquals(instructions.get(7).toString(), "LoadIntConst(1,x14)");
+        assertEquals(instructions.get(8).toString(), "LoadIntConst(1,x15)");
+        assertEquals(instructions.get(9).toString(), "Call(+,[x14, x15],x16)");
         assertEquals(instructions.get(10).toString(), "Jump(Label(while_start))");
         assertEquals(instructions.get(11).toString(), "Label(end)");
+    }
+
+    @Test @Disabled
+    public void testVariableDefinition() throws ParserException, TypeCheckerException, IRGenerationException {
+        Parser parser = new Parser(new Tokenizer().tokenize("var x:Int = 3;", "TestFile.dl"));
+        TypeChecker typeChecker = new TypeChecker();
+        Expression expression = parser.parse();
+        typeChecker.checkType(expression);
+        IRGenerator irGenerator = new IRGenerator();
+        List<Instruction> instructions = irGenerator.generateIR(expression);
+        assertEquals(instructions.size(), 3);
+        assertEquals(instructions.get(0).toString(), "Label(start)");
+        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
+        assertEquals(instructions.get(2).toString(), "Copy(x11,x12)");
+    }
+
+    @Test
+    public void testEquals() throws ParserException, TypeCheckerException, IRGenerationException {
+        Parser parser = new Parser(new Tokenizer().tokenize("var x:Int = 3; x = 2 + 3", "TestFile.dl"));
+        TypeChecker typeChecker = new TypeChecker();
+        Expression expression = parser.parse();
+        typeChecker.checkType(expression);
+        IRGenerator irGenerator = new IRGenerator();
+        List<Instruction> instructions = irGenerator.generateIR(expression);
+        assertEquals(instructions.size(), 8);
+        assertEquals(instructions.get(0).toString(), "Label(start)");
+        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
+        assertEquals(instructions.get(2).toString(), "Copy(x11,x12)");
+        assertEquals(instructions.get(3).toString(), "LoadIntConst(2,x13)");
+        assertEquals(instructions.get(4).toString(), "LoadIntConst(3,x14)");
+        assertEquals(instructions.get(5).toString(), "Call(+,[x13, x14],x15)");
+        assertEquals(instructions.get(6).toString(), "Copy(x15,x12)");
+        assertEquals(instructions.get(7).toString(), "Call(print_int,[x12],x17)");
+    }
+
+    @Test @Disabled
+    public void testEqualsWithEnd() throws ParserException, TypeCheckerException, IRGenerationException {
+        Parser parser = new Parser(new Tokenizer().tokenize("var x:Int = 3; x = 2 + 3;", "TestFile.dl"));
+        TypeChecker typeChecker = new TypeChecker();
+        Expression expression = parser.parse();
+        typeChecker.checkType(expression);
+        IRGenerator irGenerator = new IRGenerator();
+        List<Instruction> instructions = irGenerator.generateIR(expression);
+        assertEquals(instructions.size(), 7);
+        assertEquals(instructions.get(0).toString(), "Label(start)");
+        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
+        assertEquals(instructions.get(2).toString(), "Copy(x11,x12)");
+        assertEquals(instructions.get(3).toString(), "LoadIntConst(2,x13)");
+        assertEquals(instructions.get(4).toString(), "LoadIntConst(3,x14)");
+        assertEquals(instructions.get(5).toString(), "Call(+,[x13, x14],x15)");
+        assertEquals(instructions.get(6).toString(), "Copy(x15,x12)");
+        assertEquals(instructions.get(7).toString(), "Call(print_int,[x12],x17)");
     }
 
     @Test @Disabled
@@ -157,14 +205,14 @@ public class IRGeneratorTests {
         List<Instruction> instructions = irGenerator.generateIR(expression);
         assertEquals(instructions.size(), 10);
         assertEquals(instructions.get(0).toString(), "Label(start)");
-        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x2)");
-        assertEquals(instructions.get(2).toString(), "LoadIntConst(12,x3)");
-        assertEquals(instructions.get(3).toString(), "Call(>,[x2, x3],x4)");
-        assertEquals(instructions.get(4).toString(), "CondJump(x4,Label(then),Label(end))");
+        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
+        assertEquals(instructions.get(2).toString(), "LoadIntConst(12,x12)");
+        assertEquals(instructions.get(3).toString(), "Call(>,[x11, x12],x13)");
+        assertEquals(instructions.get(4).toString(), "CondJump(x13,Label(then),Label(end))");
         assertEquals(instructions.get(5).toString(), "Label(then)");
-        assertEquals(instructions.get(6).toString(), "LoadIntConst(1,x5)");
-        assertEquals(instructions.get(7).toString(), "LoadIntConst(1,x6)");
-        assertEquals(instructions.get(8).toString(), "Call(+,[x5, x6],x7)");
+        assertEquals(instructions.get(6).toString(), "LoadIntConst(1,x14)");
+        assertEquals(instructions.get(7).toString(), "LoadIntConst(1,x15)");
+        assertEquals(instructions.get(8).toString(), "Call(+,[x14, x15],x16)");
         assertEquals(instructions.get(9).toString(), "Label(end)");
     }
 }
