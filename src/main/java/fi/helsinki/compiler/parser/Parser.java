@@ -49,7 +49,7 @@ public class Parser {
             throw new ParserException(peek().getTokenLocation() + ": expected an integer literal");
         }
         Token token = consume();
-        return new IntLiteral(Integer.valueOf(token.getText()), token.getTokenLocation());
+        return new IntLiteral(Long.valueOf(token.getText()), token.getTokenLocation());
     }
 
     private FunctionCall parseFunctionCall(Token functionNameToken) throws ParserException {

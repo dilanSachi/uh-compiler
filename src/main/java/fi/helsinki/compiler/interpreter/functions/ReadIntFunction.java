@@ -15,7 +15,7 @@ public class ReadIntFunction extends FunctionDefinition {
     public Value invoke(Value... values) throws InterpreterException {
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
-        return new IntValue(Integer.valueOf(input.replace("\n", "")));
+        return new IntValue(Long.valueOf(input.replace("\n", "")));
     }
 
     @Override

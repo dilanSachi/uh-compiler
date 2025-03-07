@@ -22,8 +22,8 @@ public class TypeCheckerTests {
 
     @Test
     public void testBasicAddition() throws TypeCheckerException {
-        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1, null),
-                new Token("+", TokenType.OPERATOR, null), new IntLiteral(2, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1L, null),
+                new Token("+", TokenType.OPERATOR, null), new IntLiteral(2L, null), null);
         TypeChecker typeChecker = new TypeChecker();
         Optional<Type> result = typeChecker.checkType(binaryOp);
         assertTrue(result.get() instanceof IntType);
@@ -31,8 +31,8 @@ public class TypeCheckerTests {
 
     @Test
     public void testBasicSubtraction() throws TypeCheckerException {
-        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1, null),
-                new Token("-", TokenType.OPERATOR, null), new IntLiteral(2, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1L, null),
+                new Token("-", TokenType.OPERATOR, null), new IntLiteral(2L, null), null);
         TypeChecker typeChecker = new TypeChecker();
         Optional<Type> result = typeChecker.checkType(binaryOp);
         assertTrue(result.get() instanceof IntType);
@@ -40,8 +40,8 @@ public class TypeCheckerTests {
 
     @Test
     public void testBasicMultiplication() throws TypeCheckerException {
-        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1, null),
-                new Token("*", TokenType.OPERATOR, null), new IntLiteral(2, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1L, null),
+                new Token("*", TokenType.OPERATOR, null), new IntLiteral(2L, null), null);
         TypeChecker typeChecker = new TypeChecker();
         Optional<Type> result = typeChecker.checkType(binaryOp);
         assertTrue(result.get() instanceof IntType);
@@ -49,8 +49,8 @@ public class TypeCheckerTests {
 
     @Test
     public void testBasicDivision() throws TypeCheckerException {
-        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1, null),
-                new Token("/", TokenType.OPERATOR, null), new IntLiteral(2, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1L, null),
+                new Token("/", TokenType.OPERATOR, null), new IntLiteral(2L, null), null);
         TypeChecker typeChecker = new TypeChecker();
         Optional<Type> result = typeChecker.checkType(binaryOp);
         assertTrue(result.get() instanceof IntType);
@@ -58,8 +58,8 @@ public class TypeCheckerTests {
 
     @Test
     public void testBasicModulus() throws TypeCheckerException {
-        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1, null),
-                new Token("%", TokenType.OPERATOR, null), new IntLiteral(2, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1L, null),
+                new Token("%", TokenType.OPERATOR, null), new IntLiteral(2L, null), null);
         TypeChecker typeChecker = new TypeChecker();
         Optional<Type> result = typeChecker.checkType(binaryOp);
         assertTrue(result.get() instanceof IntType);

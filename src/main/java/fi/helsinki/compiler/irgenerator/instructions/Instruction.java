@@ -10,4 +10,12 @@ public abstract class Instruction {
         this.location = location;
         this.name = name;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
 }

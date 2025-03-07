@@ -2,13 +2,13 @@ package fi.helsinki.compiler.interpreter;
 
 public class IntValue extends Value {
 
-    private Integer intValue;
+    private Long intValue;
 
-    public IntValue(Integer intValue) {
+    public IntValue(Long intValue) {
         this.intValue = intValue;
     }
 
-    public Integer getIntValue() {
+    public Long getIntValue() {
         return intValue;
     }
 

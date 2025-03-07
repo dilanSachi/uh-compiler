@@ -4,14 +4,14 @@ import fi.helsinki.compiler.common.Location;
 
 public class IntLiteral extends Literal {
 
-    private Integer value;
+    private Long value;
 
-    public IntLiteral(Integer value, Location location) {
+    public IntLiteral(Long value, Location location) {
         super(location);
         this.value = value;
     }
 
-    public Integer getValue() {
+    public Long getValue() {
         return value;
     }
 }

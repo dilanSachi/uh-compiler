@@ -34,8 +34,8 @@ public class InterpreterTests {
 
     @Test
     public void testBasicAddition() throws InterpreterException {
-        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1, null),
-                new Token("+", TokenType.OPERATOR, null), new IntLiteral(2, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1L, null),
+                new Token("+", TokenType.OPERATOR, null), new IntLiteral(2L, null), null);
         Interpreter interpreter = new Interpreter();
         Value result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), 3);
@@ -43,8 +43,8 @@ public class InterpreterTests {
 
     @Test
     public void testBasicSubtraction() throws InterpreterException {
-        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1, null),
-                new Token("-", TokenType.OPERATOR, null), new IntLiteral(2, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(1L, null),
+                new Token("-", TokenType.OPERATOR, null), new IntLiteral(2L, null), null);
         Interpreter interpreter = new Interpreter();
         Value result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), -1);
@@ -52,8 +52,8 @@ public class InterpreterTests {
 
     @Test
     public void testBasicMultiplication() throws InterpreterException {
-        BinaryOp binaryOp = new BinaryOp(new IntLiteral(100, null),
-                new Token("*", TokenType.OPERATOR, null), new IntLiteral(120, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(100L, null),
+                new Token("*", TokenType.OPERATOR, null), new IntLiteral(120L, null), null);
         Interpreter interpreter = new Interpreter();
         Value result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), 12000);
@@ -61,8 +61,8 @@ public class InterpreterTests {
 
     @Test
     public void testBasicDivision() throws InterpreterException {
-        BinaryOp binaryOp = new BinaryOp(new IntLiteral(140, null),
-                new Token("/", TokenType.OPERATOR, null), new IntLiteral(7, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(140L, null),
+                new Token("/", TokenType.OPERATOR, null), new IntLiteral(7L, null), null);
         Interpreter interpreter = new Interpreter();
         Value result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), 20);
@@ -70,14 +70,14 @@ public class InterpreterTests {
 
     @Test
     public void testBasicModulus() throws InterpreterException {
-        BinaryOp binaryOp = new BinaryOp(new IntLiteral(140, null),
-                new Token("%", TokenType.OPERATOR, null), new IntLiteral(7, null), null);
+        BinaryOp binaryOp = new BinaryOp(new IntLiteral(140L, null),
+                new Token("%", TokenType.OPERATOR, null), new IntLiteral(7L, null), null);
         Interpreter interpreter = new Interpreter();
         Value result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), 0);
 
-        binaryOp = new BinaryOp(new IntLiteral(143, null),
-                new Token("%", TokenType.OPERATOR, null), new IntLiteral(7, null), null);
+        binaryOp = new BinaryOp(new IntLiteral(143L, null),
+                new Token("%", TokenType.OPERATOR, null), new IntLiteral(7L, null), null);
         interpreter = new Interpreter();
         result = interpreter.interpretAST(binaryOp);
         assertEquals(((IntValue) result).getIntValue(), 3);
