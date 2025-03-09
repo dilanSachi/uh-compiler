@@ -13,6 +13,14 @@ public class Copy extends Instruction {
         this.destination = destination;
     }
 
+    public IRVariable getSource() {
+        return source;
+    }
+
+    public IRVariable getDestination() {
+        return destination;
+    }
+
     @Override
     public String toString() {
         return name + "(" + source + "," + destination + ")";

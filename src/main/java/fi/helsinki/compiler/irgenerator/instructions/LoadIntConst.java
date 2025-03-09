@@ -17,6 +17,10 @@ public class LoadIntConst extends Instruction {
         return value;
     }
 
+    public IRVariable getDestination() {
+        return destination;
+    }
+
     @Override
     public String toString() {
         return name + "(" + value + "," + destination + ")";

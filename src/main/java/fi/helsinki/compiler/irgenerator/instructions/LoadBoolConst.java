@@ -13,6 +13,14 @@ public class LoadBoolConst extends Instruction {
         this.destination = destination;
     }
 
+    public boolean getValue() {
+        return value;
+    }
+
+    public IRVariable getDestination() {
+        return destination;
+    }
+
     @Override
     public String toString() {
         return name + "(" + value + "," + destination + ")";

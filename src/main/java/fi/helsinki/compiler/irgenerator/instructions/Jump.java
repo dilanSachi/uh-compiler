@@ -13,6 +13,10 @@ public class Jump extends Instruction {
         this.label = label;
     }
 
+    public Label getLabel() {
+        return label;
+    }
+
     @Override
     public String toString() {
         return name + "(" + label + ")";

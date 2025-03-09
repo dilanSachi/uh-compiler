@@ -25,6 +25,10 @@ public class Label extends Instruction {
         labelSet.clear();
     }
 
+    public String getLabelName() {
+        return label;
+    }
+
     @Override
     public String toString() {
         return name + "(" + label + ")";

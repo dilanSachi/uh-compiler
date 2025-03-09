@@ -13,13 +13,16 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class AssemblyGeneratorTests {
 
     @Test
     public void testBasic() throws ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException {
-        List<Instruction> instructions = generateInstructions("1 + 2");
+        List<Instruction> instructions = generateInstructions("{ var x = true; if x then {1} else {2}; }");
         AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
-        assemblyGenerator.generateAssembly(instructions);
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals("", assemblyCode);
     }
 
     private List<Instruction> generateInstructions(String sourceCode) throws ParserException, TypeCheckerException,

@@ -2,12 +2,13 @@ package fi.helsinki.compiler.assemblygen;
 
 import fi.helsinki.compiler.irgenerator.IRVariable;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Locals {
 
-    private Map<IRVariable, String> variableToLocationMap;
+    private Map<IRVariable, String> variableToLocationMap = new HashMap<>();
     private int stackUsed = 0;
 
     public Locals(List<IRVariable> irVariables) {
@@ -22,6 +23,6 @@ public class Locals {
     }
 
     public int getStackUsed() {
-        return stackUsed;
+        return -stackUsed;
     }
 }

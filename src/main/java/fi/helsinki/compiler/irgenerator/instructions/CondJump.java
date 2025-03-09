@@ -15,6 +15,18 @@ public class CondJump extends Instruction {
         this.elseLabel = elseLabel;
     }
 
+    public IRVariable getCondition() {
+        return condition;
+    }
+
+    public Label getThenLabel() {
+        return thenLabel;
+    }
+
+    public Label getElseLabel() {
+        return elseLabel;
+    }
+
     @Override
     public String toString() {
         return name + "(" + condition + "," + thenLabel + "," + elseLabel + ")";
