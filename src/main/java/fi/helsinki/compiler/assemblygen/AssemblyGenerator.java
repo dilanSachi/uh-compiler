@@ -64,6 +64,16 @@ public class AssemblyGenerator {
                     lines.add("jmp .L" + condJumpIns.getElseLabel().getLabelName());
                     break;
                 }
+                case Call callIns: {
+                    List<String> argRegisters = new ArrayList<>();
+                    IRVariable[] irVariables = callIns.getArguments();
+                    for (IRVariable irVariable : irVariables) {
+                        argRegisters.add(locals.getRef(irVariable));
+                    }
+                    IntrinsicAssemblyGenerator.generateIntrinsicAssemblyLines(lines,
+                            callIns.getFunction().getType().getTypeStr(), argRegisters, "%rax");
+                    lines.add("movq %rax, " + locals.getRef(callIns.getDestination()));
+                }
                 default: {}
             }
         }

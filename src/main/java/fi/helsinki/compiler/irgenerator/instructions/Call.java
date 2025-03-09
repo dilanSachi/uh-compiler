@@ -17,6 +17,18 @@ public class Call extends Instruction {
         this.destination = destination;
     }
 
+    public IRVariable getFunction() {
+        return function;
+    }
+
+    public IRVariable[] getArguments() {
+        return arguments;
+    }
+
+    public IRVariable getDestination() {
+        return destination;
+    }
+
     @Override
     public String toString() {
         return name + "(" + function.getType() + "," + String.join(",", Arrays.toString(arguments)) + "," + destination + ")";

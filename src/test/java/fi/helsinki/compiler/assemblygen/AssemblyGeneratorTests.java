@@ -18,7 +18,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class AssemblyGeneratorTests {
 
     @Test
-    public void testBasic() throws ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException {
+    public void testBasicAddition() throws ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException {
+        List<Instruction> instructions = generateInstructions("1 + 2;");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals("", assemblyCode);
+    }
+
+    @Test
+    public void testConditionalOperation() throws ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException {
         List<Instruction> instructions = generateInstructions("{ var x = true; if x then {1} else {2}; }");
         AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
         String assemblyCode = assemblyGenerator.generateAssembly(instructions);
