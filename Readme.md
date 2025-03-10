@@ -97,4 +97,7 @@ These are the main parts of the implementation stages/progress of the compiler.
   - [x] Function call
   - [x] Type declaration
 - [ ] Assembly Generator
+  - [ ] Operators
+  - [x] Assemble
+  - [x] Generate native executable
 - [ ] Analysis & Optimization

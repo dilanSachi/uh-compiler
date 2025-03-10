@@ -38,7 +38,7 @@ public class IRGenerator {
 
     public List<Instruction> generateIR(Expression rootExpression) throws IRGenerationException {
         instructions = new ArrayList<>();
-        instructions.add(new Label("start", rootExpression.getLocation()));
+//        instructions.add(new Label("start", rootExpression.getLocation()));
         SymbolTable rootSymbolTable = new SymbolTable(null);
         for (IRVariable key: variableTypeMap.keySet()) {
             rootSymbolTable.putVariable(key.getType().getTypeStr(), key);

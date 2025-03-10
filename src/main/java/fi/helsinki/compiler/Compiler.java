@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Compiler {
-    public static void main(String[] args) throws CompilationException, IOException, ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException {
+    public static void main(String[] args) throws CompilationException, IOException, ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException, InterruptedException {
         String command = null;
         String inputFile = null;
         String outputFile = null;
@@ -28,7 +28,7 @@ public class Compiler {
         int port;
         for (String arg : args) {
             if (arg.startsWith("--output=")) {
-                outputFile = arg.substring(8);
+                outputFile = arg.substring(9);
             } else if (arg.startsWith("--host=")) {
                 host = arg.substring(6);
             } else if (arg.startsWith("--port=")) {
@@ -51,25 +51,21 @@ public class Compiler {
             if (outputFile == null) {
                 throw new CompilationException("Output file flag --output=... required");
             }
-            byte[] executable = startCompilation(sourceCode);
+            startCompilation(sourceCode, outputFile);
         } else if (command.equals("serve")) {
 
         } else {
             throw new CompilationException("Invalid compilation command: " + command);
         }
-
     }
 
-    private static byte[]  startCompilation(String sourceCode) throws ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException {
+    private static void startCompilation(String sourceCode, String output) throws ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException, IOException, InterruptedException {
         Parser parser = new Parser(new Tokenizer().tokenize(sourceCode, "TestFile.dl"));
         TypeChecker typeChecker = new TypeChecker();
         Expression expression = parser.parse();
         typeChecker.checkType(expression);
-        IRGenerator irGenerator = new IRGenerator();
-        List<Instruction> instructions = irGenerator.generateIR(expression);
-        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
-        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
-        return new Assembler().assemble(assemblyCode);
+        List<Instruction> instructions = new IRGenerator().generateIR(expression);
+        new Assembler().assemble(new AssemblyGenerator().generateAssembly(instructions), output, "/home/dilansachi/Documents/compilation/", "tempfile", true, new String[]{});
     }
 
     private static String readSourceCode(String inputFilePath) throws IOException {

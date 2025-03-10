@@ -9,6 +9,12 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'fi.helsinki.compiler.Compiler'
+    }
+}
+
 apply plugin: 'jacoco'
 
 dependencies {

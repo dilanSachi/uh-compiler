@@ -22,7 +22,28 @@ public class AssemblyGeneratorTests {
         List<Instruction> instructions = generateInstructions("1 + 2;");
         AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
         String assemblyCode = assemblyGenerator.generateAssembly(instructions);
-        assertEquals("", assemblyCode);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                ".section .text\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $32, %rsp\n" +
+                "#LoadIntConst(1,x12)\n" +
+                "movq $1, -8(%rbp)\n" +
+                "#LoadIntConst(2,x13)\n" +
+                "movq $2, -16(%rbp)\n" +
+                "#Call(+,[x12, x13],x14)\n" +
+                "movq -8(%rbp), %rax\n" +
+                "addq -16(%rbp), %rax\n" +
+                "movq %rax, -32(%rbp)\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
     }
 
     @Test
@@ -40,9 +61,6 @@ public class AssemblyGeneratorTests {
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
                 "subq $40, %rsp\n" +
-                "#Label(start)\n" +
-                "\n" +
-                ".Lstart\n" +
                 "#LoadBoolConst(true,x12)\n" +
                 "movq $1, -8(%rbp)\n" +
                 "#Copy(x12,x13)\n" +
