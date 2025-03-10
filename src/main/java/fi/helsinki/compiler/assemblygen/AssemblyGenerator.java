@@ -33,7 +33,7 @@ public class AssemblyGenerator {
             switch (instruction) {
                 case Label labelIns: {
                     lines.add("");
-                    lines.add(".L" + labelIns.getLabelName());
+                    lines.add(".L" + labelIns.getLabelName() + ":");
                     break;
                 }
                 case LoadIntConst intConstIns: {

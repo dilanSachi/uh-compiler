@@ -1,9 +1,12 @@
 package fi.helsinki.compiler.assemblygen;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.Timestamp;
+import java.util.Date;
 
 public class Assembler {
 
@@ -23,13 +26,15 @@ public class Assembler {
         if (workDirectory != null) {
             workDirectory = Path.of(workDirectory).toAbsolutePath().toString();
         } else {
-            workDirectory = Path.of(System.getProperty("java.io.tmpdir")).toAbsolutePath().toString();
+            File file = new File(System.getProperty("java.io.tmpdir"), "compiler_" + System.currentTimeMillis());
+            file.mkdir();
+            workDirectory = file.getAbsolutePath();
         }
         Path stdlibAsm = Path.of(workDirectory, "stdlib.s");
         String stdlibObj = Path.of(workDirectory, "stdlib.o").toString();
         Path programAsm = Path.of(workDirectory, tempfileBasename + ".s");
         String programObj = Path.of(workDirectory, tempfileBasename + ".o").toString();
-        String outputFile = Path.of(workDirectory, "a.out").toString();
+        String outputFile = Path.of(workDirectory, "executable.out").toString();
         String finalStdlibAsmCode;
         if (linkWithC) {
             finalStdlibAsmCode = stdlibAsmCode.split("# BEGIN START")[0] + stdlibAsmCode.split("# END START")[1];

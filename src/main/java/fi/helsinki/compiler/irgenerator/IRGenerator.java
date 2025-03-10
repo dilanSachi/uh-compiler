@@ -32,7 +32,7 @@ public class IRGenerator {
         createVariable(new DivisionType());
         createVariable(new ModulusType());
         createVariable(new FunctionType("print_int", new UnitType(), new IntType()));
-        createVariable(new FunctionType("print_boolean", new UnitType(), new BooleanType()));
+        createVariable(new FunctionType("print_bool", new UnitType(), new BooleanType()));
         createVariable(new FunctionType("read_int", new IntType(), new UnitType()));
     }
 

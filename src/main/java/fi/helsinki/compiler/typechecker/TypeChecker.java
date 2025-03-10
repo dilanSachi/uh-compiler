@@ -199,8 +199,8 @@ public class TypeChecker {
     public Optional<Type> checkType(Expression expression) throws TypeCheckerException {
         SymbolTable symbolTable = new SymbolTable(null);
         symbolTable.putType("print_int", new FunctionType("print_int", new UnitType(), new IntType()));
-        symbolTable.putType("print_boolean", new FunctionType("print_boolean", new UnitType(), new BooleanType()));
-        symbolTable.putType("read_int", new FunctionType("read_int", new IntType(), new UnitType()));
+        symbolTable.putType("print_bool", new FunctionType("print_bool", new UnitType(), new BooleanType()));
+        symbolTable.putType("read_int", new FunctionType("read_int", new IntType()));
         return checkType(expression, symbolTable);
     }
 }
