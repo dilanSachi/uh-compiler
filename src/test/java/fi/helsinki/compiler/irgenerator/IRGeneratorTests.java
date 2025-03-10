@@ -5,6 +5,7 @@ import fi.helsinki.compiler.exceptions.IRGenerationException;
 import fi.helsinki.compiler.exceptions.ParserException;
 import fi.helsinki.compiler.exceptions.TypeCheckerException;
 import fi.helsinki.compiler.irgenerator.instructions.Instruction;
+import fi.helsinki.compiler.irgenerator.instructions.Label;
 import fi.helsinki.compiler.parser.Parser;
 import fi.helsinki.compiler.tokenizer.Tokenizer;
 import fi.helsinki.compiler.typechecker.TypeChecker;
@@ -20,6 +21,7 @@ public class IRGeneratorTests {
     @Test
     public void testBasicAddition() throws ParserException, TypeCheckerException, IRGenerationException {
         List<Instruction> instructions = generateInstructions("1 + 2");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 5);
         assertEquals(instructions.get(0).toString(), "Label(start)");
         assertEquals(instructions.get(1).toString(), "LoadIntConst(1,x12)");
@@ -31,6 +33,7 @@ public class IRGeneratorTests {
     @Test
     public void testIfElseBlock() throws ParserException, TypeCheckerException, IRGenerationException {
         List<Instruction> instructions = generateInstructions("if 3 > 12 then {1 + 1} else {2 + 3}");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 18);
         assertEquals(instructions.get(0).toString(), "Label(start)");
         assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x12)");
@@ -55,6 +58,7 @@ public class IRGeneratorTests {
     @Test
     public void testIfElseBlockWithoutReturn() throws ParserException, TypeCheckerException, IRGenerationException {
         List<Instruction> instructions = generateInstructions("if 3 > 12 then {1 + 1;} else {2 + 3;}");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 17);
         assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
@@ -78,6 +82,7 @@ public class IRGeneratorTests {
     @Test
     public void testIfBlock() throws ParserException, TypeCheckerException, IRGenerationException {
         List<Instruction> instructions = generateInstructions("if 3 > 12 then {1 + 1}");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 10);
         assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
@@ -94,6 +99,7 @@ public class IRGeneratorTests {
     @Test
     public void testWhileBlock() throws ParserException, TypeCheckerException, IRGenerationException {
         List<Instruction> instructions = generateInstructions("while 3 > 12 do {1 + 1}");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 12);
         assertEquals(instructions.get(0).toString(), "Label(start)");
         assertEquals(instructions.get(1).toString(), "Label(while_start)");
@@ -112,6 +118,7 @@ public class IRGeneratorTests {
     @Test
     public void testVariableDefinition() throws ParserException, TypeCheckerException, IRGenerationException {
         List<Instruction> instructions = generateInstructions("var x:Int = 3;");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 3);
         assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
@@ -121,6 +128,7 @@ public class IRGeneratorTests {
     @Test
     public void testEquals() throws ParserException, TypeCheckerException, IRGenerationException {
         List<Instruction> instructions = generateInstructions("var x:Int = 3; x = 2 + 3");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 8);
         assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
@@ -135,6 +143,7 @@ public class IRGeneratorTests {
     @Test
     public void testEqualsWithEnd() throws ParserException, TypeCheckerException, IRGenerationException {
         List<Instruction> instructions = generateInstructions("var x:Int = 3; x = 2 + 3;");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 7);
         assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadIntConst(3,x11)");
@@ -148,6 +157,7 @@ public class IRGeneratorTests {
     @Test
     public void testUnaryOps() throws ParserException, TypeCheckerException, IRGenerationException {
         List<Instruction> instructions = generateInstructions("-2");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 4);
         assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadIntConst(2,x11)");
@@ -155,18 +165,21 @@ public class IRGeneratorTests {
 //        assertEquals(instructions.get(3).toString(), "Call(print_int,[x12],x15)");
 
         instructions = generateInstructions("-2;");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 3);
         assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadIntConst(2,x11)");
 //        assertEquals(instructions.get(2).toString(), "Call(unary_-,[x11],x12)");
 
         instructions = generateInstructions("not true;");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 3);
         assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadBoolConst(true,x11)");
 //        assertEquals(instructions.get(2).toString(), "Call(not,[x11],x12)");
 
         instructions = generateInstructions("not false");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 4);
         assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadBoolConst(false,x11)");
@@ -177,6 +190,7 @@ public class IRGeneratorTests {
     @Test
     public void testAndOrOps() throws ParserException, TypeCheckerException, IRGenerationException {
         List<Instruction> instructions = generateInstructions("true and true");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 12);
 //        assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadIntConst(2,x11)");
@@ -184,18 +198,21 @@ public class IRGeneratorTests {
 //        assertEquals(instructions.get(3).toString(), "Call(print_int,[x12],x15)");
 
         instructions = generateInstructions("true and false;");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 11);
 //        assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadIntConst(2,x11)");
 //        assertEquals(instructions.get(2).toString(), "Call(unary_-,[x11],x12)");
 
         instructions = generateInstructions("true or true");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 12);
 //        assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadBoolConst(true,x11)");
 //        assertEquals(instructions.get(2).toString(), "Call(not,[x11],x12)");
 
         instructions = generateInstructions("true or false;");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 11);
 //        assertEquals(instructions.get(0).toString(), "Label(start)");
 //        assertEquals(instructions.get(1).toString(), "LoadBoolConst(false,x11)");
@@ -215,6 +232,7 @@ public class IRGeneratorTests {
                 "         e = e % 10;\na = a - 1;b = b + 1;" +
                 "    }\n" +
                 "}print_int(a);print_int(b);print_int(c);print_int(d);print_int(e);");
+        instructions.addFirst(new Label("start", null));
         assertEquals(instructions.size(), 57);
         assertEquals(instructions.get(0).toString(), "Label(start)");
         assertEquals(instructions.get(1).toString(), "LoadIntConst(30,x12)");
