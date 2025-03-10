@@ -1,8 +1,5 @@
 package fi.helsinki.compiler;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
 import fi.helsinki.compiler.assemblygen.Assembler;
 import fi.helsinki.compiler.assemblygen.AssemblyGenerator;
 import fi.helsinki.compiler.common.expressions.Expression;
@@ -18,22 +15,19 @@ import fi.helsinki.compiler.typechecker.TypeChecker;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class Compiler {
-    public static void main(String[] args) throws CompilationException, IOException, ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException, InterruptedException {
+    public static void main(String[] args) throws Exception {
         String command = null;
         String inputFile = null;
         String outputFile = null;
-        String host = "localhost";
+        String host = "0.0.0.0";
         int port = 3000;
         for (String arg : args) {
             if (arg.startsWith("--output=")) {
@@ -62,47 +56,84 @@ public class Compiler {
             }
             startCompilation(sourceCode, outputFile);
         } else if (command.equals("serve")) {
-            HttpServer server = HttpServer.create(new InetSocketAddress(host, port), 100);
-            server.createContext("/", new CompilerServerHandler());
-            server.setExecutor(new ScheduledThreadPoolExecutor(10));
-            server.start();
-            System.out.println("Server is running on port " + port);
+            CompilerServer compilerServer = new CompilerServer(host, port);
+            compilerServer.startServer();
         } else {
             throw new CompilationException("Invalid compilation command: " + command);
         }
     }
 
-    private static class CompilerServerHandler implements HttpHandler {
+    private static class CompilerServer {
+        private int port;
+        private String host;
+
+        public CompilerServer(String host, int port) {
+            this.port = port;
+            this.host = host;
+        }
+
+        public void startServer() {
+            try (ServerSocket serverSocket = new ServerSocket(port)) {
+                System.out.println("Server started. Waiting for a connection...");
+                while (true) {
+                    Thread handlerThread = new Thread(new ServerHandler(serverSocket.accept()));
+                    handlerThread.start();
+                }
+            } catch (IOException e) {
+                System.err.println("Server error: " + e.getMessage());
+            }
+        }
+    }
+
+    private static class ServerHandler implements Runnable {
+        Socket clientSocket;
+
+        public ServerHandler(Socket clientSocket) {
+            this.clientSocket = clientSocket;
+        }
 
         @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            InputStream inputStream = exchange.getRequestBody();
-            ByteArrayOutputStream result = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            for (int length; (length = inputStream.read(buffer)) != -1; ) {
-                result.write(buffer, 0, length);
-            }
-            String request = result.toString("UTF-8");
-            JSONParser jsonParser = new JSONParser();
-            String response = "";
-            try {
-                JSONObject jsonObject = (JSONObject) jsonParser.parse(request);
-                if (jsonObject.get("command").equals("compile")) {
-                    String sourceCode = jsonObject.get("code").toString();
-                    byte[] byteCode = startCompilation(sourceCode, null);
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("program", Base64.getEncoder().encode(byteCode));
-                    JSONObject responseObj = new JSONObject();
-                    responseObj.put("program", Base64.getEncoder().encodeToString(byteCode));
-                    response = responseObj.toString();
+        public void run() {
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
+                StringBuilder requestBuilder = new StringBuilder();
+                String line;
+                try {
+                    while ((line = reader.readLine()) != null) {
+                        requestBuilder.append(line);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+                String jsonRequest = requestBuilder.toString();
+                System.out.println("Received JSON request: " + jsonRequest);
+                String response = "";
+                try {
+                    JSONParser jsonParser = new JSONParser();
+                    JSONObject jsonObject = (JSONObject) jsonParser.parse(jsonRequest);
+                    if (jsonObject.get("command").equals("compile")) {
+                        String sourceCode = jsonObject.get("code").toString();
+                        byte[] byteCode = startCompilation(sourceCode, null);
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("program", new String(Base64.getEncoder().encode(byteCode)));
+                        response = new JSONObject(map).toJSONString();
+                    }
+                } catch (Exception e) {
+                    response = "{\"error\": \"Error occurred while compiling: " + e.getMessage() + "\"}";
+                    System.out.println("Error occurred while compiling: " + e.getMessage());
+                }
+                try {
+                    writer.write(response);
+                    writer.newLine();
+                    writer.flush();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("Response sent. Closing connection.");
+                clientSocket.close();
             } catch (Exception e) {
-                response = "{\"error\": \"Error occurred while compiling: " + e.getMessage() + "\"}";
+                System.err.println("Error handling client: " + e.getMessage());
             }
-            exchange.sendResponseHeaders(200, response.length());
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
         }
     }
 
@@ -132,5 +163,4 @@ public class Compiler {
             return stdScanner.next();
         }
     }
-
 }

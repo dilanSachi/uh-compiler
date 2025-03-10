@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'fi.helsinki.compiler'
-version = '1.0-SNAPSHOT'
+version = '0.0.1'
 
 repositories {
     mavenCentral()
@@ -42,3 +42,13 @@ jacocoTestReport {
         xml.required = true
     }
 }
+
+task generateDockerImage(type: Exec) {
+    workingDir "${projectDir}"
+    commandLine 'sh', '-c', 'docker build -t dilansachi/uh-compiler .'
+    doLast {
+        println "Generated docker image!"
+    }
+}
+
+//build.finalizedBy generateDockerImage
