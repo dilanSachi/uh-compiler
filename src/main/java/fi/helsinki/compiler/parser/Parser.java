@@ -307,7 +307,8 @@ public class Parser {
             } else if (checkNextToken(TokenType.IDENTIFIER, Optional.empty()) ||
                     checkNextToken(TokenType.STRING_LITERAL, Optional.empty()) ||
                     checkNextToken(TokenType.INTEGER_LITERAL, Optional.empty()) ||
-                    checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.empty())) {
+                    checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.empty()) ||
+            checkNextToken(TokenType.PUNCTUATION, Optional.of("("))) {
                 Expression expression = parseExpression();
                 block.addExpression(expression);
             } else if (checkNextToken(TokenType.OPERATOR, Optional.of("-")) ||
