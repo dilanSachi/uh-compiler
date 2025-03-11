@@ -47,6 +47,53 @@ public class AssemblyGeneratorTests {
     }
 
     @Test
+    public void testBasicAnd() throws Exception {
+        List<Instruction> instructions = generateInstructions("true and false;");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                ".section .text\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $24, %rsp\n" +
+                "#LoadBoolConst(true,x12)\n" +
+                "movq $1, -8(%rbp)\n" +
+                "#CondJump(x12,Label(and_right),Label(and_skip))\n" +
+                "cmpq $0, -8(%rbp)\n" +
+                "jne .Land_right\n" +
+                "jmp .Land_skip\n" +
+                "#Label(and_right)\n" +
+                "\n" +
+                ".Land_right:\n" +
+                "#LoadBoolConst(false,x13)\n" +
+                "movq $0, -16(%rbp)\n" +
+                "#Copy(x13,x14)\n" +
+                "movq -16(%rbp), %rax\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Jump(Label(and_end))\n" +
+                "jmp .Land_end\n" +
+                "#Label(and_skip)\n" +
+                "\n" +
+                ".Land_skip:\n" +
+                "#LoadBoolConst(false,x14)\n" +
+                "movq $0, -24(%rbp)\n" +
+                "#Jump(Label(and_end))\n" +
+                "jmp .Land_end\n" +
+                "#Label(and_end)\n" +
+                "\n" +
+                ".Land_end:\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
+    }
+
+    @Test
     public void testBasicAdditionWithMultiplication() throws Exception {
         List<Instruction> instructions = generateInstructions("(1+2)*3");
         AssemblyGenerator assemblyGenerator = new AssemblyGenerator();

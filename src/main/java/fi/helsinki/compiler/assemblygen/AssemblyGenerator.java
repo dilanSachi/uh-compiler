@@ -17,7 +17,6 @@ public class AssemblyGenerator {
     public String generateAssembly(List<Instruction> instructions) throws ClassNotFoundException, IllegalAccessException {
         List<String> lines = new ArrayList<>();
         Locals locals = new Locals(getAllIRVariables(instructions));
-        // ... Emit initial declarations and stack setup here ...
         lines.add(".extern print_int");
         lines.add(".extern print_bool");
         lines.add(".extern read_int");
@@ -41,7 +40,7 @@ public class AssemblyGenerator {
                         lines.add("movq $" + intConstIns.getValue() + ", " + locals.getRef(intConstIns.getDestination()));
                     } else {
                         lines.add("movabsq $" + intConstIns.getValue() + ", %rax");
-                        lines.add("movq %rax, $" + locals.getRef(intConstIns.getDestination()));
+                        lines.add("movq %rax, " + locals.getRef(intConstIns.getDestination()));
                     }
                     break;
                 }

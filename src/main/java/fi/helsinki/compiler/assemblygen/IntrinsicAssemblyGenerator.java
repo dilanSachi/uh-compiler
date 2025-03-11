@@ -13,7 +13,7 @@ public class IntrinsicAssemblyGenerator {
         intrinsicMap.put("-", new SubtractionIntrinsic());
         intrinsicMap.put("*", new MultiplyIntrinsic());
         intrinsicMap.put("/", new DivisionIntrinsic());
-        intrinsicMap.put("%", new DivisionIntrinsic());
+        intrinsicMap.put("%", new RemainderIntrinsic());
         intrinsicMap.put("==", new EqualsIntrinsic());
         intrinsicMap.put("!=", new NotEqualsIntrinsic());
         intrinsicMap.put("<", new LessThanIntrinsic());
