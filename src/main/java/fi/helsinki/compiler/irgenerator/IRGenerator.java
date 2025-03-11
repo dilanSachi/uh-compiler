@@ -168,8 +168,13 @@ public class IRGenerator {
                     IRVariable conditionVariable = visit(conditionalOp.getCondition(), symbolTable);
                     instructions.add(new CondJump(conditionVariable, thenLabel, elseLabel, location));
                     instructions.add(thenLabel);
-                    List<Expression> expressionList = ((Block) conditionalOp.getThenBlock()).getExpressionList();
-                    Type finalType = !expressionList.isEmpty() ? expressionList.get(expressionList.size() - 1).getType() : new UnitType();
+                    Type finalType;
+                    if (conditionalOp.getThenBlock() instanceof Block) {
+                        List<Expression> expressionList = ((Block) conditionalOp.getThenBlock()).getExpressionList();
+                        finalType = !expressionList.isEmpty() ? expressionList.get(expressionList.size() - 1).getType() : new UnitType();
+                    } else {
+                        finalType = conditionalOp.getThenBlock().getType();
+                    }
                     IRVariable outputVariable = createVariable(finalType);
                     IRVariable thenVariable = visit(conditionalOp.getThenBlock(), symbolTable);
                     instructions.add(new Copy(thenVariable, outputVariable, location));

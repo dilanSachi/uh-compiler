@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class AssemblyGeneratorTests {
 
     @Test
-    public void testBasicAddition() throws ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException {
+    public void testBasicAddition() throws Exception {
         List<Instruction> instructions = generateInstructions("1 + 2;");
         AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
         String assemblyCode = assemblyGenerator.generateAssembly(instructions);
@@ -47,7 +47,46 @@ public class AssemblyGeneratorTests {
     }
 
     @Test
-    public void testBasicAdditionWithPrint() throws ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException {
+    public void testBasicAdditionWithMultiplication() throws Exception {
+        List<Instruction> instructions = generateInstructions("(1+2)*3");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                ".section .text\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $72, %rsp\n" +
+                "#LoadIntConst(1,x12)\n" +
+                "movq $1, -8(%rbp)\n" +
+                "#LoadIntConst(2,x13)\n" +
+                "movq $2, -16(%rbp)\n" +
+                "#Call(+,[x12, x13],x14)\n" +
+                "movq -8(%rbp), %rax\n" +
+                "addq -16(%rbp), %rax\n" +
+                "movq %rax, -32(%rbp)\n" +
+                "#LoadIntConst(3,x15)\n" +
+                "movq $3, -40(%rbp)\n" +
+                "#Call(*,[x14, x15],x16)\n" +
+                "movq -32(%rbp), %rax\n" +
+                "imulq -40(%rbp), %rax\n" +
+                "movq %rax, -56(%rbp)\n" +
+                "#Call(print_int,[x16],x18)\n" +
+                "movq -56(%rbp), %rdi\n" +
+                "callq print_int\n" +
+                "movq %rax, -72(%rbp)\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
+    }
+
+    @Test
+    public void testBasicAdditionWithPrint() throws Exception {
         List<Instruction> instructions = generateInstructions("1 + 2");
         AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
         String assemblyCode = assemblyGenerator.generateAssembly(instructions);
@@ -80,7 +119,7 @@ public class AssemblyGeneratorTests {
     }
 
     @Test
-    public void testConditionalOperation() throws ParserException, TypeCheckerException, IRGenerationException, ClassNotFoundException, IllegalAccessException {
+    public void testConditionalOperation() throws Exception {
         List<Instruction> instructions = generateInstructions("{ var x = true; if x then {1} else {2}; }");
         AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
         String assemblyCode = assemblyGenerator.generateAssembly(instructions);
@@ -124,6 +163,58 @@ public class AssemblyGeneratorTests {
                 "#Label(end)\n" +
                 "\n" +
                 ".Lend:\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
+    }
+
+    @Test
+    public void testConditionalOperationWithoutParenthesis() throws Exception {
+        List<Instruction> instructions = generateInstructions("{ if true then 1 else 2 }");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                ".section .text\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $48, %rsp\n" +
+                "#LoadBoolConst(true,x12)\n" +
+                "movq $1, -8(%rbp)\n" +
+                "#CondJump(x12,Label(then),Label(else))\n" +
+                "cmpq $0, -8(%rbp)\n" +
+                "jne .Lthen\n" +
+                "jmp .Lelse\n" +
+                "#Label(then)\n" +
+                "\n" +
+                ".Lthen:\n" +
+                "#LoadIntConst(1,x14)\n" +
+                "movq $1, -16(%rbp)\n" +
+                "#Copy(x14,x13)\n" +
+                "movq -16(%rbp), %rax\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Jump(Label(end))\n" +
+                "jmp .Lend\n" +
+                "#Label(else)\n" +
+                "\n" +
+                ".Lelse:\n" +
+                "#LoadIntConst(2,x15)\n" +
+                "movq $2, -32(%rbp)\n" +
+                "#Copy(x15,x13)\n" +
+                "movq -32(%rbp), %rax\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Label(end)\n" +
+                "\n" +
+                ".Lend:\n" +
+                "#Call(print_int,[x13],x17)\n" +
+                "movq -24(%rbp), %rdi\n" +
+                "callq print_int\n" +
+                "movq %rax, -48(%rbp)\n" +
                 "movq $0, %rax\n" +
                 "movq %rbp, %rsp\n" +
                 "popq %rbp\n" +
