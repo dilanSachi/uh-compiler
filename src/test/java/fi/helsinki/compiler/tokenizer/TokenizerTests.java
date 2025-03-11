@@ -173,6 +173,20 @@ public class TokenizerTests {
         assertTokens(tokens, expectedTokens);
     }
 
+    @Test
+    public void testBreakAndContinue() {
+        String sourceCode = "while true do {\n" +
+                "    if n % 2 == 0 then { // checking if n is even\n" +
+                "        break;\n" +
+                "    } else {\n" +
+                "        continue;\n" +
+                "    }\n" +
+                "}";
+        Tokenizer testTokenizer = new Tokenizer();
+        List<Token> tokens = testTokenizer.tokenize(sourceCode, "Testfile.dl");
+        assertEquals(tokens.size(), 21);
+    }
+
     private void assertTokens(List<Token> resultTokenList, Token[] expectedTokens) {
         assertEquals(expectedTokens.length, resultTokenList.size());
         Token[] resultTokens = resultTokenList.toArray(new Token[resultTokenList.size()]);

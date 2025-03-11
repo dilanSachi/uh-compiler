@@ -99,6 +99,9 @@ public class Parser {
             Token booleanToken = consume();
             return new BooleanLiteral(Boolean.valueOf(booleanToken.getText()), booleanToken.getTokenLocation());
         }
+        if (checkNextToken(TokenType.KEYWORD, Optional.of("break"))) {
+            return parseBreakAndContinue();
+        }
         throw new ParserException("Invalid token: " + token.getText() + token.getTokenLocation() +
                 ": expected an integer literal or an identifier");
     }
@@ -199,7 +202,7 @@ public class Parser {
 
     private Expression parseAnd() throws ParserException {
         Expression left = parseEquality();
-        while (Arrays.asList("and").contains(peek().getText())) {
+        while (Objects.equals("and", peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseEquality();
             left = new BinaryOp(left, operatorToken, right, operatorToken.getTokenLocation());
@@ -209,7 +212,7 @@ public class Parser {
 
     private Expression parseOr() throws ParserException {
         Expression left = parseAnd();
-        while (Arrays.asList("or").contains(peek().getText())) {
+        while (Objects.equals("or", peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseAnd();
             left = new BinaryOp(left, operatorToken, right, operatorToken.getTokenLocation());
@@ -219,7 +222,7 @@ public class Parser {
 
     private Expression parseExpression() throws ParserException {
         Expression left = parseOr();
-        while (Arrays.asList("=").contains(peek().getText())) {
+        while (Objects.equals("=", peek().getText())) {
             Token operatorToken = consume();
             Expression right = parseExpression();
             left = new BinaryOp(left, operatorToken, right, operatorToken.getTokenLocation());
@@ -254,6 +257,15 @@ public class Parser {
         return expression;
     }
 
+    private Expression parseBreakAndContinue() throws ParserException {
+        Token token = consume();
+        if (token.getText().equals("continue")) {
+            return new ContinueOp(token.getTokenLocation());
+        } else {
+            return new BreakOp(token.getTokenLocation());
+        }
+    }
+
     private Expression parseBlock() throws ParserException {
         Token blockToken = consume("{");
         List<Expression> expressionList = new ArrayList<>();
@@ -279,6 +291,9 @@ public class Parser {
                 block.addExpression(childBlock);
             } else if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
                 block.addExpression(parseVariableDefinition());
+            } else if (checkNextToken(TokenType.KEYWORD, Optional.of("break")) ||
+                    checkNextToken(TokenType.KEYWORD, Optional.of("continue"))) {
+                block.addExpression(parseBreakAndContinue());
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
                 Token uniToken = consume(";");
@@ -329,6 +344,8 @@ public class Parser {
                 return block;
             } else if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
                 block.addExpression(parseVariableDefinition());
+            } else if (checkNextToken(TokenType.KEYWORD, Optional.of("break"))) {
+                block.addExpression(parseBreakAndContinue());
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
                 consume(";");

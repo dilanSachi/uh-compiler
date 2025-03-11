@@ -190,6 +190,16 @@ public class TypeChecker {
                 }
                 return Optional.of(new UnitType());
             }
+            case BreakOp breakOp: {
+                UnitType unitType = new UnitType();
+                breakOp.setType(unitType);
+                return Optional.of(unitType);
+            }
+            case ContinueOp continueOp: {
+                UnitType unitType = new UnitType();
+                continueOp.setType(unitType);
+                return Optional.of(unitType);
+            }
             default: {
                 throw new TypeCheckerException("Invalid type found: " + expression.getLocation());
             }

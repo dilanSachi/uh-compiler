@@ -15,6 +15,8 @@ public class IRGenerator {
     private Map<IRVariable, Type> variableTypeMap;
     private List<Instruction> instructions;
     private CommonStatics commonStatics;
+    private Stack<Label> whileStartLabelStack = new Stack<>();
+    private Stack<Label> whileEndLabelStack = new Stack<>();
 
     public IRGenerator(CommonStatics commonStatics) {
         this.commonStatics = commonStatics;
@@ -198,7 +200,9 @@ public class IRGenerator {
             case WhileOp whileOp: {
                 Label doLabel = new Label(commonStatics, "do", whileOp.getCondition().getLocation());
                 Label endLabel = new Label(commonStatics, "end", whileOp.getLocation());
+                whileEndLabelStack.push(endLabel);
                 Label startLabel = new Label(commonStatics, "while_start", whileOp.getLocation());
+                whileStartLabelStack.push(startLabel);
                 instructions.add(startLabel);
                 IRVariable condition = visit(whileOp.getCondition(), symbolTable);
                 instructions.add(new CondJump(condition, doLabel, endLabel, whileOp.getBody().getLocation()));
@@ -226,6 +230,16 @@ public class IRGenerator {
                 instructions.add(new Call(functionVariable, params.toArray(new IRVariable[]{}),
                         resultVariable, functionCall.getLocation()));
                 return resultVariable;
+            }
+            case BreakOp breakOp: {
+                Jump jumpIns = new Jump(whileEndLabelStack.pop(), breakOp.getLocation());
+                instructions.add(jumpIns);
+                return createVariable(new UnitType());
+            }
+            case ContinueOp continueOp: {
+                Jump jumpIns = new Jump(whileStartLabelStack.pop(), continueOp.getLocation());
+                instructions.add(jumpIns);
+                return createVariable(new UnitType());
             }
             default: {
                 throw new IRGenerationException("Invalid Expression found");

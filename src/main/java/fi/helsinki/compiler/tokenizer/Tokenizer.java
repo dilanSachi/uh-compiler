@@ -16,6 +16,7 @@ public class Tokenizer {
     private static final Pattern patternIdentifier = Pattern.compile("^(((?!var(?![a-zA-Z]))(?<![a-zA-Z])[a-z|A-Z|_]+[a-z|A-Z|_|0-9]*)|((var)[a-z|A-Z|_|0-9]+))");
     private static final Pattern patternOperator = Pattern.compile("^(==|or |and |=|!=|<=|>=|>|<|\\+|-|\\*|\\/|%)");
     private static final Pattern patternKeyword = Pattern.compile("^(if|while|function|var|do|then|else)( |\n|$)");
+    private static final Pattern patternBreakContinue = Pattern.compile("^(break|continue)( |\n|;|\\)|\\+|-|\\*|/|}|%|$)");
     private static final Pattern patternNewline = Pattern.compile("^\n");
     private static final Pattern patternStringLiteral = Pattern.compile("^\".*?\"");
     private static final Pattern patternIntegerLiteral = Pattern.compile("^[0-9]+");
@@ -55,6 +56,24 @@ public class Tokenizer {
                 continue;
             }
             matcher = patternKeyword.matcher(sourceCode);
+            if (matcher.find()) {
+                String keyword;
+                if (matcher.hitEnd()) {
+                    keyword = sourceCode.substring(0, matcher.end()).strip();
+                    sourceCode = sourceCode.substring(matcher.end());
+                } else {
+                    keyword = sourceCode.substring(0, matcher.end() - 1);
+                    sourceCode = sourceCode.substring(matcher.end() - 1);
+                }
+                tokens.add(new Token(keyword, TokenType.KEYWORD, new Location(filename, line, column)));
+                if (matcher.hitEnd()) {
+                    column += matcher.end() - matcher.start();
+                } else {
+                    column += matcher.end() - matcher.start() - 1;
+                }
+                continue;
+            }
+            matcher = patternBreakContinue.matcher(sourceCode);
             if (matcher.find()) {
                 String keyword;
                 if (matcher.hitEnd()) {
