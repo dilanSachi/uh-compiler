@@ -254,7 +254,7 @@ public class Parser {
         return expression;
     }
 
-    private Block parseBlock() throws ParserException {
+    private Expression parseBlock() throws ParserException {
         Token blockToken = consume("{");
         List<Expression> expressionList = new ArrayList<>();
         Block block = new Block(expressionList, blockToken.getTokenLocation());
@@ -275,7 +275,7 @@ public class Parser {
             } else if (checkNextToken(TokenType.KEYWORD, Optional.of("while"))) {
                 block.addExpression(parseWhileBlock());
             } else if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
-                Block childBlock = parseBlock();
+                Expression childBlock = parseBlock();
                 block.addExpression(childBlock);
             } else if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
                 block.addExpression(parseVariableDefinition());
@@ -292,6 +292,10 @@ public class Parser {
             }
         }
         consume("}");
+        if (checkNextToken(TokenType.OPERATOR, Optional.empty())) {
+            BinaryOp binaryOp = new BinaryOp(block, consume(), parseExpression(), block.getLocation());
+            return binaryOp;
+        }
         return block;
     }
 
@@ -318,7 +322,7 @@ public class Parser {
             } else if (checkNextToken(TokenType.KEYWORD, Optional.of("while"))) {
                 block.addExpression(parseWhileBlock());
             } else if (checkNextToken(TokenType.PUNCTUATION, Optional.of("{"))) {
-                Block childBlock = parseBlock();
+                Expression childBlock = parseBlock();
                 block.addExpression(childBlock);
             } else if (checkNextToken(TokenType.PUNCTUATION, Optional.of("}"))) {
                 consume("}");

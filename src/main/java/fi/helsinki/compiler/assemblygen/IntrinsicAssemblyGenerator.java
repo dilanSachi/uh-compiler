@@ -91,7 +91,7 @@ class RemainderIntrinsic implements Intrinsic {
         assemblyLines.add("movq " + argRefs.get(0) + ", %rax");
         assemblyLines.add("cqto");
         assemblyLines.add("idivq " + argRefs.get(1));
-        if (!resultRegister.equals("%rax")) {
+        if (!resultRegister.equals("%rdx")) {
             assemblyLines.add("movq %rdx, " + resultRegister);
         }
     }
@@ -152,7 +152,9 @@ class PrintIntIntrinsic implements Intrinsic {
     public void generate(List<String> assemblyLines, List<String> argRefs, String resultRegister) {
         assemblyLines.add("movq " + argRefs.get(0) + ", %rdi");
         assemblyLines.add("callq print_int");
-//        assemblyLines.add("movq %rax, " + resultRegister);
+        if (!resultRegister.equals("%rax")) {
+            assemblyLines.add("movq %rax, " + resultRegister);
+        }
     }
 }
 
@@ -161,7 +163,9 @@ class PrintBooleanIntrinsic implements Intrinsic {
     public void generate(List<String> assemblyLines, List<String> argRefs, String resultRegister) {
         assemblyLines.add("movq " + argRefs.get(0) + ", %rdi");
         assemblyLines.add("callq print_bool");
-//        assemblyLines.add("movq %rax, " + resultRegister);
+        if (!resultRegister.equals("%rax")) {
+            assemblyLines.add("movq %rax, " + resultRegister);
+        }
     }
 }
 

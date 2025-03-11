@@ -301,6 +301,141 @@ public class AssemblyGeneratorTests {
                 "ret", assemblyCode);
     }
 
+    @Test
+    public void testWhileIf() throws Exception {
+        List<Instruction> instructions = generateInstructions("var i = 0;\n" +
+                "while i <= 3 do {\n" +
+                "        if i % 2 == 1 then {\n" +
+                "            print_int(i);\n" +
+                "        }\n" +
+                "        i = i + 1;\n" +
+                "    }");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                ".section .text\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $128, %rsp\n" +
+                "#LoadIntConst(0,x12)\n" +
+                "movq $0, -8(%rbp)\n" +
+                "#Copy(x12,x13)\n" +
+                "movq -8(%rbp), %rax\n" +
+                "movq %rax, -16(%rbp)\n" +
+                "#Label(while_start)\n" +
+                "\n" +
+                ".Lwhile_start:\n" +
+                "#LoadIntConst(3,x15)\n" +
+                "movq $3, -24(%rbp)\n" +
+                "#Call(<=,[x13, x15],x16)\n" +
+                "xor %rax, %rax\n" +
+                "movq -16(%rbp), %rdx\n" +
+                "cmpq -24(%rbp), %rdx\n" +
+                "setle %al\n" +
+                "movq %rax, -40(%rbp)\n" +
+                "#CondJump(x16,Label(do),Label(end))\n" +
+                "cmpq $0, -40(%rbp)\n" +
+                "jne .Ldo\n" +
+                "jmp .Lend\n" +
+                "#Label(do)\n" +
+                "\n" +
+                ".Ldo:\n" +
+                "#LoadIntConst(2,x17)\n" +
+                "movq $2, -48(%rbp)\n" +
+                "#Call(%,[x13, x17],x18)\n" +
+                "movq -16(%rbp), %rax\n" +
+                "cqto\n" +
+                "idivq -48(%rbp)\n" +
+                "movq %rdx, %rax\n" +
+                "movq %rax, -64(%rbp)\n" +
+                "#LoadIntConst(1,x19)\n" +
+                "movq $1, -72(%rbp)\n" +
+                "#Call(==,[x18, x19],x20)\n" +
+                "xor %rax, %rax\n" +
+                "movq -64(%rbp), %rdx\n" +
+                "cmpq -72(%rbp), %rdx\n" +
+                "sete %al\n" +
+                "movq %rax, -88(%rbp)\n" +
+                "#CondJump(x20,Label(then),Label(end0))\n" +
+                "cmpq $0, -88(%rbp)\n" +
+                "jne .Lthen\n" +
+                "jmp .Lend0\n" +
+                "#Label(then)\n" +
+                "\n" +
+                ".Lthen:\n" +
+                "#Call(print_int,[x13],x22)\n" +
+                "movq -16(%rbp), %rdi\n" +
+                "callq print_int\n" +
+                "movq %rax, -104(%rbp)\n" +
+                "#Label(end0)\n" +
+                "\n" +
+                ".Lend0:\n" +
+                "#LoadIntConst(1,x25)\n" +
+                "movq $1, -112(%rbp)\n" +
+                "#Call(+,[x13, x25],x26)\n" +
+                "movq -16(%rbp), %rax\n" +
+                "addq -112(%rbp), %rax\n" +
+                "movq %rax, -128(%rbp)\n" +
+                "#Copy(x26,x13)\n" +
+                "movq -128(%rbp), %rax\n" +
+                "movq %rax, -16(%rbp)\n" +
+                "#Jump(Label(while_start))\n" +
+                "jmp .Lwhile_start\n" +
+                "#Label(end)\n" +
+                "\n" +
+                ".Lend:\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
+    }
+
+    @Test
+    public void testBlockStatement() throws Exception {
+        List<Instruction> instructions = generateInstructions("{ true; 1 + 2 } + 3");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                ".section .text\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $72, %rsp\n" +
+                "#LoadBoolConst(true,x12)\n" +
+                "movq $1, -8(%rbp)\n" +
+                "#LoadIntConst(1,x13)\n" +
+                "movq $1, -16(%rbp)\n" +
+                "#LoadIntConst(2,x14)\n" +
+                "movq $2, -24(%rbp)\n" +
+                "#Call(+,[x13, x14],x15)\n" +
+                "movq -16(%rbp), %rax\n" +
+                "addq -24(%rbp), %rax\n" +
+                "movq %rax, -40(%rbp)\n" +
+                "#LoadIntConst(3,x16)\n" +
+                "movq $3, -48(%rbp)\n" +
+                "#Call(+,[x15, x16],x17)\n" +
+                "movq -40(%rbp), %rax\n" +
+                "addq -48(%rbp), %rax\n" +
+                "movq %rax, -56(%rbp)\n" +
+                "#Call(print_int,[x17],x19)\n" +
+                "movq -56(%rbp), %rdi\n" +
+                "callq print_int\n" +
+                "movq %rax, -72(%rbp)\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
+    }
+
     private List<Instruction> generateInstructions(String sourceCode) throws ParserException, TypeCheckerException,
             IRGenerationException {
         Parser parser = new Parser(new Tokenizer().tokenize(sourceCode, "TestFile.dl"));
