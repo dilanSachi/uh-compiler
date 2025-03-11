@@ -1,5 +1,6 @@
 package fi.helsinki.compiler.irgenerator;
 
+import fi.helsinki.compiler.common.CommonStatics;
 import fi.helsinki.compiler.common.expressions.*;
 import fi.helsinki.compiler.common.Location;
 import fi.helsinki.compiler.common.types.*;
@@ -13,10 +14,10 @@ public class IRGenerator {
 
     private Map<IRVariable, Type> variableTypeMap;
     private List<Instruction> instructions;
+    private CommonStatics commonStatics;
 
-    public IRGenerator() {
-        IRVariable.resetCounter();
-        Label.resetCounter();
+    public IRGenerator(CommonStatics commonStatics) {
+        this.commonStatics = commonStatics;
         variableTypeMap = new HashMap<>();
         setPredefinedVariableTypes();
     }
@@ -38,7 +39,6 @@ public class IRGenerator {
 
     public List<Instruction> generateIR(Expression rootExpression) throws IRGenerationException {
         instructions = new ArrayList<>();
-//        instructions.add(new Label("start", rootExpression.getLocation()));
         SymbolTable rootSymbolTable = new SymbolTable(null);
         for (IRVariable key: variableTypeMap.keySet()) {
             rootSymbolTable.putVariable(key.getType().getTypeStr(), key);
@@ -94,9 +94,9 @@ public class IRGenerator {
                 }
                 if (operator.getText().equals("and")) {
                     IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
-                    Label andRightLabel = new Label("and_right", binaryOp.getLeft().getLocation());
-                    Label andSkipLabel = new Label("and_skip", binaryOp.getLeft().getLocation());
-                    Label andEndLabel = new Label("and_end", binaryOp.getLocation());
+                    Label andRightLabel = new Label(commonStatics, "and_right", binaryOp.getLeft().getLocation());
+                    Label andSkipLabel = new Label(commonStatics, "and_skip", binaryOp.getLeft().getLocation());
+                    Label andEndLabel = new Label(commonStatics, "and_end", binaryOp.getLocation());
                     instructions.add(new CondJump(leftVariable, andRightLabel, andSkipLabel, binaryOp.getLocation()));
                     instructions.add(andRightLabel);
                     IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
@@ -111,9 +111,9 @@ public class IRGenerator {
                 }
                 if (operator.getText().equals("or")) {
                     IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
-                    Label orRightLabel = new Label("or_right", binaryOp.getLeft().getLocation());
-                    Label orSkipLabel = new Label("or_skip", binaryOp.getLeft().getLocation());
-                    Label orEndLabel = new Label("or_end", binaryOp.getLocation());
+                    Label orRightLabel = new Label(commonStatics, "or_right", binaryOp.getLeft().getLocation());
+                    Label orSkipLabel = new Label(commonStatics, "or_skip", binaryOp.getLeft().getLocation());
+                    Label orEndLabel = new Label(commonStatics, "or_end", binaryOp.getLocation());
                     instructions.add(new CondJump(leftVariable, orSkipLabel, orRightLabel, binaryOp.getLocation()));
                     instructions.add(orRightLabel);
                     IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
@@ -162,9 +162,9 @@ public class IRGenerator {
             }
             case ConditionalOp conditionalOp: {
                 if (conditionalOp.getElseBlock() != null) {
-                    Label thenLabel = new Label("then", conditionalOp.getThenBlock().getLocation());
-                    Label elseLabel = new Label("else", location);
-                    Label endLabel = new Label("end", location);
+                    Label thenLabel = new Label(commonStatics, "then", conditionalOp.getThenBlock().getLocation());
+                    Label elseLabel = new Label(commonStatics, "else", location);
+                    Label endLabel = new Label(commonStatics, "end", location);
                     IRVariable conditionVariable = visit(conditionalOp.getCondition(), symbolTable);
                     instructions.add(new CondJump(conditionVariable, thenLabel, elseLabel, location));
                     instructions.add(thenLabel);
@@ -185,8 +185,8 @@ public class IRGenerator {
                     instructions.add(endLabel);
                     return outputVariable;
                 } else {
-                    Label thenLabel = new Label("then", conditionalOp.getThenBlock().getLocation());
-                    Label endLabel = new Label("end", location);
+                    Label thenLabel = new Label(commonStatics, "then", conditionalOp.getThenBlock().getLocation());
+                    Label endLabel = new Label(commonStatics, "end", location);
                     IRVariable conditionVariable = visit(conditionalOp.getCondition(), symbolTable);
                     instructions.add(new CondJump(conditionVariable, thenLabel, endLabel, location));
                     instructions.add(thenLabel);
@@ -196,9 +196,9 @@ public class IRGenerator {
                 }
             }
             case WhileOp whileOp: {
-                Label doLabel = new Label("do", whileOp.getCondition().getLocation());
-                Label endLabel = new Label("end", whileOp.getLocation());
-                Label startLabel = new Label("while_start", whileOp.getLocation());
+                Label doLabel = new Label(commonStatics, "do", whileOp.getCondition().getLocation());
+                Label endLabel = new Label(commonStatics, "end", whileOp.getLocation());
+                Label startLabel = new Label(commonStatics, "while_start", whileOp.getLocation());
                 instructions.add(startLabel);
                 IRVariable condition = visit(whileOp.getCondition(), symbolTable);
                 instructions.add(new CondJump(condition, doLabel, endLabel, whileOp.getBody().getLocation()));
@@ -228,14 +228,13 @@ public class IRGenerator {
                 return resultVariable;
             }
             default: {
-
+                throw new IRGenerationException("Invalid Expression found");
             }
         }
-        return null;
     }
 
     private IRVariable createVariable(Type type) {
-        IRVariable variable = IRVariable.createVariable(type);
+        IRVariable variable = new IRVariable(commonStatics, type);
         variableTypeMap.put(variable, type);
         return variable;
     }

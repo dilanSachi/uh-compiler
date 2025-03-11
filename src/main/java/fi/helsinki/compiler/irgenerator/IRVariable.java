@@ -1,5 +1,6 @@
 package fi.helsinki.compiler.irgenerator;
 
+import fi.helsinki.compiler.common.CommonStatics;
 import fi.helsinki.compiler.common.types.Type;
 
 /*
@@ -8,21 +9,11 @@ import fi.helsinki.compiler.common.types.Type;
 public class IRVariable {
     private String name;
     private Type type;
-    private static int counter = -1;
 
-    private IRVariable(int counter, Type type) {
-        this.name = "x" + counter;
+    public IRVariable(CommonStatics commonStatics, Type type) {
+        this.name = "x" + commonStatics.getIRVariableCounter();
         // need to check whether we need to hardcode unittype variable
         this.type = type;
-    }
-
-    public static IRVariable createVariable(Type type) {
-        counter += 1;
-        return new IRVariable(counter, type);
-    }
-
-    public static void resetCounter() {
-        counter = -1;
     }
 
     public String getName() {

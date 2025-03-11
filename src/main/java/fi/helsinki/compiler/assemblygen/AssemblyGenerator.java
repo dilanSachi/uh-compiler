@@ -4,6 +4,7 @@ import fi.helsinki.compiler.irgenerator.IRVariable;
 import fi.helsinki.compiler.irgenerator.instructions.*;
 
 import java.lang.reflect.Field;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -37,9 +38,9 @@ public class AssemblyGenerator {
                 }
                 case LoadIntConst intConstIns: {
                     if (Math.pow(-2, 31) <= intConstIns.getValue() && intConstIns.getValue() <= Math.pow(2, 31)) {
-                        lines.add("movq $" + intConstIns.getValue() + ", " + locals.getRef(intConstIns.getDestination()));
+                        lines.add("movq $" + intConstIns.getValue().toString().replace("-", "") + ", " + locals.getRef(intConstIns.getDestination()));
                     } else {
-                        lines.add("movabsq $" + intConstIns.getValue() + ", %rax");
+                        lines.add("movabsq $" + intConstIns.getValue().toString().replace("-", "") + ", %rax");
                         lines.add("movq %rax, " + locals.getRef(intConstIns.getDestination()));
                     }
                     break;

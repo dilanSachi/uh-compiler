@@ -1,5 +1,6 @@
 package fi.helsinki.compiler.assemblygen;
 
+import fi.helsinki.compiler.common.CommonStatics;
 import fi.helsinki.compiler.common.expressions.Expression;
 import fi.helsinki.compiler.exceptions.IRGenerationException;
 import fi.helsinki.compiler.exceptions.ParserException;
@@ -268,13 +269,45 @@ public class AssemblyGeneratorTests {
                 "ret", assemblyCode);
     }
 
+    @Test
+    public void testMinIntPrint() throws Exception {
+        List<Instruction> instructions = generateInstructions("print_int(-9223372036854775808);");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                ".section .text\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $40, %rsp\n" +
+                "#LoadIntConst(-9223372036854775808,x12)\n" +
+                "movabsq $9223372036854775808, %rax\n" +
+                "movq %rax, -8(%rbp)\n" +
+                "#Call(unary_-,[x12],x13)\n" +
+                "movq -8(%rbp), %rax\n" +
+                "negq %rax\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Call(print_int,[x13],x15)\n" +
+                "movq -24(%rbp), %rdi\n" +
+                "callq print_int\n" +
+                "movq %rax, -40(%rbp)\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
+    }
+
     private List<Instruction> generateInstructions(String sourceCode) throws ParserException, TypeCheckerException,
             IRGenerationException {
         Parser parser = new Parser(new Tokenizer().tokenize(sourceCode, "TestFile.dl"));
         TypeChecker typeChecker = new TypeChecker();
         Expression expression = parser.parse();
         typeChecker.checkType(expression);
-        IRGenerator irGenerator = new IRGenerator();
+        IRGenerator irGenerator = new IRGenerator(new CommonStatics());
         return irGenerator.generateIR(expression);
     }
 }

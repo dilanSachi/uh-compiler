@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.Timestamp;
-import java.util.Date;
+import java.util.UUID;
 
 public class Assembler {
 
@@ -26,7 +25,7 @@ public class Assembler {
         if (workDirectory != null) {
             workDirectory = Path.of(workDirectory).toAbsolutePath().toString();
         } else {
-            File file = new File(System.getProperty("java.io.tmpdir"), "compiler_" + System.currentTimeMillis());
+            File file = new File(System.getProperty("java.io.tmpdir"), "compiler_" + UUID.randomUUID() + System.currentTimeMillis());
             file.mkdir();
             workDirectory = file.getAbsolutePath();
         }

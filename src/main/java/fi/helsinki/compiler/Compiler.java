@@ -2,6 +2,7 @@ package fi.helsinki.compiler;
 
 import fi.helsinki.compiler.assemblygen.Assembler;
 import fi.helsinki.compiler.assemblygen.AssemblyGenerator;
+import fi.helsinki.compiler.common.CommonStatics;
 import fi.helsinki.compiler.common.expressions.Expression;
 import fi.helsinki.compiler.exceptions.CompilationException;
 import fi.helsinki.compiler.exceptions.IRGenerationException;
@@ -144,7 +145,7 @@ public class Compiler {
         TypeChecker typeChecker = new TypeChecker();
         Expression expression = parser.parse();
         typeChecker.checkType(expression);
-        List<Instruction> instructions = new IRGenerator().generateIR(expression);
+        List<Instruction> instructions = new IRGenerator(new CommonStatics()).generateIR(expression);
         if (output == null) {
             return new Assembler().assembleAndGetExecutable(new AssemblyGenerator().generateAssembly(instructions),
                     null, "tempfile", true, new String[]{});
