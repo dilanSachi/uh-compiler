@@ -92,4 +92,20 @@ public class TypeCheckerTests {
         Optional<Type> type = typeChecker.checkType(expression);
         assertTrue(type.get() instanceof UnitType);
     }
+
+    @Test
+    public void testFunctionDefinition() throws ParserException, TypeCheckerException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser parser = new Parser(tokenizer.tokenize("fun f(n: Int): Int {\n" +
+                        "  if n > 5 then {\n" +
+                        "    return 5;\n" +
+                        "  }\n" +
+                        "  123\n" +
+                        "}",
+                "Testfile.dl"));
+        TypeChecker typeChecker = new TypeChecker();
+        Expression expression = parser.parse();
+        Optional<Type> type = typeChecker.checkType(expression);
+        assertTrue(type.get() instanceof IntType);
+    }
 }

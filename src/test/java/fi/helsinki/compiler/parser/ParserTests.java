@@ -832,6 +832,27 @@ public class ParserTests {
         assertEquals(((IntLiteral) binaryOp.getRight()).getValue(), 10);
     }
 
+    @Test
+    public void testFunctionDefinition() throws ParserException {
+        Tokenizer tokenizer = new Tokenizer();
+        Parser testParser = new Parser(tokenizer.tokenize("fun f(x:Bool, y:Int):Int {x}", "Testfile.dl"));
+        Block block = testParser.parse();
+        assertEquals(block.getExpressionList().size(), 1);
+        FunctionDefinition functionDefinition = (FunctionDefinition) block.getExpressionList().get(0);
+        assertEquals(functionDefinition.getFunctionName(), "f");
+        assertEquals(functionDefinition.getReturnType(), "Int");
+        assertEquals(functionDefinition.getArguments().size(), 2);
+        FunctionArgumentDefinition argumentDefinition = functionDefinition.getArguments().get(0);
+        assertEquals(argumentDefinition.getName(), "x");
+        assertEquals(argumentDefinition.getArgType(), "Bool");
+        argumentDefinition = functionDefinition.getArguments().get(1);
+        assertEquals(argumentDefinition.getName(), "y");
+        assertEquals(argumentDefinition.getArgType(), "Int");
+        Block block1 = functionDefinition.getBlock();
+        assertEquals(block1.getExpressionList().size(), 1);
+        assertEquals(((Identifier) block1.getExpressionList().get(0)).getName(), "x");
+    }
+
     @ParameterizedTest
     @MethodSource("dataProvider")
     public void testValidBlocks(String sourceCode) throws ParserException {

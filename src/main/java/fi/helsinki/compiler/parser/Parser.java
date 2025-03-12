@@ -99,8 +99,10 @@ public class Parser {
             Token booleanToken = consume();
             return new BooleanLiteral(Boolean.valueOf(booleanToken.getText()), booleanToken.getTokenLocation());
         }
-        if (checkNextToken(TokenType.KEYWORD, Optional.of("break"))) {
-            return parseBreakAndContinue();
+        if (checkNextToken(TokenType.KEYWORD, Optional.of("break")) ||
+                checkNextToken(TokenType.KEYWORD, Optional.of("return")) ||
+                checkNextToken(TokenType.KEYWORD, Optional.of("continue"))) {
+            return parseFlowControl();
         }
         throw new ParserException("Invalid token: " + token.getText() + token.getTokenLocation() +
                 ": expected an integer literal or an identifier");
@@ -257,13 +259,37 @@ public class Parser {
         return expression;
     }
 
-    private Expression parseBreakAndContinue() throws ParserException {
+    private Expression parseFlowControl() throws ParserException {
         Token token = consume();
         if (token.getText().equals("continue")) {
-            return new ContinueOp(token.getTokenLocation());
+            return new Continue(token.getTokenLocation());
+        } else if (token.getText().equals("return")) {
+            Expression value = parseExpression();
+            return new Return(value, token.getTokenLocation());
         } else {
-            return new BreakOp(token.getTokenLocation());
+            return new Break(token.getTokenLocation());
         }
+    }
+
+    private Expression parseFunctionDefinition() throws ParserException {
+        consume("fun");
+        String functionName = consume().getText();
+        consume("(");
+        List<FunctionArgumentDefinition> functionArgs = new ArrayList<>();
+        while (!peek().getText().equals(")")) {
+            String argName = consume().getText();
+            consume(":");
+            String argType = consume().getText();
+            if (!peek().getText().equals(")")) {
+                consume(",");
+            }
+            functionArgs.add(new FunctionArgumentDefinition(argName, argType, peek().getTokenLocation()));
+        }
+        consume(")");
+        consume(":");
+        String returnType = consume().getText();
+        Block block = (Block) parseBlock();
+        return new FunctionDefinition(functionName, functionArgs, returnType, block, block.getLocation());
     }
 
     private Expression parseBlock() throws ParserException {
@@ -292,8 +318,9 @@ public class Parser {
             } else if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
                 block.addExpression(parseVariableDefinition());
             } else if (checkNextToken(TokenType.KEYWORD, Optional.of("break")) ||
+                    checkNextToken(TokenType.KEYWORD, Optional.of("return")) ||
                     checkNextToken(TokenType.KEYWORD, Optional.of("continue"))) {
-                block.addExpression(parseBreakAndContinue());
+                block.addExpression(parseFlowControl());
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
                 Token uniToken = consume(";");
@@ -327,7 +354,7 @@ public class Parser {
                     checkNextToken(TokenType.STRING_LITERAL, Optional.empty()) ||
                     checkNextToken(TokenType.INTEGER_LITERAL, Optional.empty()) ||
                     checkNextToken(TokenType.BOOLEAN_LITERAL, Optional.empty()) ||
-            checkNextToken(TokenType.PUNCTUATION, Optional.of("("))) {
+                    checkNextToken(TokenType.PUNCTUATION, Optional.of("("))) {
                 Expression expression = parseExpression();
                 block.addExpression(expression);
             } else if (checkNextToken(TokenType.OPERATOR, Optional.of("-")) ||
@@ -344,8 +371,12 @@ public class Parser {
                 return block;
             } else if (checkNextToken(TokenType.KEYWORD, Optional.of("var"))) {
                 block.addExpression(parseVariableDefinition());
-            } else if (checkNextToken(TokenType.KEYWORD, Optional.of("break"))) {
-                block.addExpression(parseBreakAndContinue());
+            } else if (checkNextToken(TokenType.KEYWORD, Optional.of("break")) ||
+                    checkNextToken(TokenType.KEYWORD, Optional.of("return")) ||
+                    checkNextToken(TokenType.KEYWORD, Optional.of("continue"))) {
+                block.addExpression(parseFlowControl());
+            } else if (checkNextToken(TokenType.KEYWORD, Optional.of("fun"))) {
+                block.addExpression(parseFunctionDefinition());
             }
             if (checkNextToken(TokenType.PUNCTUATION, Optional.of(";"))) {
                 consume(";");

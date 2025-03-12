@@ -158,6 +158,34 @@ public class TypeChecker {
                     throw new TypeCheckerException("Expected a Boolean type for the conditional type.");
                 }
             }
+            case FunctionDefinition functionDefinition: {
+                SymbolTable localSymbolTable = new SymbolTable(symbolTable);
+                for (FunctionArgumentDefinition argument : functionDefinition.getArguments()) {
+                    Type argType;
+                    if (argument.getArgType().equals("Int")) {
+                        argType = new IntType();
+                    } else {
+                        argType = new BooleanType();
+                    }
+                    argument.setType(argType);
+                    localSymbolTable.putType(argument.getName(), argType);
+                }
+                Type returnType;
+                if (functionDefinition.getReturnType().equals("Int")) {
+                    returnType = new IntType();
+                } else if (functionDefinition.getReturnType().equals("Bool")) {
+                    returnType = new BooleanType();
+                } else {
+                    returnType = new UnitType();
+                }
+                functionDefinition.setType(returnType);
+                Optional<Type> bodyType = checkType(functionDefinition.getBlock(), localSymbolTable);
+                if (!returnType.getTypeStr().equals(bodyType.get().getTypeStr())) {
+                    throw new TypeCheckerException("Type mismatch for function, return type: " + returnType + ", actual return type: " + bodyType);
+                }
+                symbolTable.putType(functionDefinition.getFunctionName(), returnType);
+                return Optional.of(returnType);
+            }
             case WhileOp whileOp: {
                 Optional<Type> condition = checkType(whileOp.getCondition(), symbolTable);
                 if (condition.get() instanceof BooleanType) {
@@ -190,15 +218,20 @@ public class TypeChecker {
                 }
                 return Optional.of(new UnitType());
             }
-            case BreakOp breakOp: {
+            case Break breakOp: {
                 UnitType unitType = new UnitType();
                 breakOp.setType(unitType);
                 return Optional.of(unitType);
             }
-            case ContinueOp continueOp: {
+            case Continue continueOp: {
                 UnitType unitType = new UnitType();
                 continueOp.setType(unitType);
                 return Optional.of(unitType);
+            }
+            case Return returnExp: {
+                Optional<Type> valueType = checkType(returnExp.getValue(), symbolTable);
+                returnExp.setType(valueType.get());
+                return valueType;
             }
             default: {
                 throw new TypeCheckerException("Invalid type found: " + expression.getLocation());

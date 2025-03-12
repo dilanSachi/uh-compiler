@@ -187,6 +187,27 @@ public class TokenizerTests {
         assertEquals(tokens.size(), 21);
     }
 
+    @Test
+    public void testFunctionDefinitions() {
+        String sourceCode = "fun square(x: Int): Int {\n" +
+                "    return x * x;\n" +
+                "}\n" +
+                "\n" +
+                "fun vec_len_squared(x: Int, y: Int): Int {\n" +
+                "    return square(x) + square(y);\n" +
+                "}\n" +
+                "\n" +
+                "fun print_int_twice(x: Int): Unit {\n" +
+                "    print_int(x);\n" +
+                "    print_int(x);\n" +
+                "}\n" +
+                "\n" +
+                "print_int_twice(vec_len_squared(3, 4));";
+        Tokenizer testTokenizer = new Tokenizer();
+        List<Token> tokens = testTokenizer.tokenize(sourceCode, "Testfile.dl");
+        assertEquals(tokens.size(), 73);
+    }
+
     private void assertTokens(List<Token> resultTokenList, Token[] expectedTokens) {
         assertEquals(expectedTokens.length, resultTokenList.size());
         Token[] resultTokens = resultTokenList.toArray(new Token[resultTokenList.size()]);

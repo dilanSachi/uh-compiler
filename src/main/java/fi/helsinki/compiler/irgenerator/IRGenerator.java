@@ -231,12 +231,12 @@ public class IRGenerator {
                         resultVariable, functionCall.getLocation()));
                 return resultVariable;
             }
-            case BreakOp breakOp: {
+            case Break breakOp: {
                 Jump jumpIns = new Jump(whileEndLabelStack.pop(), breakOp.getLocation());
                 instructions.add(jumpIns);
                 return createVariable(new UnitType());
             }
-            case ContinueOp continueOp: {
+            case Continue continueOp: {
                 Jump jumpIns = new Jump(whileStartLabelStack.pop(), continueOp.getLocation());
                 instructions.add(jumpIns);
                 return createVariable(new UnitType());

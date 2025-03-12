@@ -15,8 +15,8 @@ public class Tokenizer {
     private static final Pattern patternComment = Pattern.compile("^((\\/\\/|#).*?(\\n|$))");
     private static final Pattern patternIdentifier = Pattern.compile("^(((?!var(?![a-zA-Z]))(?<![a-zA-Z])[a-z|A-Z|_]+[a-z|A-Z|_|0-9]*)|((var)[a-z|A-Z|_|0-9]+))");
     private static final Pattern patternOperator = Pattern.compile("^(==|or |and |=|!=|<=|>=|>|<|\\+|-|\\*|\\/|%)");
-    private static final Pattern patternKeyword = Pattern.compile("^(if|while|function|var|do|then|else)( |\n|$)");
-    private static final Pattern patternBreakContinue = Pattern.compile("^(break|continue)( |\n|;|\\)|\\+|-|\\*|/|}|%|$)");
+    private static final Pattern patternKeyword = Pattern.compile("^(if|while|function|var|do|then|else|fun|Unit)( |\n|$)");
+    private static final Pattern patternFlowControl = Pattern.compile("^(break|continue|return)( |\n|;|\\)|\\+|-|\\*|/|}|%|$)");
     private static final Pattern patternNewline = Pattern.compile("^\n");
     private static final Pattern patternStringLiteral = Pattern.compile("^\".*?\"");
     private static final Pattern patternIntegerLiteral = Pattern.compile("^[0-9]+");
@@ -73,7 +73,7 @@ public class Tokenizer {
                 }
                 continue;
             }
-            matcher = patternBreakContinue.matcher(sourceCode);
+            matcher = patternFlowControl.matcher(sourceCode);
             if (matcher.find()) {
                 String keyword;
                 if (matcher.hitEnd()) {
