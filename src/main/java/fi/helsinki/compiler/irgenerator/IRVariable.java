@@ -16,6 +16,11 @@ public class IRVariable {
         this.type = type;
     }
 
+    public IRVariable(String varName, Type type) {
+        this.name = varName;
+        this.type = type;
+    }
+
     public String getName() {
         return name;
     }

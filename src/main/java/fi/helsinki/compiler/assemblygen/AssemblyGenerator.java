@@ -4,7 +4,6 @@ import fi.helsinki.compiler.irgenerator.IRVariable;
 import fi.helsinki.compiler.irgenerator.instructions.*;
 
 import java.lang.reflect.Field;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,14 +16,27 @@ public class AssemblyGenerator {
 
     public String generateAssembly(List<Instruction> instructions) throws ClassNotFoundException, IllegalAccessException {
         List<String> lines = new ArrayList<>();
-        Locals locals = new Locals(getAllIRVariables(instructions));
         lines.add(".extern print_int");
         lines.add(".extern print_bool");
         lines.add(".extern read_int");
-        lines.add(".global main");
-        lines.add(".type main, @function");
         lines.add(".section .text");
-        lines.add("main:");
+        if (!instructions.isEmpty() && instructions.getFirst() instanceof FunctionDefinitionIns) {
+            for (FunctionDefinitionIns instruction : (FunctionDefinitionIns[]) instructions.toArray()) {
+                lines.addAll(generateAssemblyForFunction(instruction.getFunctionName(), instruction.getFunctionInstructions()));
+            }
+        } else {
+            lines.addAll(generateAssemblyForFunction("main", instructions));
+        }
+        return String.join("\n", lines);
+    }
+
+    private List<String> generateAssemblyForFunction(String functionName, List<Instruction> instructions) throws ClassNotFoundException,
+            IllegalAccessException {
+        List<String> lines = new ArrayList<>();
+        Locals locals = new Locals(getAllIRVariables(instructions));
+        lines.add(".global " + functionName);
+        lines.add(".type " + functionName + ", @function");
+        lines.add(functionName+ ":");
         lines.add("pushq %rbp");
         lines.add("movq %rsp, %rbp");
         lines.add("subq $" + locals.getStackUsed() + ", %rsp");
@@ -73,6 +85,10 @@ public class AssemblyGenerator {
                     IntrinsicAssemblyGenerator.generateIntrinsicAssemblyLines(lines,
                             callIns.getFunction().getType().getTypeStr(), argRegisters, "%rax");
                     lines.add("movq %rax, " + locals.getRef(callIns.getDestination()));
+                    break;
+                }
+                case FunctionDefinitionIns functionDefinitionIns: {
+
                 }
                 default: {}
             }
@@ -81,7 +97,7 @@ public class AssemblyGenerator {
         lines.add("movq %rbp, %rsp");
         lines.add("popq %rbp");
         lines.add("ret");
-        return String.join("\n", lines);
+        return lines;
     }
 
     private List<IRVariable> getAllIRVariables(List<Instruction> instructions) throws ClassNotFoundException, IllegalAccessException {

@@ -1,8 +1,8 @@
 package fi.helsinki.compiler.common.expressions;
 
 import fi.helsinki.compiler.common.Location;
-import fi.helsinki.compiler.common.types.Type;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionDefinition extends Expression {
@@ -40,5 +40,14 @@ public class FunctionDefinition extends Expression {
     @Override
     public Location getLocation() {
         return super.getLocation();
+    }
+
+    @Override
+    public String toString() {
+        List<String> args = new ArrayList<>();
+        for (FunctionArgumentDefinition argument : arguments) {
+            args.add(argument.getName());
+        }
+        return functionName + "(" + String.join(",", args) + ")";
     }
 }

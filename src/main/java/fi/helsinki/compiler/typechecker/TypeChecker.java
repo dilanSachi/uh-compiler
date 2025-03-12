@@ -160,6 +160,7 @@ public class TypeChecker {
             }
             case FunctionDefinition functionDefinition: {
                 SymbolTable localSymbolTable = new SymbolTable(symbolTable);
+                List<Type> argTypes = new ArrayList<>();
                 for (FunctionArgumentDefinition argument : functionDefinition.getArguments()) {
                     Type argType;
                     if (argument.getArgType().equals("Int")) {
@@ -168,6 +169,7 @@ public class TypeChecker {
                         argType = new BooleanType();
                     }
                     argument.setType(argType);
+                    argTypes.add(argType);
                     localSymbolTable.putType(argument.getName(), argType);
                 }
                 Type returnType;
@@ -178,12 +180,13 @@ public class TypeChecker {
                 } else {
                     returnType = new UnitType();
                 }
-                functionDefinition.setType(returnType);
+                FunctionType functionType = new FunctionType(functionDefinition.getFunctionName(), returnType, argTypes.toArray(new Type[]{}));
+                functionDefinition.setType(functionType);
                 Optional<Type> bodyType = checkType(functionDefinition.getBlock(), localSymbolTable);
                 if (!returnType.getTypeStr().equals(bodyType.get().getTypeStr())) {
                     throw new TypeCheckerException("Type mismatch for function, return type: " + returnType + ", actual return type: " + bodyType);
                 }
-                symbolTable.putType(functionDefinition.getFunctionName(), returnType);
+                symbolTable.putType(functionDefinition.getFunctionName(), functionType);
                 return Optional.of(returnType);
             }
             case WhileOp whileOp: {

@@ -26,9 +26,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -55,9 +55,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -102,9 +102,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -141,9 +141,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -174,9 +174,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -225,9 +225,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -277,9 +277,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -315,9 +315,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -403,9 +403,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -446,9 +446,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
