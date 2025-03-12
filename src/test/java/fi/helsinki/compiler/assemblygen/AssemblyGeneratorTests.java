@@ -478,6 +478,54 @@ public class AssemblyGeneratorTests {
                 "ret", assemblyCode);
     }
 
+    @Test
+    public void testFunctionDefinition() throws Exception {
+        List<Instruction> instructions = generateInstructions("fun f(x:Bool, y:Int):Int {\n" +
+            " if (x) then {\n" +
+                    "  return y\n" +
+                    " } else {\n" +
+                    "  return 2\n" +
+                    " }\n" +
+                    "}\n" +
+                    "\n" +
+                    "f(true, 5)");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".section .text\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $8, %rsp\n" +
+                "#Label(while_start)\n" +
+                "\n" +
+                ".Lwhile_start:\n" +
+                "#LoadBoolConst(true,x12)\n" +
+                "movq $1, -8(%rbp)\n" +
+                "#CondJump(x12,Label(do),Label(end))\n" +
+                "cmpq $0, -8(%rbp)\n" +
+                "jne .Ldo\n" +
+                "jmp .Lend\n" +
+                "#Label(do)\n" +
+                "\n" +
+                ".Ldo:\n" +
+                "#Jump(Label(end))\n" +
+                "jmp .Lend\n" +
+                "#Jump(Label(while_start))\n" +
+                "jmp .Lwhile_start\n" +
+                "#Label(end)\n" +
+                "\n" +
+                ".Lend:\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
+    }
+
     private List<Instruction> generateInstructions(String sourceCode) throws ParserException, TypeCheckerException,
             IRGenerationException {
         Parser parser = new Parser(new Tokenizer().tokenize(sourceCode, "TestFile.dl"));

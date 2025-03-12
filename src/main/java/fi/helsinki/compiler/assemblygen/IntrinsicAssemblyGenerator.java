@@ -30,6 +30,10 @@ public class IntrinsicAssemblyGenerator {
     public static void generateIntrinsicAssemblyLines(List<String> assemblyLines, String operator, List<String> argRefs, String resultRegister) {
         intrinsicMap.get(operator).generate(assemblyLines, argRefs, resultRegister);
     }
+
+    public static boolean hasIntrinsic(String operator) {
+        return intrinsicMap.containsKey(operator);
+    }
 }
 
 interface Intrinsic {

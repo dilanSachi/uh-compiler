@@ -57,7 +57,7 @@ public class IRGenerator {
             List<Instruction> moduleInstructions = new ArrayList<>();
             moduleInstructions.addAll(functionDefinitions);
             instructions.add(new ReturnIns(new IRVariable("None", new UnitType()), rootExpression.getLocation()));
-            FunctionDefinitionIns mainFunctionDefIns = new FunctionDefinitionIns("main()", instructions, rootExpression.getLocation());
+            FunctionDefinitionIns mainFunctionDefIns = new FunctionDefinitionIns("main", instructions, rootExpression.getLocation());
             moduleInstructions.add(mainFunctionDefIns);
             return moduleInstructions;
         }
@@ -258,7 +258,8 @@ public class IRGenerator {
                 }
                 List<Instruction> functionInstructions = new ArrayList<>();
                 visit(functionDefinition.getBlock(), localSymbolTable, functionInstructions);
-                FunctionDefinitionIns funcDefInstruction = new FunctionDefinitionIns(functionDefinition.toString(), functionInstructions, functionDefinition.getLocation());
+                FunctionDefinitionIns funcDefInstruction = new FunctionDefinitionIns(functionDefinition.getFunctionName(),
+                        functionInstructions, functionDefinition.getLocation());
                 functionDefinitions.add(funcDefInstruction);
                 IRVariable functionVariable = new IRVariable(functionDefinition.getFunctionName(), functionDefinition.getType());
                 symbolTable.putVariable(functionDefinition.getFunctionName(), functionVariable);

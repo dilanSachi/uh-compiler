@@ -4,15 +4,14 @@ import fi.helsinki.compiler.irgenerator.IRVariable;
 import fi.helsinki.compiler.irgenerator.instructions.*;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class AssemblyGenerator {
 
     private List<IRVariable> resultList = new ArrayList<>();
     private Set<IRVariable> resultSet = new HashSet<>();
+    private Map<String, FunctionDefinitionIns> functionDefinitionInsMap = new HashMap<>();
+    private final String[] PARAMETER_REGISTERS = new String[]{"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
 
     public String generateAssembly(List<Instruction> instructions) throws ClassNotFoundException, IllegalAccessException {
         List<String> lines = new ArrayList<>();
@@ -21,8 +20,9 @@ public class AssemblyGenerator {
         lines.add(".extern read_int");
         lines.add(".section .text");
         if (!instructions.isEmpty() && instructions.getFirst() instanceof FunctionDefinitionIns) {
-            for (FunctionDefinitionIns instruction : (FunctionDefinitionIns[]) instructions.toArray()) {
+            for (FunctionDefinitionIns instruction : instructions.toArray(new FunctionDefinitionIns[]{})) {
                 lines.addAll(generateAssemblyForFunction(instruction.getFunctionName(), instruction.getFunctionInstructions()));
+                functionDefinitionInsMap.put(instruction.getFunctionName(), instruction);
             }
         } else {
             lines.addAll(generateAssemblyForFunction("main", instructions));
@@ -82,12 +82,21 @@ public class AssemblyGenerator {
                     for (IRVariable irVariable : irVariables) {
                         argRegisters.add(locals.getRef(irVariable));
                     }
-                    IntrinsicAssemblyGenerator.generateIntrinsicAssemblyLines(lines,
-                            callIns.getFunction().getType().getTypeStr(), argRegisters, "%rax");
+                    if (IntrinsicAssemblyGenerator.hasIntrinsic(callIns.getFunction().getType().getTypeStr())) {
+                        IntrinsicAssemblyGenerator.generateIntrinsicAssemblyLines(lines,
+                                callIns.getFunction().getType().getTypeStr(), argRegisters, "%rax");
+                    } else {
+                        FunctionDefinitionIns funDefIns = functionDefinitionInsMap.get(callIns.getFunction().getName());
+
+                    }
                     lines.add("movq %rax, " + locals.getRef(callIns.getDestination()));
                     break;
                 }
-                case FunctionDefinitionIns functionDefinitionIns: {
+                case ReturnIns returnIns: {
+                    lines.add("moveq " + locals.getRef(returnIns.getValue()) + ", %rax");
+                    lines.add("movq %rbp, %rsp");
+                    lines.add("popq %rbp");
+                    lines.add("ret");
 
                 }
                 default: {}
