@@ -478,7 +478,7 @@ public class AssemblyGeneratorTests {
                 "ret", assemblyCode);
     }
 
-//    @Test
+    @Test
     public void testFunctionDefinition() throws Exception {
         List<Instruction> instructions = generateInstructions("fun f(x:Bool, y:Int):Int {\n" +
             " if (x) then {\n" +
@@ -510,7 +510,7 @@ public class AssemblyGeneratorTests {
                 "#Label(then)\n" +
                 "\n" +
                 ".Lthen:\n" +
-                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@28b576a9\n" +
+                "#Return(y)\n" +
                 "movq -16(%rbp), %rax\n" +
                 "movq %rbp, %rsp\n" +
                 "popq %rbp\n" +
@@ -525,7 +525,7 @@ public class AssemblyGeneratorTests {
                 ".Lelse:\n" +
                 "#LoadIntConst(2,x13)\n" +
                 "movq $2, -32(%rbp)\n" +
-                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@2ba45490\n" +
+                "#Return(x13)\n" +
                 "movq -32(%rbp), %rax\n" +
                 "movq %rbp, %rsp\n" +
                 "popq %rbp\n" +
@@ -565,7 +565,7 @@ public class AssemblyGeneratorTests {
                 "ret", assemblyCode);
     }
 
-//    @Test
+    @Test
     public void testFunctionWithMultiplication() throws Exception {
         List<Instruction> instructions = generateInstructions("fun square(x: Int): Int {\n" +
                 "    return x * x;\n" +
@@ -583,14 +583,14 @@ public class AssemblyGeneratorTests {
                 "square:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
-                "movq %rdi, null\n" +
-                "subq $16, %rsp\n" +
+                "movq %rdi, -16(%rbp)\n" +
+                "subq $24, %rsp\n" +
                 "#Call(*,[x, x],x12)\n" +
-                "movq null, %rax\n" +
-                "imulq null, %rax\n" +
-                "movq %rax, -16(%rbp)\n" +
-                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@78d50a3c\n" +
                 "movq -16(%rbp), %rax\n" +
+                "imulq -16(%rbp), %rax\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Return(x12)\n" +
+                "movq -24(%rbp), %rax\n" +
                 "movq %rbp, %rsp\n" +
                 "popq %rbp\n" +
                 "ret\n" +
@@ -620,7 +620,7 @@ public class AssemblyGeneratorTests {
                 "ret", assemblyCode);
     }
 
-//    @Test
+    @Test
     public void testFunctionDefinitionWithSemicolon() throws Exception {
         List<Instruction> instructions = generateInstructions("fun f(x:Bool, y:Int):Int {\n" +
                 " if (x) then {\n" +
@@ -644,7 +644,7 @@ public class AssemblyGeneratorTests {
                 "movq %rsp, %rbp\n" +
                 "movq %rdi, -8(%rbp)\n" +
                 "movq %rsi, -16(%rbp)\n" +
-                "subq $32, %rsp\n" +
+                "subq $48, %rsp\n" +
                 "#CondJump(x,Label(then),Label(else))\n" +
                 "cmpq $0, -8(%rbp)\n" +
                 "jne .Lthen\n" +
@@ -652,29 +652,29 @@ public class AssemblyGeneratorTests {
                 "#Label(then)\n" +
                 "\n" +
                 ".Lthen:\n" +
-                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@28b576a9\n" +
+                "#Return(y)\n" +
                 "movq -16(%rbp), %rax\n" +
                 "movq %rbp, %rsp\n" +
                 "popq %rbp\n" +
                 "ret\n" +
-                "#Copy(y,x12)\n" +
-                "movq -16(%rbp), %rax\n" +
-                "movq %rax, -24(%rbp)\n" +
+                "#Copy(x13,x12)\n" +
+                "movq -24(%rbp), %rax\n" +
+                "movq %rax, -32(%rbp)\n" +
                 "#Jump(Label(end))\n" +
                 "jmp .Lend\n" +
                 "#Label(else)\n" +
                 "\n" +
                 ".Lelse:\n" +
-                "#LoadIntConst(2,x13)\n" +
-                "movq $2, -32(%rbp)\n" +
-                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@2ba45490\n" +
-                "movq -32(%rbp), %rax\n" +
+                "#LoadIntConst(2,x14)\n" +
+                "movq $2, -40(%rbp)\n" +
+                "#Return(x14)\n" +
+                "movq -40(%rbp), %rax\n" +
                 "movq %rbp, %rsp\n" +
                 "popq %rbp\n" +
                 "ret\n" +
-                "#Copy(x13,x12)\n" +
-                "movq -32(%rbp), %rax\n" +
-                "movq %rax, -24(%rbp)\n" +
+                "#Copy(x15,x12)\n" +
+                "movq -48(%rbp), %rax\n" +
+                "movq %rax, -32(%rbp)\n" +
                 "#Label(end)\n" +
                 "\n" +
                 ".Lend:\n" +
@@ -688,16 +688,16 @@ public class AssemblyGeneratorTests {
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
                 "subq $48, %rsp\n" +
-                "#LoadBoolConst(true,x14)\n" +
+                "#LoadBoolConst(true,x16)\n" +
                 "movq $1, -8(%rbp)\n" +
-                "#LoadIntConst(5,x15)\n" +
+                "#LoadIntConst(5,x17)\n" +
                 "movq $5, -16(%rbp)\n" +
-                "#Call(f,[x14, x15],x16)\n" +
+                "#Call(f,[x16, x17],x18)\n" +
                 "movq -8(%rbp), %rdi\n" +
                 "movq -16(%rbp), %rsi\n" +
                 "callq f\n" +
                 "movq %rax, -32(%rbp)\n" +
-                "#Call(print_int,[x16],x18)\n" +
+                "#Call(print_int,[x18],x20)\n" +
                 "movq -32(%rbp), %rdi\n" +
                 "callq print_int\n" +
                 "movq %rax, -48(%rbp)\n" +
@@ -707,7 +707,7 @@ public class AssemblyGeneratorTests {
                 "ret", assemblyCode);
     }
 
-//    @Test
+    @Test
     public void testMultipleFunctionDefinition() throws Exception {
         List<Instruction> instructions = generateInstructions("fun f(x: Int): Int {\n" +
                 "    return g(x + 1);\n" +
@@ -732,39 +732,78 @@ public class AssemblyGeneratorTests {
                 "f:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
-                "movq %rdi, -8(%rbp)\n" +
-                "movq %rsi, -16(%rbp)\n" +
-                "subq $32, %rsp\n" +
-                "#CondJump(x,Label(then),Label(else))\n" +
-                "cmpq $0, -8(%rbp)\n" +
+                "movq %rdi, -24(%rbp)\n" +
+                "subq $48, %rsp\n" +
+                "#LoadIntConst(1,x12)\n" +
+                "movq $1, -8(%rbp)\n" +
+                "#Call(+,[x, x12],x13)\n" +
+                "movq -24(%rbp), %rax\n" +
+                "addq -8(%rbp), %rax\n" +
+                "movq %rax, -32(%rbp)\n" +
+                "#Call(g,[x13],x14)\n" +
+                "movq -32(%rbp), %rdi\n" +
+                "callq g\n" +
+                "movq %rax, -48(%rbp)\n" +
+                "#Return(x14)\n" +
+                "movq -48(%rbp), %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                ".global g\n" +
+                ".type g, @function\n" +
+                "g:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "movq %rdi, -16(%rbp)\n" +
+                "subq $88, %rsp\n" +
+                "#Call(print_int,[x],x16)\n" +
+                "movq -16(%rbp), %rdi\n" +
+                "callq print_int\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#LoadIntConst(5,x17)\n" +
+                "movq $5, -32(%rbp)\n" +
+                "#Call(<,[x, x17],x18)\n" +
+                "xor %rax, %rax\n" +
+                "movq -16(%rbp), %rdx\n" +
+                "cmpq -32(%rbp), %rdx\n" +
+                "setl %al\n" +
+                "movq %rax, -48(%rbp)\n" +
+                "#CondJump(x18,Label(then),Label(else))\n" +
+                "cmpq $0, -48(%rbp)\n" +
                 "jne .Lthen\n" +
                 "jmp .Lelse\n" +
                 "#Label(then)\n" +
                 "\n" +
                 ".Lthen:\n" +
-                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@28b576a9\n" +
-                "movq -16(%rbp), %rax\n" +
+                "#Call(f,[x],x20)\n" +
+                "movq -16(%rbp), %rdi\n" +
+                "callq f\n" +
+                "movq %rax, -64(%rbp)\n" +
+                "#Return(x20)\n" +
+                "movq -64(%rbp), %rax\n" +
                 "movq %rbp, %rsp\n" +
                 "popq %rbp\n" +
                 "ret\n" +
-                "#Copy(y,x12)\n" +
-                "movq -16(%rbp), %rax\n" +
-                "movq %rax, -24(%rbp)\n" +
+                "#Copy(x21,x19)\n" +
+                "movq -72(%rbp), %rax\n" +
+                "movq %rax, -80(%rbp)\n" +
                 "#Jump(Label(end))\n" +
                 "jmp .Lend\n" +
                 "#Label(else)\n" +
                 "\n" +
                 ".Lelse:\n" +
-                "#LoadIntConst(2,x13)\n" +
-                "movq $2, -32(%rbp)\n" +
-                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@2ba45490\n" +
-                "movq -32(%rbp), %rax\n" +
+                "#Return(x)\n" +
+                "movq -16(%rbp), %rax\n" +
                 "movq %rbp, %rsp\n" +
                 "popq %rbp\n" +
                 "ret\n" +
-                "#Copy(x13,x12)\n" +
-                "movq -32(%rbp), %rax\n" +
-                "movq %rax, -24(%rbp)\n" +
+                "#Copy(x22,x19)\n" +
+                "movq -88(%rbp), %rax\n" +
+                "movq %rax, -80(%rbp)\n" +
                 "#Label(end)\n" +
                 "\n" +
                 ".Lend:\n" +
@@ -777,20 +816,23 @@ public class AssemblyGeneratorTests {
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
-                "subq $48, %rsp\n" +
-                "#LoadBoolConst(true,x14)\n" +
+                "subq $64, %rsp\n" +
+                "#LoadIntConst(1,x23)\n" +
                 "movq $1, -8(%rbp)\n" +
-                "#LoadIntConst(5,x15)\n" +
-                "movq $5, -16(%rbp)\n" +
-                "#Call(f,[x14, x15],x16)\n" +
+                "#Call(f,[x23],x24)\n" +
                 "movq -8(%rbp), %rdi\n" +
-                "movq -16(%rbp), %rsi\n" +
                 "callq f\n" +
-                "movq %rax, -32(%rbp)\n" +
-                "#Call(print_int,[x16],x18)\n" +
-                "movq -32(%rbp), %rdi\n" +
-                "callq print_int\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#LoadIntConst(100,x25)\n" +
+                "movq $100, -32(%rbp)\n" +
+                "#Call(*,[x24, x25],x26)\n" +
+                "movq -24(%rbp), %rax\n" +
+                "imulq -32(%rbp), %rax\n" +
                 "movq %rax, -48(%rbp)\n" +
+                "#Call(print_int,[x26],x28)\n" +
+                "movq -48(%rbp), %rdi\n" +
+                "callq print_int\n" +
+                "movq %rax, -64(%rbp)\n" +
                 "movq $0, %rax\n" +
                 "movq %rbp, %rsp\n" +
                 "popq %rbp\n" +

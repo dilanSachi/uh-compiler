@@ -15,4 +15,9 @@ public class ReturnIns extends Instruction {
     public IRVariable getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "Return(" + value+ ")";
+    }
 }
