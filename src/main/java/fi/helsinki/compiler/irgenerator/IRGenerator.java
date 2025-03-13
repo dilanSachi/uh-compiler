@@ -42,6 +42,9 @@ public class IRGenerator {
 
     public List<Instruction> generateIR(Expression rootExpression) throws IRGenerationException {
         SymbolTable rootSymbolTable = new SymbolTable(null);
+        if (rootExpression instanceof Block block) {
+            handleFunctionDefinitions(block.getExpressionList(), rootSymbolTable);
+        }
         for (IRVariable key: variableTypeMap.keySet()) {
             rootSymbolTable.putVariable(key.getType().getTypeStr(), key);
         }
@@ -56,12 +59,22 @@ public class IRGenerator {
         if (!functionDefinitions.isEmpty()) {
             List<Instruction> moduleInstructions = new ArrayList<>();
             moduleInstructions.addAll(functionDefinitions);
-            instructions.add(new ReturnIns(new IRVariable("None", new UnitType()), rootExpression.getLocation()));
-            FunctionDefinitionIns mainFunctionDefIns = new FunctionDefinitionIns("main", instructions, rootExpression.getLocation());
+//            instructions.add(new ReturnIns(new IRVariable("None", new UnitType()), rootExpression.getLocation()));
+            FunctionDefinitionIns mainFunctionDefIns = new FunctionDefinitionIns("main", instructions,
+                    new ArrayList<>(), rootExpression.getLocation());
             moduleInstructions.add(mainFunctionDefIns);
             return moduleInstructions;
         }
         return instructions;
+    }
+
+    private void handleFunctionDefinitions(List<Expression> expressionList, SymbolTable rootSymbolTable) {
+        for (Expression expression : expressionList) {
+            if (expression instanceof FunctionDefinition functionDefinition) {
+                IRVariable functionVariable = new IRVariable(functionDefinition.getFunctionName(), functionDefinition.getType());
+                rootSymbolTable.putVariable(functionDefinition.getFunctionName(), functionVariable);
+            }
+        }
     }
 
     private IRVariable visit(Expression expression, SymbolTable symbolTable, 
@@ -252,18 +265,21 @@ public class IRGenerator {
             }
             case FunctionDefinition functionDefinition: {
                 SymbolTable localSymbolTable = new SymbolTable(symbolTable);
+                List<IRVariable> parameterVariables = new ArrayList<>();
                 for (FunctionArgumentDefinition argument : functionDefinition.getArguments()) {
                     IRVariable variable = new IRVariable(argument.getName(), argument.getType());
                     localSymbolTable.putVariable(argument.getName(), variable);
+                    parameterVariables.add(variable);
                 }
                 List<Instruction> functionInstructions = new ArrayList<>();
                 visit(functionDefinition.getBlock(), localSymbolTable, functionInstructions);
                 FunctionDefinitionIns funcDefInstruction = new FunctionDefinitionIns(functionDefinition.getFunctionName(),
-                        functionInstructions, functionDefinition.getLocation());
+                        functionInstructions, parameterVariables, functionDefinition.getLocation());
                 functionDefinitions.add(funcDefInstruction);
-                IRVariable functionVariable = new IRVariable(functionDefinition.getFunctionName(), functionDefinition.getType());
-                symbolTable.putVariable(functionDefinition.getFunctionName(), functionVariable);
-                return functionVariable;
+//                IRVariable functionVariable = new IRVariable(functionDefinition.getFunctionName(), functionDefinition.getType());
+//                symbolTable.putVariable(functionDefinition.getFunctionName(), functionVariable);
+//                return functionVariable;
+                return symbolTable.getVariable(functionDefinition.getFunctionName());
             }
             case Return returnDef: {
                 IRVariable valueVariable = visit(returnDef.getValue(), symbolTable, instructionList);

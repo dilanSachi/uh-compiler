@@ -93,7 +93,7 @@ These are the main parts of the implementation stages/progress of the compiler.
   - [x] Function call
   - [x] Type declaration
   - [x] Break, Continue
-  - [ ] Function support
+  - [x] Function support
 - [x] Interpreter - This is an optional part of the compiler which is done for learning
   - [x] Basic recursion
   - [x] Symbol table
@@ -102,7 +102,7 @@ These are the main parts of the implementation stages/progress of the compiler.
   - [x] Conditional block
   - [x] While block
   - [x] Break, Continue
-  - [ ] Function support
+  - [x] Function support
 - [x] Type Checker
   - [x] Positive test cases
   - [ ] Negative test cases
@@ -116,7 +116,7 @@ These are the main parts of the implementation stages/progress of the compiler.
   - [x] Function call
   - [x] Type declaration
   - [x] Break, Continue
-  - [ ] Function support
+  - [x] Function support
 - [ ] Assembly Generator
   - [x] Operators
   - [x] Assemble
