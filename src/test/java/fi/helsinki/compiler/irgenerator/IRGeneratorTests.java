@@ -293,6 +293,20 @@ public class IRGeneratorTests {
         assertEquals(instructions.get(56).toString(), "Call(print_int,[x27],x56)");
     }
 
+    @Test
+    public void testFunctionDefinition() throws ParserException, TypeCheckerException, IRGenerationException {
+        List<Instruction> instructions = generateInstructions("fun f(x:Bool, y:Int):Int {\n" +
+                " if (x) then {\n" +
+                "  return y\n" +
+                " } else {\n" +
+                "  return 2\n" +
+                " }\n" +
+                "}\n" +
+                "\n" +
+                "f(true, 5)");
+        assertEquals(instructions.size(), 2);
+    }
+
     private List<Instruction> generateInstructions(String sourceCode) throws ParserException, TypeCheckerException,
             IRGenerationException {
         Parser parser = new Parser(new Tokenizer().tokenize(sourceCode, "TestFile.dl"));

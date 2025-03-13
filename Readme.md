@@ -35,7 +35,7 @@ You can use the compiler as a one time compilation tool or as a language server 
 At the moment, the compiler can be run on Docker as a language server as well. Run `docker build -t . yourname/image_name:version` to build the image and run `docker run -p 3000:3000 yourname/image_name:version` to start the container. Container will respond to TCP requests as stated above.
 
 ### Language Spec
-**Note** Copied from the course page.
+**Note:** Copied from the course page.
 
 An expression is defined recursively as follows, where `E`, `E1`, `E2`, `…` `En` represent some other arbitrary expression.
 
@@ -93,7 +93,7 @@ These are the main parts of the implementation stages/progress of the compiler.
   - [x] Function call
   - [x] Type declaration
   - [x] Break, Continue
-  - [ ] Function support
+  - [x] Function support
 - [x] Interpreter - This is an optional part of the compiler which is done for learning
   - [x] Basic recursion
   - [x] Symbol table
@@ -102,7 +102,7 @@ These are the main parts of the implementation stages/progress of the compiler.
   - [x] Conditional block
   - [x] While block
   - [x] Break, Continue
-  - [ ] Function support
+  - [x] Function support
 - [x] Type Checker
   - [x] Positive test cases
   - [ ] Negative test cases
@@ -116,7 +116,7 @@ These are the main parts of the implementation stages/progress of the compiler.
   - [x] Function call
   - [x] Type declaration
   - [x] Break, Continue
-  - [ ] Function support
+  - [x] Function support
 - [ ] Assembly Generator
   - [x] Operators
   - [x] Assemble

@@ -13,7 +13,8 @@ import java.util.*;
 public class IRGenerator {
 
     private Map<IRVariable, Type> variableTypeMap;
-    private List<Instruction> instructions;
+    private List<Instruction> instructions = new ArrayList<>();;
+    private List<Instruction> functionDefinitions = new ArrayList<>();
     private CommonStatics commonStatics;
     private Stack<Label> whileStartLabelStack = new Stack<>();
     private Stack<Label> whileEndLabelStack = new Stack<>();
@@ -40,12 +41,14 @@ public class IRGenerator {
     }
 
     public List<Instruction> generateIR(Expression rootExpression) throws IRGenerationException {
-        instructions = new ArrayList<>();
         SymbolTable rootSymbolTable = new SymbolTable(null);
+        if (rootExpression instanceof Block block) {
+            handleFunctionDefinitions(block.getExpressionList(), rootSymbolTable);
+        }
         for (IRVariable key: variableTypeMap.keySet()) {
             rootSymbolTable.putVariable(key.getType().getTypeStr(), key);
         }
-        IRVariable finalResult = visit(rootExpression, rootSymbolTable);
+        IRVariable finalResult = visit(rootExpression, rootSymbolTable, instructions);
         if (variableTypeMap.get(finalResult) instanceof IntType) {
             instructions.add(new Call(createVariable(new FunctionType("print_int", new UnitType(), new IntType())),
                     new IRVariable[]{finalResult}, createVariable(new UnitType()), rootExpression.getLocation()));
@@ -53,29 +56,48 @@ public class IRGenerator {
             instructions.add(new Call(createVariable(new FunctionType("print_bool", new UnitType(), new BooleanType())),
                     new IRVariable[]{finalResult}, createVariable(new UnitType()), rootExpression.getLocation()));
         }
+        if (!functionDefinitions.isEmpty()) {
+            List<Instruction> moduleInstructions = new ArrayList<>();
+            moduleInstructions.addAll(functionDefinitions);
+//            instructions.add(new ReturnIns(new IRVariable("None", new UnitType()), rootExpression.getLocation()));
+            FunctionDefinitionIns mainFunctionDefIns = new FunctionDefinitionIns("main", instructions,
+                    new ArrayList<>(), rootExpression.getLocation());
+            moduleInstructions.add(mainFunctionDefIns);
+            return moduleInstructions;
+        }
         return instructions;
     }
 
-    private IRVariable visit(Expression expression, SymbolTable symbolTable) throws IRGenerationException {
+    private void handleFunctionDefinitions(List<Expression> expressionList, SymbolTable rootSymbolTable) {
+        for (Expression expression : expressionList) {
+            if (expression instanceof FunctionDefinition functionDefinition) {
+                IRVariable functionVariable = new IRVariable(functionDefinition.getFunctionName(), functionDefinition.getType());
+                rootSymbolTable.putVariable(functionDefinition.getFunctionName(), functionVariable);
+            }
+        }
+    }
+
+    private IRVariable visit(Expression expression, SymbolTable symbolTable, 
+                             List<Instruction> instructionList) throws IRGenerationException {
         Location location = expression.getLocation();
         switch (expression) {
             case IntLiteral intLiteral: {
                 IRVariable variable = createVariable(new IntType());
                 Instruction instruction = new LoadIntConst(intLiteral.getValue(), variable, location);
-                instructions.add(instruction);
+                instructionList.add(instruction);
                 return variable;
             }
             case BooleanLiteral booleanLiteral: {
                 IRVariable variable = createVariable(new BooleanType());
                 Instruction instruction = new LoadBoolConst(booleanLiteral.getValue(), variable, location);
-                instructions.add(instruction);
+                instructionList.add(instruction);
                 return variable;
             }
             case Identifier identifier: {
                 return symbolTable.getVariable(identifier.getName());
             }
             case UnaryOp unaryOp: {
-                IRVariable variable = visit(unaryOp.getExpression(), symbolTable);
+                IRVariable variable = visit(unaryOp.getExpression(), symbolTable, instructionList);
                 IRVariable resultVariable = createVariable(unaryOp.getType());
                 IRVariable operatorVariable;
                 if (unaryOp.getOperator().getText().equals("-")) {
@@ -83,82 +105,82 @@ public class IRGenerator {
                 } else {
                     operatorVariable = createVariable(new NotType());
                 }
-                instructions.add(new Call(operatorVariable, new IRVariable[]{variable}, resultVariable, unaryOp.getLocation()));
+                instructionList.add(new Call(operatorVariable, new IRVariable[]{variable}, resultVariable, unaryOp.getLocation()));
                 return resultVariable;
             }
             case BinaryOp binaryOp: {
                 Token operator = binaryOp.getOperator();
                 if (operator.getText().equals("=")) {
-                    IRVariable variable = visit(binaryOp.getRight(), symbolTable);
+                    IRVariable variable = visit(binaryOp.getRight(), symbolTable, instructionList);
                     IRVariable identifier = symbolTable.getVariable(((Identifier) binaryOp.getLeft()).getName());
-                    instructions.add(new Copy(variable, identifier, binaryOp.getLeft().getLocation()));
+                    instructionList.add(new Copy(variable, identifier, binaryOp.getLeft().getLocation()));
                     return identifier;
                 }
                 if (operator.getText().equals("and")) {
-                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
+                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable, instructionList);
                     Label andRightLabel = new Label(commonStatics, "and_right", binaryOp.getLeft().getLocation());
                     Label andSkipLabel = new Label(commonStatics, "and_skip", binaryOp.getLeft().getLocation());
                     Label andEndLabel = new Label(commonStatics, "and_end", binaryOp.getLocation());
-                    instructions.add(new CondJump(leftVariable, andRightLabel, andSkipLabel, binaryOp.getLocation()));
-                    instructions.add(andRightLabel);
-                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
+                    instructionList.add(new CondJump(leftVariable, andRightLabel, andSkipLabel, binaryOp.getLocation()));
+                    instructionList.add(andRightLabel);
+                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable, instructionList);
                     IRVariable resultVariable = createVariable(binaryOp.getType());
-                    instructions.add(new Copy(rightVariable, resultVariable, binaryOp.getLocation()));
-                    instructions.add(new Jump(andEndLabel, binaryOp.getLocation()));
-                    instructions.add(andSkipLabel);
-                    instructions.add(new LoadBoolConst(false, resultVariable, binaryOp.getLocation()));
-                    instructions.add(new Jump(andEndLabel, binaryOp.getLocation()));
-                    instructions.add(andEndLabel);
+                    instructionList.add(new Copy(rightVariable, resultVariable, binaryOp.getLocation()));
+                    instructionList.add(new Jump(andEndLabel, binaryOp.getLocation()));
+                    instructionList.add(andSkipLabel);
+                    instructionList.add(new LoadBoolConst(false, resultVariable, binaryOp.getLocation()));
+                    instructionList.add(new Jump(andEndLabel, binaryOp.getLocation()));
+                    instructionList.add(andEndLabel);
                     return resultVariable;
                 }
                 if (operator.getText().equals("or")) {
-                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
+                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable, instructionList);
                     Label orRightLabel = new Label(commonStatics, "or_right", binaryOp.getLeft().getLocation());
                     Label orSkipLabel = new Label(commonStatics, "or_skip", binaryOp.getLeft().getLocation());
                     Label orEndLabel = new Label(commonStatics, "or_end", binaryOp.getLocation());
-                    instructions.add(new CondJump(leftVariable, orSkipLabel, orRightLabel, binaryOp.getLocation()));
-                    instructions.add(orRightLabel);
-                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
+                    instructionList.add(new CondJump(leftVariable, orSkipLabel, orRightLabel, binaryOp.getLocation()));
+                    instructionList.add(orRightLabel);
+                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable, instructionList);
                     IRVariable resultVariable = createVariable(binaryOp.getType());
-                    instructions.add(new Copy(rightVariable, resultVariable, binaryOp.getLocation()));
-                    instructions.add(new Jump(orEndLabel, binaryOp.getLocation()));
-                    instructions.add(orSkipLabel);
-                    instructions.add(new LoadBoolConst(true, resultVariable, binaryOp.getLocation()));
-                    instructions.add(new Jump(orEndLabel, binaryOp.getLocation()));
-                    instructions.add(orEndLabel);
+                    instructionList.add(new Copy(rightVariable, resultVariable, binaryOp.getLocation()));
+                    instructionList.add(new Jump(orEndLabel, binaryOp.getLocation()));
+                    instructionList.add(orSkipLabel);
+                    instructionList.add(new LoadBoolConst(true, resultVariable, binaryOp.getLocation()));
+                    instructionList.add(new Jump(orEndLabel, binaryOp.getLocation()));
+                    instructionList.add(orEndLabel);
                     return resultVariable;
                 }
                 if (operator.getText().equals("!=")) {
-                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
-                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
+                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable, instructionList);
+                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable, instructionList);
                     IRVariable resultVariable = createVariable(binaryOp.getType());
-                    instructions.add(new Call(createVariable(new InequalityType()), new IRVariable[]{leftVariable,
+                    instructionList.add(new Call(createVariable(new InequalityType()), new IRVariable[]{leftVariable,
                             rightVariable}, resultVariable, binaryOp.getLocation()));
                     return resultVariable;
                 }
                 if (operator.getText().equals("==")) {
-                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
-                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
+                    IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable, instructionList);
+                    IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable, instructionList);
                     IRVariable resultVariable = createVariable(binaryOp.getType());
-                    instructions.add(new Call(createVariable(new EqualityType()), new IRVariable[]{leftVariable,
+                    instructionList.add(new Call(createVariable(new EqualityType()), new IRVariable[]{leftVariable,
                             rightVariable}, resultVariable, binaryOp.getLocation()));
                     return resultVariable;
                 }
                 IRVariable operatorVariable = symbolTable.getVariable(operator.getText());
-                IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable);
-                IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable);
+                IRVariable leftVariable = visit(binaryOp.getLeft(), symbolTable, instructionList);
+                IRVariable rightVariable = visit(binaryOp.getRight(), symbolTable, instructionList);
                 IRVariable result = createVariable(binaryOp.getType());
-                instructions.add(new Call(operatorVariable, new IRVariable[]{leftVariable, rightVariable}, result, location));
+                instructionList.add(new Call(operatorVariable, new IRVariable[]{leftVariable, rightVariable}, result, location));
                 return result;
             }
             case Block block: {
                 SymbolTable localSymbolTable = new SymbolTable(symbolTable);
                 List<Expression> expressionList = block.getExpressionList();
                 for (int i = 0; i < expressionList.size() - 1; i++) {
-                    visit(expressionList.get(i), localSymbolTable);
+                    visit(expressionList.get(i), localSymbolTable, instructionList);
                 }
                 if (!(expressionList.getLast() instanceof Unit)) {
-                    return visit(expressionList.getLast(), localSymbolTable);
+                    return visit(expressionList.getLast(), localSymbolTable, instructionList);
                 }
                 return createVariable(new UnitType());
             }
@@ -167,9 +189,9 @@ public class IRGenerator {
                     Label thenLabel = new Label(commonStatics, "then", conditionalOp.getThenBlock().getLocation());
                     Label elseLabel = new Label(commonStatics, "else", location);
                     Label endLabel = new Label(commonStatics, "end", location);
-                    IRVariable conditionVariable = visit(conditionalOp.getCondition(), symbolTable);
-                    instructions.add(new CondJump(conditionVariable, thenLabel, elseLabel, location));
-                    instructions.add(thenLabel);
+                    IRVariable conditionVariable = visit(conditionalOp.getCondition(), symbolTable, instructionList);
+                    instructionList.add(new CondJump(conditionVariable, thenLabel, elseLabel, location));
+                    instructionList.add(thenLabel);
                     Type finalType;
                     if (conditionalOp.getThenBlock() instanceof Block) {
                         List<Expression> expressionList = ((Block) conditionalOp.getThenBlock()).getExpressionList();
@@ -178,22 +200,22 @@ public class IRGenerator {
                         finalType = conditionalOp.getThenBlock().getType();
                     }
                     IRVariable outputVariable = createVariable(finalType);
-                    IRVariable thenVariable = visit(conditionalOp.getThenBlock(), symbolTable);
-                    instructions.add(new Copy(thenVariable, outputVariable, location));
-                    instructions.add(new Jump(endLabel, location));
-                    instructions.add(elseLabel);
-                    IRVariable elseVariable = visit(conditionalOp.getElseBlock(), symbolTable);
-                    instructions.add(new Copy(elseVariable, outputVariable, location));
-                    instructions.add(endLabel);
+                    IRVariable thenVariable = visit(conditionalOp.getThenBlock(), symbolTable, instructionList);
+                    instructionList.add(new Copy(thenVariable, outputVariable, location));
+                    instructionList.add(new Jump(endLabel, location));
+                    instructionList.add(elseLabel);
+                    IRVariable elseVariable = visit(conditionalOp.getElseBlock(), symbolTable, instructionList);
+                    instructionList.add(new Copy(elseVariable, outputVariable, location));
+                    instructionList.add(endLabel);
                     return outputVariable;
                 } else {
                     Label thenLabel = new Label(commonStatics, "then", conditionalOp.getThenBlock().getLocation());
                     Label endLabel = new Label(commonStatics, "end", location);
-                    IRVariable conditionVariable = visit(conditionalOp.getCondition(), symbolTable);
-                    instructions.add(new CondJump(conditionVariable, thenLabel, endLabel, location));
-                    instructions.add(thenLabel);
-                    visit(conditionalOp.getThenBlock(), symbolTable);
-                    instructions.add(endLabel);
+                    IRVariable conditionVariable = visit(conditionalOp.getCondition(), symbolTable, instructionList);
+                    instructionList.add(new CondJump(conditionVariable, thenLabel, endLabel, location));
+                    instructionList.add(thenLabel);
+                    visit(conditionalOp.getThenBlock(), symbolTable, instructionList);
+                    instructionList.add(endLabel);
                     return createVariable(new UnitType());
                 }
             }
@@ -203,43 +225,66 @@ public class IRGenerator {
                 whileEndLabelStack.push(endLabel);
                 Label startLabel = new Label(commonStatics, "while_start", whileOp.getLocation());
                 whileStartLabelStack.push(startLabel);
-                instructions.add(startLabel);
-                IRVariable condition = visit(whileOp.getCondition(), symbolTable);
-                instructions.add(new CondJump(condition, doLabel, endLabel, whileOp.getBody().getLocation()));
-                instructions.add(doLabel);
-                visit(whileOp.getBody(), symbolTable);
-                instructions.add(new Jump(startLabel, whileOp.getBody().getLocation()));
-                instructions.add(endLabel);
+                instructionList.add(startLabel);
+                IRVariable condition = visit(whileOp.getCondition(), symbolTable, instructionList);
+                instructionList.add(new CondJump(condition, doLabel, endLabel, whileOp.getBody().getLocation()));
+                instructionList.add(doLabel);
+                visit(whileOp.getBody(), symbolTable, instructionList);
+                instructionList.add(new Jump(startLabel, whileOp.getBody().getLocation()));
+                instructionList.add(endLabel);
                 return createVariable(new UnitType());
             }
             case VariableDef variableDef: {
-                IRVariable rightSide = visit(variableDef.getValue(), symbolTable);
+                IRVariable rightSide = visit(variableDef.getValue(), symbolTable, instructionList);
                 IRVariable leftSide = createVariable(variableDef.getType());
                 symbolTable.putVariable(variableDef.getName(), leftSide);
-                instructions.add(new Copy(rightSide, leftSide, variableDef.getLocation()));
+                instructionList.add(new Copy(rightSide, leftSide, variableDef.getLocation()));
                 return createVariable(new UnitType());
             }
             case FunctionCall functionCall: {
                 List<Expression> parameters = functionCall.getParameters();
                 List<IRVariable> params = new ArrayList<>();
                 for (Expression parameter: parameters) {
-                    params.add(visit(parameter, symbolTable));
+                    params.add(visit(parameter, symbolTable, instructionList));
                 }
                 IRVariable functionVariable = symbolTable.getVariable(functionCall.getFunctionName());
                 IRVariable resultVariable = createVariable(functionCall.getType());
-                instructions.add(new Call(functionVariable, params.toArray(new IRVariable[]{}),
+                instructionList.add(new Call(functionVariable, params.toArray(new IRVariable[]{}),
                         resultVariable, functionCall.getLocation()));
                 return resultVariable;
             }
-            case BreakOp breakOp: {
+            case Break breakOp: {
                 Jump jumpIns = new Jump(whileEndLabelStack.pop(), breakOp.getLocation());
-                instructions.add(jumpIns);
+                instructionList.add(jumpIns);
                 return createVariable(new UnitType());
             }
-            case ContinueOp continueOp: {
+            case Continue continueOp: {
                 Jump jumpIns = new Jump(whileStartLabelStack.pop(), continueOp.getLocation());
-                instructions.add(jumpIns);
+                instructionList.add(jumpIns);
                 return createVariable(new UnitType());
+            }
+            case FunctionDefinition functionDefinition: {
+                SymbolTable localSymbolTable = new SymbolTable(symbolTable);
+                List<IRVariable> parameterVariables = new ArrayList<>();
+                for (FunctionArgumentDefinition argument : functionDefinition.getArguments()) {
+                    IRVariable variable = new IRVariable(argument.getName(), argument.getType());
+                    localSymbolTable.putVariable(argument.getName(), variable);
+                    parameterVariables.add(variable);
+                }
+                List<Instruction> functionInstructions = new ArrayList<>();
+                visit(functionDefinition.getBlock(), localSymbolTable, functionInstructions);
+                FunctionDefinitionIns funcDefInstruction = new FunctionDefinitionIns(functionDefinition.getFunctionName(),
+                        functionInstructions, parameterVariables, functionDefinition.getLocation());
+                functionDefinitions.add(funcDefInstruction);
+//                IRVariable functionVariable = new IRVariable(functionDefinition.getFunctionName(), functionDefinition.getType());
+//                symbolTable.putVariable(functionDefinition.getFunctionName(), functionVariable);
+//                return functionVariable;
+                return symbolTable.getVariable(functionDefinition.getFunctionName());
+            }
+            case Return returnDef: {
+                IRVariable valueVariable = visit(returnDef.getValue(), symbolTable, instructionList);
+                instructionList.add(new ReturnIns(valueVariable, returnDef.getLocation()));
+                return valueVariable;
             }
             default: {
                 throw new IRGenerationException("Invalid Expression found");

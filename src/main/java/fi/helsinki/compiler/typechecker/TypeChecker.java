@@ -13,6 +13,9 @@ import java.util.Optional;
 public class TypeChecker {
 
     private Optional<Type> checkType(Expression expression, SymbolTable symbolTable) throws TypeCheckerException {
+        if (expression instanceof Block block) {
+            handleFunctionDefinitions(block.getExpressionList(), symbolTable);
+        }
         switch (expression) {
             case IntLiteral literal: {
                 Type intType = new IntType();
@@ -158,6 +161,37 @@ public class TypeChecker {
                     throw new TypeCheckerException("Expected a Boolean type for the conditional type.");
                 }
             }
+            case FunctionDefinition functionDefinition: {
+                SymbolTable localSymbolTable = new SymbolTable(symbolTable);
+                List<Type> argTypes = new ArrayList<>();
+                for (FunctionArgumentDefinition argument : functionDefinition.getArguments()) {
+                    Type argType;
+                    if (argument.getArgType().equals("Int")) {
+                        argType = new IntType();
+                    } else {
+                        argType = new BooleanType();
+                    }
+                    argument.setType(argType);
+                    argTypes.add(argType);
+                    localSymbolTable.putType(argument.getName(), argType);
+                }
+                Type returnType;
+                if (functionDefinition.getReturnType().equals("Int")) {
+                    returnType = new IntType();
+                } else if (functionDefinition.getReturnType().equals("Bool")) {
+                    returnType = new BooleanType();
+                } else {
+                    returnType = new UnitType();
+                }
+                FunctionType functionType = new FunctionType(functionDefinition.getFunctionName(), returnType, argTypes.toArray(new Type[]{}));
+                functionDefinition.setType(functionType);
+                Optional<Type> bodyType = checkType(functionDefinition.getBlock(), localSymbolTable);
+                if (!returnType.getTypeStr().equals(bodyType.get().getTypeStr())) {
+                    throw new TypeCheckerException("Type mismatch for function, return type: " + returnType + ", actual return type: " + bodyType);
+                }
+                symbolTable.putType(functionDefinition.getFunctionName(), functionType);
+                return Optional.of(returnType);
+            }
             case WhileOp whileOp: {
                 Optional<Type> condition = checkType(whileOp.getCondition(), symbolTable);
                 if (condition.get() instanceof BooleanType) {
@@ -183,25 +217,67 @@ public class TypeChecker {
                 SymbolTable localSymbolTable = new SymbolTable(symbolTable);
                 List<Expression> expressionList = block.getExpressionList();
                 for (int i = 0; i < expressionList.size() - 1; i++) {
-                    checkType(expressionList.get(i), localSymbolTable);
+                    Optional<Type> expressionType = checkType(expressionList.get(i), localSymbolTable);
+                    if (expressionType.isPresent() && expressionType.get() instanceof ReturnType returnType) {
+                        return Optional.of(returnType.getActualReturnType());
+                    }
                 }
                 if (!(expressionList.getLast() instanceof Unit)) {
-                    return checkType(expressionList.getLast(), localSymbolTable);
+                    Optional<Type> expressionType = checkType(expressionList.getLast(), localSymbolTable);
+                    if (expressionType.isPresent() && expressionType.get() instanceof ReturnType returnType) {
+                        return Optional.of(returnType.getActualReturnType());
+                    }
+                    return expressionType;
                 }
                 return Optional.of(new UnitType());
             }
-            case BreakOp breakOp: {
+            case Break breakOp: {
                 UnitType unitType = new UnitType();
                 breakOp.setType(unitType);
                 return Optional.of(unitType);
             }
-            case ContinueOp continueOp: {
+            case Continue continueOp: {
                 UnitType unitType = new UnitType();
                 continueOp.setType(unitType);
                 return Optional.of(unitType);
             }
+            case Return returnExp: {
+                Optional<Type> valueType = checkType(returnExp.getValue(), symbolTable);
+                returnExp.setType(valueType.get());
+                return Optional.of(new ReturnType(valueType.get()));
+            }
             default: {
                 throw new TypeCheckerException("Invalid type found: " + expression.getLocation());
+            }
+        }
+    }
+
+    private void handleFunctionDefinitions(List<Expression> expressionList, SymbolTable symbolTable) {
+        for (Expression expression : expressionList) {
+            if (expression instanceof FunctionDefinition functionDefinition) {
+                List<Type> argTypes = new ArrayList<>();
+                for (FunctionArgumentDefinition argument : functionDefinition.getArguments()) {
+                    Type argType;
+                    if (argument.getArgType().equals("Int")) {
+                        argType = new IntType();
+                    } else {
+                        argType = new BooleanType();
+                    }
+                    argument.setType(argType);
+                    argTypes.add(argType);
+                    symbolTable.putType(argument.getName(), argType);
+                }
+                Type returnType;
+                if (functionDefinition.getReturnType().equals("Int")) {
+                    returnType = new IntType();
+                } else if (functionDefinition.getReturnType().equals("Bool")) {
+                    returnType = new BooleanType();
+                } else {
+                    returnType = new UnitType();
+                }
+                FunctionType functionType = new FunctionType(functionDefinition.getFunctionName(), returnType, argTypes.toArray(new Type[]{}));
+                functionDefinition.setType(functionType);
+                symbolTable.putType(functionDefinition.getFunctionName(), functionType);
             }
         }
     }

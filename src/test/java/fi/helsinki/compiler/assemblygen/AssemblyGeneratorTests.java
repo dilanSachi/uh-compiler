@@ -26,9 +26,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -55,9 +55,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -102,9 +102,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -141,9 +141,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -174,9 +174,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -225,9 +225,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -277,9 +277,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -315,9 +315,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -403,9 +403,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -446,9 +446,9 @@ public class AssemblyGeneratorTests {
         assertEquals(".extern print_int\n" +
                 ".extern print_bool\n" +
                 ".extern read_int\n" +
+                ".section .text\n" +
                 ".global main\n" +
                 ".type main, @function\n" +
-                ".section .text\n" +
                 "main:\n" +
                 "pushq %rbp\n" +
                 "movq %rsp, %rbp\n" +
@@ -472,6 +472,325 @@ public class AssemblyGeneratorTests {
                 "#Label(end)\n" +
                 "\n" +
                 ".Lend:\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
+    }
+
+//    @Test
+    public void testFunctionDefinition() throws Exception {
+        List<Instruction> instructions = generateInstructions("fun f(x:Bool, y:Int):Int {\n" +
+            " if (x) then {\n" +
+                    "  return y\n" +
+                    " } else {\n" +
+                    "  return 2\n" +
+                    " }\n" +
+                    "}\n" +
+                    "\n" +
+                    "f(true, 5)");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".section .text\n" +
+                ".global f\n" +
+                ".type f, @function\n" +
+                "f:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "movq %rdi, -8(%rbp)\n" +
+                "movq %rsi, -16(%rbp)\n" +
+                "subq $32, %rsp\n" +
+                "#CondJump(x,Label(then),Label(else))\n" +
+                "cmpq $0, -8(%rbp)\n" +
+                "jne .Lthen\n" +
+                "jmp .Lelse\n" +
+                "#Label(then)\n" +
+                "\n" +
+                ".Lthen:\n" +
+                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@28b576a9\n" +
+                "movq -16(%rbp), %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                "#Copy(y,x12)\n" +
+                "movq -16(%rbp), %rax\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Jump(Label(end))\n" +
+                "jmp .Lend\n" +
+                "#Label(else)\n" +
+                "\n" +
+                ".Lelse:\n" +
+                "#LoadIntConst(2,x13)\n" +
+                "movq $2, -32(%rbp)\n" +
+                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@2ba45490\n" +
+                "movq -32(%rbp), %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                "#Copy(x13,x12)\n" +
+                "movq -32(%rbp), %rax\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Label(end)\n" +
+                "\n" +
+                ".Lend:\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $48, %rsp\n" +
+                "#LoadBoolConst(true,x14)\n" +
+                "movq $1, -8(%rbp)\n" +
+                "#LoadIntConst(5,x15)\n" +
+                "movq $5, -16(%rbp)\n" +
+                "#Call(f,[x14, x15],x16)\n" +
+                "movq -8(%rbp), %rdi\n" +
+                "movq -16(%rbp), %rsi\n" +
+                "callq f\n" +
+                "movq %rax, -32(%rbp)\n" +
+                "#Call(print_int,[x16],x18)\n" +
+                "movq -32(%rbp), %rdi\n" +
+                "callq print_int\n" +
+                "movq %rax, -48(%rbp)\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
+    }
+
+//    @Test
+    public void testFunctionWithMultiplication() throws Exception {
+        List<Instruction> instructions = generateInstructions("fun square(x: Int): Int {\n" +
+                "    return x * x;\n" +
+                "}\n" +
+                "\n" +
+                "square(3)\n");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".section .text\n" +
+                ".global square\n" +
+                ".type square, @function\n" +
+                "square:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "movq %rdi, null\n" +
+                "subq $16, %rsp\n" +
+                "#Call(*,[x, x],x12)\n" +
+                "movq null, %rax\n" +
+                "imulq null, %rax\n" +
+                "movq %rax, -16(%rbp)\n" +
+                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@78d50a3c\n" +
+                "movq -16(%rbp), %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $40, %rsp\n" +
+                "#LoadIntConst(3,x14)\n" +
+                "movq $3, -8(%rbp)\n" +
+                "#Call(square,[x14],x15)\n" +
+                "movq -8(%rbp), %rdi\n" +
+                "callq square\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Call(print_int,[x15],x17)\n" +
+                "movq -24(%rbp), %rdi\n" +
+                "callq print_int\n" +
+                "movq %rax, -40(%rbp)\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
+    }
+
+//    @Test
+    public void testFunctionDefinitionWithSemicolon() throws Exception {
+        List<Instruction> instructions = generateInstructions("fun f(x:Bool, y:Int):Int {\n" +
+                " if (x) then {\n" +
+                "  return y;\n" +
+                " } else {\n" +
+                "  return 2;\n" +
+                " }\n" +
+                "}\n" +
+                "\n" +
+                "f(true, 5)");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".section .text\n" +
+                ".global f\n" +
+                ".type f, @function\n" +
+                "f:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "movq %rdi, -8(%rbp)\n" +
+                "movq %rsi, -16(%rbp)\n" +
+                "subq $32, %rsp\n" +
+                "#CondJump(x,Label(then),Label(else))\n" +
+                "cmpq $0, -8(%rbp)\n" +
+                "jne .Lthen\n" +
+                "jmp .Lelse\n" +
+                "#Label(then)\n" +
+                "\n" +
+                ".Lthen:\n" +
+                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@28b576a9\n" +
+                "movq -16(%rbp), %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                "#Copy(y,x12)\n" +
+                "movq -16(%rbp), %rax\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Jump(Label(end))\n" +
+                "jmp .Lend\n" +
+                "#Label(else)\n" +
+                "\n" +
+                ".Lelse:\n" +
+                "#LoadIntConst(2,x13)\n" +
+                "movq $2, -32(%rbp)\n" +
+                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@2ba45490\n" +
+                "movq -32(%rbp), %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                "#Copy(x13,x12)\n" +
+                "movq -32(%rbp), %rax\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Label(end)\n" +
+                "\n" +
+                ".Lend:\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $48, %rsp\n" +
+                "#LoadBoolConst(true,x14)\n" +
+                "movq $1, -8(%rbp)\n" +
+                "#LoadIntConst(5,x15)\n" +
+                "movq $5, -16(%rbp)\n" +
+                "#Call(f,[x14, x15],x16)\n" +
+                "movq -8(%rbp), %rdi\n" +
+                "movq -16(%rbp), %rsi\n" +
+                "callq f\n" +
+                "movq %rax, -32(%rbp)\n" +
+                "#Call(print_int,[x16],x18)\n" +
+                "movq -32(%rbp), %rdi\n" +
+                "callq print_int\n" +
+                "movq %rax, -48(%rbp)\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret", assemblyCode);
+    }
+
+//    @Test
+    public void testMultipleFunctionDefinition() throws Exception {
+        List<Instruction> instructions = generateInstructions("fun f(x: Int): Int {\n" +
+                "    return g(x + 1);\n" +
+                "}\n" +
+                "fun g(x: Int): Int {\n" +
+                "    print_int(x);\n" +
+                "    if x < 5 then {\n" +
+                "        return f(x);\n" +
+                "    } else {\n" +
+                "        return x;\n" +
+                "    }\n" +
+                "}\n" +
+                "f(1) * 100");
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        String assemblyCode = assemblyGenerator.generateAssembly(instructions);
+        assertEquals(".extern print_int\n" +
+                ".extern print_bool\n" +
+                ".extern read_int\n" +
+                ".section .text\n" +
+                ".global f\n" +
+                ".type f, @function\n" +
+                "f:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "movq %rdi, -8(%rbp)\n" +
+                "movq %rsi, -16(%rbp)\n" +
+                "subq $32, %rsp\n" +
+                "#CondJump(x,Label(then),Label(else))\n" +
+                "cmpq $0, -8(%rbp)\n" +
+                "jne .Lthen\n" +
+                "jmp .Lelse\n" +
+                "#Label(then)\n" +
+                "\n" +
+                ".Lthen:\n" +
+                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@28b576a9\n" +
+                "movq -16(%rbp), %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                "#Copy(y,x12)\n" +
+                "movq -16(%rbp), %rax\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Jump(Label(end))\n" +
+                "jmp .Lend\n" +
+                "#Label(else)\n" +
+                "\n" +
+                ".Lelse:\n" +
+                "#LoadIntConst(2,x13)\n" +
+                "movq $2, -32(%rbp)\n" +
+                "#fi.helsinki.compiler.irgenerator.instructions.ReturnIns@2ba45490\n" +
+                "movq -32(%rbp), %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                "#Copy(x13,x12)\n" +
+                "movq -32(%rbp), %rax\n" +
+                "movq %rax, -24(%rbp)\n" +
+                "#Label(end)\n" +
+                "\n" +
+                ".Lend:\n" +
+                "movq $0, %rax\n" +
+                "movq %rbp, %rsp\n" +
+                "popq %rbp\n" +
+                "ret\n" +
+                ".global main\n" +
+                ".type main, @function\n" +
+                "main:\n" +
+                "pushq %rbp\n" +
+                "movq %rsp, %rbp\n" +
+                "subq $48, %rsp\n" +
+                "#LoadBoolConst(true,x14)\n" +
+                "movq $1, -8(%rbp)\n" +
+                "#LoadIntConst(5,x15)\n" +
+                "movq $5, -16(%rbp)\n" +
+                "#Call(f,[x14, x15],x16)\n" +
+                "movq -8(%rbp), %rdi\n" +
+                "movq -16(%rbp), %rsi\n" +
+                "callq f\n" +
+                "movq %rax, -32(%rbp)\n" +
+                "#Call(print_int,[x16],x18)\n" +
+                "movq -32(%rbp), %rdi\n" +
+                "callq print_int\n" +
+                "movq %rax, -48(%rbp)\n" +
                 "movq $0, %rax\n" +
                 "movq %rbp, %rsp\n" +
                 "popq %rbp\n" +

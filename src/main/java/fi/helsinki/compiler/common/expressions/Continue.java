@@ -2,9 +2,9 @@ package fi.helsinki.compiler.common.expressions;
 
 import fi.helsinki.compiler.common.Location;
 
-public class BreakOp extends Expression {
+public class Continue extends Expression {
 
-    public BreakOp(Location location) {
+    public Continue(Location location) {
         super(location);
     }
 

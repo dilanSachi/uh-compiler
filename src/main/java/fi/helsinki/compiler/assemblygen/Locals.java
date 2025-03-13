@@ -22,6 +22,10 @@ public class Locals {
         return variableToLocationMap.get(irVariable);
     }
 
+    public void addVariableToLocationMap(IRVariable irVariable, String location) {
+        variableToLocationMap.put(irVariable, location);
+    }
+
     public int getStackUsed() {
         return -stackUsed;
     }
