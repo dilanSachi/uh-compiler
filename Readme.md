@@ -29,8 +29,8 @@ while n > 1 do {
 
 Navigate to the directory and run `./gradlew clean build` which will generate the compiler as a jar in `build/libs/`.
 You can use the compiler as a one time compilation tool or as a language server at the moment.
-1. `java -jar uh-compiler-0.0.1 compile --output=path/to/output path/to/input.in`
-2. `java -jar uh-compiler-0.0.1 serve --host=localhost --port=3000` - The server will respond to TCP requests `{"command": "ping"}` or `{"command":"compile", "code":"print_int(2);"}` with response as empty or `{"program":"base64-encoded statically linked x86_64 program"}`.
+1. `java -jar uh-compiler-0.0.1.jar compile --output=path/to/output.out path/to/input.in`
+2. `java -jar uh-compiler-0.0.1.jar serve --host=localhost --port=3000` - The server will respond to TCP requests `{"command": "ping"}` or `{"command":"compile", "code":"print_int(2);"}` with response as empty or `{"program":"base64-encoded statically linked x86_64 program"}`.
 
 At the moment, the compiler can be run on Docker as a language server as well. Run `docker build -t . yourname/image_name:version` to build the image and run `docker run -p 3000:3000 yourname/image_name:version` to start the container. Container will respond to TCP requests as stated above.
 
